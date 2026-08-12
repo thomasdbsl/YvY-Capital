@@ -1,0 +1,15 @@
+fund_id,name,currency_id,is_internal,is_active
+19,Fund H,1,true,true
+25,Fund N,1,true,true
+22,Fund K,1,true,true
+23,Fund L,1,true,true
+24,Fund M,1,true,true
+20,Fund I,1,true,true
+11,Fund A,1,true,true
+18,Fund G,1,true,true
+16,Fund E,1,true,true
+17,Fund F,1,true,true
+21,Fund J,1,true,true
+12,Fund B,1,true,true
+13,Fund C,1,true,true
+14,Fund D,1,true,true

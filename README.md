@@ -1,93 +1,85 @@
 # YvY Capital
 
+Ce depot centralise les livrables et jeux de donnees de travail du projet YvY Capital. Il regroupe des documents de cadrage, des extractions de fonds, des fichiers de reference et des tables analytiques destinees a l'etude de la performance, de la composition de portefeuille, de la liquidite et du risque.
 
+## Objectif du projet
 
-## Getting started
+Le projet vise a documenter et exploiter des donnees de gestion d'actifs afin de :
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+- suivre l'evolution des fonds et de leur valeur liquidative ;
+- analyser les portefeuilles et les instruments sous-jacents ;
+- mesurer les flux de souscriptions et rachats ;
+- observer des indicateurs de risque comme le stress testing, le drawdown, la liquidite et le DV01 ;
+- conserver les livrables academiques et de recherche relies au sujet.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+## Contenu du depot
 
-## Add your files
+La racine du depot contient :
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+- `2026_TAPI_YvY_Capital_Inteli_ENGLISH.docx` : document principal en anglais lie au projet YvY Capital ;
+- `Special Projects -4o year.docx` : document de travail complementaire ;
+- `data_YvY/` : dossier principal de donnees et de sources ;
+- `Sprint 1/` : dossier present mais actuellement vide.
 
-```
-cd existing_repo
-git remote add origin https://git.inteli.edu.br/thomas.duberseuil-guerin/yvy-capital.git
-git branch -M main
-git push -uf origin main
-```
+## Structure des donnees
 
-## Integrate with your tools
+### Dossier `data_YvY/`
 
-- [ ] [Set up project integrations](https://git.inteli.edu.br/thomas.duberseuil-guerin/yvy-capital/-/settings/integrations)
+Ce dossier rassemble des tables consolidees, des extractions brutes et des fichiers de reference.
 
-## Collaborate with your team
+#### Tables consolidees
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+- `funds.csv` : referentiel des fonds avec identifiant, nom, devise et statut d'activation. Environ 14 lignes de donnees.
+- `fund_nav_snapshot.csv` : historique de snapshots de valeur liquidative (`nav`) par fonds et par date. Environ 88 lignes.
+- `portfolio_holdings.csv` : composition detaillee des portefeuilles par fonds, date, groupe d'actifs et instrument. Environ 1 013 lignes.
+- `returns_navps.csv` : serie temporelle de performance cumulee par fonds. Environ 2 733 lignes.
+- `cash_flow_daily.csv` : flux nets quotidiens, souscriptions et rachats. Environ 32 lignes.
+- `corporate_payments.csv` : paiements et evenements sur titres, avec date d'ex-dividende et montant par unite. Environ 16 lignes.
+- `drawdown.csv` : suivi du drawdown par fonds et par date. Environ 1 350 lignes.
+- `dv01.csv` : mesures de sensibilite taux au format structure, avec details embarques en JSON. Environ 14 lignes.
+- `bond_instruments.csv` : referentiel simplifie d'instruments obligataires, avec codes et maturites. Environ 67 lignes.
+- `liquidity_by_horizon.csv` : projection de liquidite par horizon de temps exprimee en pourcentage de NAV. Environ 84 lignes.
+- `stress_risk.csv` : resultats de stress tests par fonds, avec details de scenarios dans une colonne JSON. Environ 14 lignes.
+- `transactions_summary.csv` : synthese des souscriptions, rachats, taxes et NAV sur une periode. Environ 14 lignes.
+- `var_mask_configs.csv` : configuration des masques de VaR et parametres de calcul. 1 ligne.
+- `external_debenture_data_raw.csv` : fichier present mais vide a la date du 12 aout 2026.
 
-## Test and Deploy
+#### Sources complementaires
 
-Use the built-in continuous integration in GitLab.
+- `Fund-administration-database-Inteli/docs/Fund-administration-database.md` : description fonctionnelle de la base d'administration de fonds. Le document explique que les donnees proviennent d'INOA et couvrent notamment NAV, AUM, positions, provisions, transactions et vues agregees.
+- `Fund-administration-database-Inteli/29-05-2026/` : extractions `PortfolioView` par fonds et par lot de collecte.
+- `Fund-administration-database-peers-Inteli/comparativo_fundos_pares_FINAL.xlsx` : fichier Excel de comparaison entre fonds pairs.
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+## Lecture fonctionnelle des donnees
 
-***
+Les fichiers disponibles permettent de couvrir plusieurs axes d'analyse :
 
-# Editing this README
+- performance : `returns_navps.csv`, `fund_nav_snapshot.csv`, `drawdown.csv` ;
+- portefeuille : `portfolio_holdings.csv`, `bond_instruments.csv` ;
+- flux investisseurs : `cash_flow_daily.csv`, `transactions_summary.csv` ;
+- evenements de marche et de portefeuille : `corporate_payments.csv` ;
+- risque : `stress_risk.csv`, `dv01.csv`, `liquidity_by_horizon.csv`, `var_mask_configs.csv` ;
+- documentation source : fichiers `.docx`, fichier Markdown INOA, fichiers bruts `PortfolioView`, fichier pair-comparison Excel.
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+## Points de gouvernance et qualite
 
-## Suggestions for a good README
+Les sources deja presentes dans le projet font apparaitre plusieurs regles importantes :
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+- certains identifiants ou noms de fonds semblent masques ou anonymises ;
+- une partie des mesures de risque est stockee sous forme de JSON dans des colonnes CSV, ce qui demande un traitement specifique pour l'analyse ;
+- les fichiers contiennent des caracteres accentues parfois mal encodes, ce qui suggere un point d'attention sur l'encodage ;
+- `external_debenture_data_raw.csv` est vide et devra etre controle avant toute utilisation analytique ;
+- le dossier `Sprint 1/` est vide a ce stade.
 
-## Name
-Choose a self-explaining name for your project.
+## Utilisation recommandee
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+Le depot peut servir de base pour :
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+- des analyses exploratoires en Python, R, Excel ou SQL ;
+- la construction d'un pipeline de normalisation et de controle qualite ;
+- la documentation d'un projet academique ou d'un cas d'usage en asset management ;
+- des travaux de comparaison entre fonds, de mesure du risque et de suivi de portefeuille.
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+## Etat du depot au 12 aout 2026
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+Ce depot a ete remplace pour refleter le contenu du dossier local `C:\Users\thdub\OneDrive\Bureau\YvY`. Le contenu historise correspond donc desormais aux livrables et donnees presents dans ce dossier source, avec un nouveau `README.md` de synthese.

@@ -1,0 +1,132 @@
+29/05/2026;INFRA-RF-02;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Resumo da Carteira - Conteudo;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Patrimonio Liquido;Valor da Cota Liquida;Cota Congelada;Valor da Cota Bruta;Quantidade de Cotas;portfolio-front.export-file.portfolio-view-panel-data.fields.start-date-variation;Variacao Diaria;Variacao Mensal;Variacao Anual;Variacao 6 Meses;Variacao 12 Meses;Contribuicao Total;Contribuicao Erro;Exposicao Total;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+185.553.079,98;1,156543;true;1,156543;160.437.680,57;0,02791;0,001064;0,002402;0,019156;0,028262;0,123004;0,001064;0;185.553.079,98;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Resumo da Carteira - Informacoes Adicionais;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Equities Net.;Net Delta=1;Gross;Gross Delta=1;Long Exp.;Short Exp.;Patrimonio Bruto;Valor da Cota sem Amortizacoes;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0;0;0;0;0;0;185.553.079,98;1,156543;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Acoes e Recibos;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Criptomoedas;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Imoveis;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Acoes, Opcoes e Recibos;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ETFs;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Opcoes e Direitos;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Futuros e Opcoes de Moeda;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Futuros;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Instrumento (Nome);Instrumento (Nome Completo);Id do Instrumento;ISIN;Quantidade;Preco;Data Preco;Delta Preco;Valor Liquido;Valor Bruto;PnL (% PL);PnL ($);% / Total (Bruto);Exposicao (% PL);Exposicao ($);% / Total (Acumulado);Moeda;Valor na Moeda Original;Id da Estrategia;Estrategia;Id Emissor;Setor;Emissor;Id do Custodiante;Nome do Custodiante;Criacao;Ultima Atualizacao;Id de Origem;Fonte;Id Interno;Data de Referencia;Codigo da Conta;Nome da Conta;Spread Diario (Padrao);Spread Mensal (Padrao);portfolio-front.models.future-asset-positions.fields.daily-spread;portfolio-front.models.future-asset-positions.fields.monthly-spread;Contrato;Id do Contrato;Data de Alocacao Inicial;Data Vencimento;Quantidade Disponivel;Quantidade Provisionada;Ativo Subjacente (Simbolo);Ativo Subjacente (Preco);portfolio-front.models.future-asset-positions.fields.exposition-dv-1;portfolio-front.models.future-asset-positions.fields.exposition-dv-1-value;Yield;;;
+Futuro de DI1 2030-01-02 [DI1F30];Futuro de DI1 2030-01-02;89;;-21;62.981,02;29/05/2026;0,032767;0;0;0,000147;272,58;0;-0,712789;-1.322.601,42;-0,712789;real;62.981,02;1;Padrao;;;;;BTG Pactual;;;;arquivo B3;35.237;29/05/2026;1;Padrao;spread;spread;;;Contrato #None;;;02/01/2030;-21;0;;1,068243;0;0;0;;;
+Futuro de DI1 2029-01-02 [DI1F29];Futuro de DI1 2029-01-02;99;;-21;71.650,97;29/05/2026;-0,030012;0;0;0,000677;1.255,38;0;-0,810911;-1.504.670,37;-1,5237;real;71.650,97;1;Padrao;;;;;BTG Pactual;;;;arquivo B3;35.232;29/05/2026;1;Padrao;spread;spread;;;Contrato #None;;;02/01/2029;-21;0;;1,068243;0;0;0;;;
+Futuro de DI1 2028-01-03 [DI1F28];Futuro de DI1 2028-01-03;98;;-22;81.347,91;29/05/2026;-0,037823;0;0;0,000881;1.633,06;0;-0,964497;-1.789.654,02;-2,488197;real;81.347,91;1;Padrao;;;;;BTG Pactual;;;;arquivo B3;35.242;29/05/2026;1;Padrao;spread;spread;;;Contrato #None;;;03/01/2028;-22;0;;1,068243;0;0;0;;;
+Futuro de DI1 2027-01-04 [DI1F27];Futuro de DI1 2027-01-04;97;;-23;92.504,42;29/05/2026;0,036639;0;0;0,000192;356,27;0;-1,146627;-2.127.601,66;-3,634824;real;92.504,42;1;Padrao;;;;;BTG Pactual;;;;arquivo B3;35.230;29/05/2026;1;Padrao;spread;spread;;;Contrato #None;;;04/01/2027;-23;0;;1,068243;0;0;0;;;
+Futuro de DI1 2032-01-02 [DI1F32];Futuro de DI1 2032-01-02;101;;-82;48.411,62;29/05/2026;0,115312;0;0;-0,001325;-2.455,08;0;-2,139416;-3.969.752,84;-5,77424;real;48.411,62;1;Padrao;;;;;BTG Pactual;;;;arquivo B3;35.238;29/05/2026;1;Padrao;spread;spread;;;Contrato #None;;;02/01/2032;-82;0;;1,068243;0;0;0;;;
+Futuro de DI1 2031-01-02 [DI1F31];Futuro de DI1 2031-01-02;100;;-94;55.278,58;29/05/2026;0,095698;0;0;-0,001185;-2.195,84;0;-2,800377;-5.196.186,52;-8,574617;real;55.278,58;1;Padrao;;;;;BTG Pactual;;;;arquivo B3;35.241;29/05/2026;1;Padrao;spread;spread;;;Contrato #None;;;02/01/2031;-94;0;;1,068243;0;0;0;;;
+Futuro de DAP 2026-08-17 [DAPQ26];Futuro de DAP 2026-08-17;95;;-51;97.921,88;29/05/2026;0,028092;0;0;0,000017;31,62;0;-5,123834;-9.507.432,64;-13,698452;real;97.921,88;1;Padrao;;;;;BTG Pactual;;;;arquivo B3;35.231;29/05/2026;1;Padrao;spread;spread;;;Contrato #None;;;17/08/2026;-51;0;;1,052484;0;0;0;;;
+Futuro de DAP 2028-08-15 [DAPQ28];Futuro de DAP 2028-08-15;96;;-76;84.305,70;29/05/2026;-0,101941;0;0;0,008588;15.918,20;0;-6,573788;-12.197.866,31;-20,27224;real;84.305,70;1;Padrao;;;;;BTG Pactual;;;;arquivo B3;35.236;29/05/2026;1;Padrao;spread;spread;;;Contrato #None;;;15/08/2028;-76;0;;1,052484;0;0;0;;;
+Futuro de DAP 2029-05-15 [DAPK29];Futuro de DAP 2029-05-15;85;;-86;79.926,58;29/05/2026;-0,078498;0;0;0,007554;14.002,52;0;-7,052366;-13.085.882,60;-27,324606;real;79.926,58;1;Padrao;;;;;BTG Pactual;;;;arquivo B3;35.233;29/05/2026;1;Padrao;spread;spread;;;Contrato #None;;;15/05/2029;-86;0;;1,052484;0;0;0;;;
+Futuro de DAP 2033-05-16 [DAPK33];Futuro de DAP 2033-05-16;94;;-130;59.674,85;29/05/2026;-0,195178;0;0;0,017852;33.088,90;0;-7,959391;-14.768.895,81;-35,283998;real;59.674,85;1;Padrao;;;;;BTG Pactual;;;;arquivo B3;35.234;29/05/2026;1;Padrao;spread;spread;;;Contrato #None;;;16/05/2033;-130;0;;1,052484;0;0;0;;;
+Futuro de DAP 2027-05-17 [DAPK27];Futuro de DAP 2027-05-17;93;;-87;92.752,61;29/05/2026;0,013673;0;0;0,001223;2.267,22;0;-8,279242;-15.362.388,01;-43,563239;real;92.752,61;1;Padrao;;;;;BTG Pactual;;;;arquivo B3;35.239;29/05/2026;1;Padrao;spread;spread;;;Contrato #None;;;17/05/2027;-87;0;;1,052484;0;0;0;;;
+Futuro de DAP 2030-08-15 [DAPQ30];Futuro de DAP 2030-08-15;87;;-131;72.612,05;29/05/2026;-0,143873;0;0;0,016857;31.246,12;0;-9,759446;-18.108.952,60;-53,322685;real;72.612,05;1;Padrao;;;;;BTG Pactual;;;;arquivo B3;35.235;29/05/2026;1;Padrao;spread;spread;;;Contrato #None;;;15/08/2030;-131;0;;1,052484;0;0;0;;;
+Futuro de DAP 2032-08-16 [DAPQ32];Futuro de DAP 2032-08-16;88;;-196;62.782,76;29/05/2026;-0,227934;0;0;0,032475;60.193,56;0;-12,625298;-23.426.629,73;-65,947983;real;62.782,76;1;Padrao;;;;;BTG Pactual;;;;arquivo B3;35.229;29/05/2026;1;Padrao;spread;spread;;;Contrato #None;;;16/08/2032;-196;0;;1,052484;0;0;0;;;
+Futuro de DAP 2035-05-15 [DAPK35];Futuro de DAP 2035-05-15;86;;-453;52.144,06;29/05/2026;-0,260347;0;0;0,070241;130.196,73;0;-24,23529;-44.969.326,48;-90,183273;real;52.144,06;1;Padrao;;;;;BTG Pactual;;;;arquivo B3;35.240;29/05/2026;1;Padrao;spread;spread;;;Contrato #None;;;15/05/2035;-453;0;;1,052484;0;0;0;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Termos;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Swaps;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Commodities a Vista;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Cotas de Fundos;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Titulos Publicos;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Instrumento (Nome);Instrumento (Nome Completo);Id do Instrumento;ISIN;Quantidade;Preco;Data Preco;Delta Preco;Valor Liquido;Valor Bruto;PnL (% PL);PnL ($);% / Total (Bruto);Exposicao (% PL);Exposicao ($);% / Total (Acumulado);Moeda;Valor na Moeda Original;Id da Estrategia;Estrategia;Id Emissor;Setor;Emissor;Id do Custodiante;Nome do Custodiante;Criacao;Ultima Atualizacao;Id de Origem;Fonte;Id Interno;Data de Referencia;Codigo da Conta;Nome da Conta;Spread Diario (Padrao);Spread Mensal (Padrao);portfolio-front.models.bond-asset-positions.fields.daily-spread;portfolio-front.models.bond-asset-positions.fields.monthly-spread;Tipo (RF);Contrato;Id do Contrato;Data de Emissao;Data Vencimento;Quantidade Disponivel;Quantidade Garantia;Duration;Prazo Medio;Juros Acumulado;Total Acumulado de Juros;Yield;Metodo de Precificacao;portfolio-front.models.bond-asset-positions.fields.is-exempt
+210100 vencimento 01/03/2028;210100 vencimento 01/03/2028;71;BRSTNCLF1RI1;639;19.103,49;29/05/2026;0,0533;12.207.133,21;12.207.133,21;0,003508;6.502,93;0;6,578782;12.207.133,21;6,578782;real;19.103,49;1;Padrao;2;Desconhecido;Tesouro Nacional;;BTG Pactual;;;;site ANBIMA;35.205;29/05/2026;1;Padrao;spread;spread;;;LFT;Contrato #2;2;05/01/2022;01/03/2028;639;0;0.0039682539683;17.589.041.095.890;;;0,019;Taxa a Mercado;false
+OVER @ LTN 01/04/2027 - ida: 28/05/2026 >> retorno: 29/05/2026;OVER @ LTN 01/04/2027;144;;0;892,798468;29/05/2026;0,053226;0;0;0,00168;3.113,76;0;0;0;6,578782;real;892,798468;2;Caixa;2;Desconhecido;Tesouro Nacional;;BTG Pactual;;;;carteira adm;35.488;29/05/2026;1;Padrao;spread;spread;;;;OVER @ LTN 01/04/2027 - ida: 28/05/2026 >> retorno: 29/05/2026;389;;;0;0;;;;;0;;false
+OVER @ NTNB 15/08/2028 - ida: 29/05/2026 >> retorno: 01/06/2026;OVER @ NTNB 15/08/2028;92;;1.238;4.582,26;29/05/2026;0;5.672.841,72;5.672.841,72;0;0;0;3,057261;5.672.841,72;9,636043;real;4.582,26;2;Caixa;2;Desconhecido;Tesouro Nacional;;BTG Pactual;;;;carteira adm;36.024;29/05/2026;1;Padrao;spread;spread;;;;OVER @ NTNB 15/08/2028 - ida: 29/05/2026 >> retorno: 01/06/2026;392;;;1.238;0;;;;;0;;false
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Titulos Privados;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Instrumento (Nome);Instrumento (Nome Completo);Id do Instrumento;ISIN;Quantidade;Preco;Data Preco;Delta Preco;Valor Liquido;Valor Bruto;PnL (% PL);PnL ($);% / Total (Bruto);Exposicao (% PL);Exposicao ($);% / Total (Acumulado);Moeda;Valor na Moeda Original;Id da Estrategia;Estrategia;Id Emissor;Setor;Emissor;Id do Custodiante;Nome do Custodiante;Criacao;Ultima Atualizacao;Id de Origem;Fonte;Id Interno;Data de Referencia;Codigo da Conta;Nome da Conta;Spread Diario (Padrao);Spread Mensal (Padrao);portfolio-front.models.private-bond-asset-positions.fields.daily-spread;portfolio-front.models.private-bond-asset-positions.fields.monthly-spread;Tipo (RF);Contrato;Id do Contrato;Data de Emissao;Data Vencimento;Quantidade Disponivel;Quantidade Garantia;Duration;Prazo Medio;Juros Acumulado;Total Acumulado de Juros;Yield;Metodo de Precificacao;portfolio-front.models.private-bond-asset-positions.fields.is-exempt
+MTXS11;MTXS11 MTX SE-CAMANDUCAIA SPE S.A. IPCA+12.4111% 15/Set/39;80;BRMTXSDBS006;30.000;1.061,37;29/05/2026;-0,109121;31.841.175,72;31.841.175,72;-0,018766;-34.783,26;0;17,160144;31.841.175,72;17,160144;real;1.061,37;1;Padrao;9;Financeiro;MTX SE-CAMANDUCAIA SPE S.A.;;BTG Pactual;;;;calculo interno;35.211;29/05/2026;1;Padrao;spread;spread;;;Debenture;Contrato #8;8;15/09/2025;15/09/2039;30.000;0;4.864.303;6.425.691;;;12,1049;Taxa a Mercado;false
+ARTRA7;ARTRA7 ARTERIS S.A. IPCA+7.7% 15/Mai/35;75;BRARTRDBS0C4;14.803;924,444209;29/05/2026;0,14248;13.684.547,63;13.684.547,63;0,010504;19.470,02;0;7,375004;13.684.547,63;24,535148;real;924,444209;1;Padrao;5;Financeiro;ARTERIS S.A.;;BTG Pactual;;;;site ANBIMA;35.206;29/05/2026;1;Padrao;spread;spread;;;Debenture;Contrato #3;3;15/05/2025;15/05/2035;14.803;0;59.192.460.317.460;;;;9,9783;Taxa a Mercado;false
+ARTRA8;ARTRA8 ARTERIS S.A. IPCA+8.2857% 15/Out/32;76;BRARTRDBS0E0;18.500;980,944334;29/05/2026;-0,164432;18.147.470,18;18.147.470,18;-0,016125;-29.889,34;0;9,780204;18.147.470,18;34,315353;real;980,944334;1;Padrao;5;Financeiro;ARTERIS S.A.;;BTG Pactual;;;;site ANBIMA;35.207;29/05/2026;1;Padrao;spread;spread;;;Debenture;Contrato #4;4;15/10/2025;15/10/2032;18.500;0;46.726.190.476.190;;;;9,7391;Taxa a Mercado;false
+RALM21;RALM21 RIALMA TRANSMISSORA DE ENERGIA V S/A IPCA+7.8293% 15/Dez/48;81;BRRALMDBS011;15.640;1.091,52;29/05/2026;0,263026;17.071.365,14;17.071.365,14;0,024161;44.784,30;0;9,20026;17.071.365,14;43,515612;real;1.091,52;1;Padrao;10;Financeiro;RIALMA TRANSMISSORA DE ENERGIA V S/A;;BTG Pactual;;;;site ANBIMA;35.212;29/05/2026;1;Padrao;spread;spread;;;Debenture;Contrato #9;9;15/10/2024;15/12/2048;15.640;0;86.133.730.158.730;;;;8,372;Taxa a Mercado;false
+MGPRA0;MGPRA0 CONCESSAO METROVIARIA DO RIO DE JANEIRO S/A IPCA+7.8868% 15/Mar/42;79;BRMGPRDBS076;15.000;1.020,94;29/05/2026;-0,347062;15.314.154,50;15.314.154,50;-0,028774;-53.334,69;0;8,253247;15.314.154,50;51,768859;real;1.020,94;1;Padrao;8;Financeiro;CONCESSAO METROVIARIA DO RIO DE JANEIRO S/A;;BTG Pactual;;;;site ANBIMA;35.210;29/05/2026;1;Padrao;spread;spread;;;Debenture;Contrato #7;7;15/09/2025;15/03/2042;15.000;0;79.143.650.793.651;;;;8,76;Taxa a Mercado;false
+MGPRA0;MGPRA0 CONCESSAO METROVIARIA DO RIO DE JANEIRO S/A IPCA+7.8868% 15/Mar/42;79;BRMGPRDBS076;1.000;1.020,94;29/05/2026;-0,347062;1.020.943,63;1.020.943,63;-0,001918;-3.555,65;0;0,550216;1.020.943,63;52,319076;real;1.020,94;1;Padrao;8;Financeiro;CONCESSAO METROVIARIA DO RIO DE JANEIRO S/A;;BTG Pactual;;;;site ANBIMA;35.222;29/05/2026;1;Padrao;spread;spread;;;Debenture;Contrato #46;46;15/09/2025;15/03/2042;1.000;0;79.143.650.793.651;;;;8,76;Taxa a Mercado;false
+BTEL13;BTEL13 V.TAL - REDE NEUTRA DE TELECOMUNICACOES S.A. PRE+15.05% 15/Abr/32;77;BRBTELDBS020;15.180;1.007,86;29/05/2026;0,283916;15.299.298,66;15.299.298,66;0,023368;43.314,23;0;8,245241;15.299.298,66;60,564317;real;1.007,86;1;Padrao;6;Financeiro;V.TAL - REDE NEUTRA DE TELECOMUNICACOES S.A.;;BTG Pactual;;;;site ANBIMA;35.208;29/05/2026;1;Padrao;spread;spread;;;Debenture;Contrato #5;5;23/04/2025;15/04/2032;15.180;0;38.133.730.158.730;;;;15,3174;Taxa a Mercado;false
+EPRL12;EPRL12 EPR LITORAL PIONEIRO S.A. IPCA+8.203% 15/Mar/49;173;BREPRLDBS065;13.840;1.020,68;29/05/2026;-0,253071;14.126.181,13;14.126.181,13;-0,019336;-35.839,91;0;7,613014;14.126.181,13;68,17733;real;1.020,68;1;Padrao;19;Financeiro;EPR LITORAL PIONEIRO S.A.;;BTG Pactual;;;;site ANBIMA;35.228;29/05/2026;1;Padrao;spread;spread;;;Debenture;Contrato #181;181;15/09/2025;15/03/2049;13.840;0;89.163.095.238.095;12.462.476;;;8,556;Taxa a Mercado;false
+VRDN12;VRDN12 VIARONDON CONCESSIONARIA DE RODOVIA S/A IPCA+5.55% 15/Dez/34;84;BRVRDNDBS012;9.811;1.222,61;29/05/2026;-0,476244;11.995.062,53;11.995.062,53;-0,030967;-57.399,12;0;6,464491;11.995.062,53;74,641822;real;1.222,61;1;Padrao;13;Financeiro;VIARONDON CONCESSIONARIA DE RODOVIA S/A;;BTG Pactual;;;;site ANBIMA;35.215;29/05/2026;1;Padrao;spread;spread;;;Debenture;Contrato #12;12;15/02/2020;15/12/2034;9.811;0;37.734.920.634.921;;;;8,7097;Taxa a Mercado;false
+VRDN12;VRDN12 VIARONDON CONCESSIONARIA DE RODOVIA S/A IPCA+5.55% 15/Dez/34;84;BRVRDNDBS012;46;1.222,61;29/05/2026;-0,476244;56.240,23;56.240,23;-0,000145;-269,12;0;0,03031;56.240,23;74,672131;real;1.222,61;1;Padrao;13;Financeiro;VIARONDON CONCESSIONARIA DE RODOVIA S/A;;BTG Pactual;;;;site ANBIMA;35.219;29/05/2026;1;Padrao;spread;spread;;;Debenture;Contrato #40;40;15/02/2020;15/12/2034;46;0;37.734.920.634.921;;;;8,7097;Taxa a Mercado;false
+CGEE13;CGEE13 COMPANHIA ESTADUAL DE GERACAO DE ENERGIA ELETRICA - CEEE-G IPCA+8.7219% 14/Dez/41;78;BRCGEEDBS038;9.985;885,585203;29/05/2026;-0,118443;8.842.568,25;8.842.568,25;-0,005657;-10.485,79;0;4,76552;8.842.568,25;79,437651;real;885,585203;1;Padrao;7;Financeiro;COMPANHIA ESTADUAL DE GERACAO DE ENERGIA ELETRICA - CEEE-G;;BTG Pactual;;;;site ANBIMA;35.209;29/05/2026;1;Padrao;spread;spread;;;Debenture;Contrato #6;6;15/12/2024;14/12/2041;9.985;0;55.355.555.555.556;;;;12,784;Taxa a Mercado;false
+CGEE13;CGEE13 COMPANHIA ESTADUAL DE GERACAO DE ENERGIA ELETRICA - CEEE-G IPCA+8.7219% 14/Dez/41;78;BRCGEEDBS038;204;885,585203;29/05/2026;-0,118443;180.659,38;180.659,38;-0,000116;-214,23;0;0,097363;180.659,38;79,535013;real;885,585203;1;Padrao;7;Financeiro;COMPANHIA ESTADUAL DE GERACAO DE ENERGIA ELETRICA - CEEE-G;;BTG Pactual;;;;site ANBIMA;35.217;29/05/2026;1;Padrao;spread;spread;;;Debenture;Contrato #37;37;15/12/2024;14/12/2041;204;0;55.355.555.555.556;;;;12,784;Taxa a Mercado;false
+CGEE13;CGEE13 COMPANHIA ESTADUAL DE GERACAO DE ENERGIA ELETRICA - CEEE-G IPCA+8.7219% 14/Dez/41;78;BRCGEEDBS038;400;885,585203;29/05/2026;-0,118443;354.234,08;354.234,08;-0,000227;-420,06;0;0,190907;354.234,08;79,725921;real;885,585203;1;Padrao;7;Financeiro;COMPANHIA ESTADUAL DE GERACAO DE ENERGIA ELETRICA - CEEE-G;;BTG Pactual;;;;site ANBIMA;35.218;29/05/2026;1;Padrao;spread;spread;;;Debenture;Contrato #39;39;15/12/2024;14/12/2041;400;0;55.355.555.555.556;;;;12,784;Taxa a Mercado;false
+TEPA13;TEPA13 BRASIL TECNOLOGIA E PARTICIPACAO S.A. IPCA+11.5593% 15/Mar/32;83;BRTEPADBS031;5.508;1.033,13;29/05/2026;-0,186362;5.690.478,01;5.690.478,01;-0,005732;-10.624,67;0;3,066766;5.690.478,01;82,792686;real;1.033,13;1;Padrao;12;Financeiro;BRASIL TECNOLOGIA E PARTICIPACAO S.A.;;BTG Pactual;;;;site ANBIMA;35.214;29/05/2026;1;Padrao;spread;spread;;;Debenture;Contrato #11;11;15/03/2025;15/03/2032;5.508;0;33.534.920.634.921;;;;12,8779;Taxa a Mercado;false
+PSAN23;PSAN23 PARSAN S.A. CDI+2.7% 18/Mar/30;120;BRPSANDBS026;392;1.042,89;29/05/2026;0,055574;408.814,22;408.814,22;0,000123;227,07;0;0,220322;408.814,22;83,013008;real;1.042,89;1;Padrao;14;Financeiro;PARSAN S.A.;;BTG Pactual;;;;site ANBIMA;35.216;29/05/2026;1;Padrao;spread;spread;;;Debenture;Contrato #36;36;18/03/2025;18/03/2030;392;0;28.725.396.825.397;;;;2,3285;Taxa a Mercado;false
+PSAN23;PSAN23 PARSAN S.A. CDI+2.7% 18/Mar/30;120;BRPSANDBS026;1.000;1.042,89;29/05/2026;0,055574;1.042.893,42;1.042.893,42;0,000313;579,26;0;0,562046;1.042.893,42;83,575054;real;1.042,89;1;Padrao;14;Financeiro;PARSAN S.A.;;BTG Pactual;;;;site ANBIMA;35.221;29/05/2026;1;Padrao;spread;spread;;;Debenture;Contrato #45;45;18/03/2025;18/03/2030;1.000;0;28.725.396.825.397;;;;2,3285;Taxa a Mercado;false
+PSAN23;PSAN23 PARSAN S.A. CDI+2.7% 18/Mar/30;120;BRPSANDBS026;1.000;1.042,89;29/05/2026;0,055574;1.042.893,42;1.042.893,42;0,000313;579,26;0;0,562046;1.042.893,42;84,1371;real;1.042,89;1;Padrao;14;Financeiro;PARSAN S.A.;;BTG Pactual;;;;site ANBIMA;35.224;29/05/2026;1;Padrao;spread;spread;;;Debenture;Contrato #54;54;18/03/2025;18/03/2030;1.000;0;28.725.396.825.397;;;;2,3285;Taxa a Mercado;false
+PSAN23;PSAN23 PARSAN S.A. CDI+2.7% 18/Mar/30;120;BRPSANDBS026;934;1.042,89;29/05/2026;0,055574;974.062,45;974.062,45;0,000292;541,02;0;0,524951;974.062,45;84,662051;real;1.042,89;1;Padrao;14;Financeiro;PARSAN S.A.;;BTG Pactual;;;;site ANBIMA;35.225;29/05/2026;1;Padrao;spread;spread;;;Debenture;Contrato #62;62;18/03/2025;18/03/2030;934;0;28.725.396.825.397;;;;2,3285;Taxa a Mercado;false
+PSAN23;PSAN23 PARSAN S.A. CDI+2.7% 18/Mar/30;120;BRPSANDBS026;930;1.042,89;29/05/2026;0,055574;969.890,88;969.890,88;0,000291;538,71;0;0,522703;969.890,88;85,184753;real;1.042,89;1;Padrao;14;Financeiro;PARSAN S.A.;;BTG Pactual;;;;site ANBIMA;35.226;29/05/2026;1;Padrao;spread;spread;;;Debenture;Contrato #68;68;18/03/2025;18/03/2030;930;0;28.725.396.825.397;;;;2,3285;Taxa a Mercado;false
+PSAN23;PSAN23 PARSAN S.A. CDI+2.7% 18/Mar/30;120;BRPSANDBS026;1.010;1.042,89;29/05/2026;0,055574;1.053.322,35;1.053.322,35;0,000316;585,05;0;0,567666;1.053.322,35;85,75242;real;1.042,89;1;Padrao;14;Financeiro;PARSAN S.A.;;BTG Pactual;;;;site ANBIMA;35.227;29/05/2026;1;Padrao;spread;spread;;;Debenture;Contrato #128;128;18/03/2025;18/03/2030;1.010;0;28.725.396.825.397;;;;2,3285;Taxa a Mercado;false
+RISP12;RISP12 AGUAS DO RIO 1 SPE S.A IPCA+6.9% 15/Jan/34;82;BRRISPDBS020;407.863;9,522727;29/05/2026;0,604723;3.883.968;3.883.968;0,012595;23.346,08;0;2,093184;3.883.968,00;87,845604;real;9,522727;1;Padrao;11;Financeiro;AGUAS DO RIO 1 SPE S.A;;BTG Pactual;;;;site ANBIMA;35.213;29/05/2026;1;Padrao;spread;spread;;;Debenture;Contrato #10;10;15/07/2023;15/01/2034;407.863;0;40.411.111.111.111;;;;12,3373;Taxa a Mercado;false
+RISP12;RISP12 AGUAS DO RIO 1 SPE S.A IPCA+6.9% 15/Jan/34;82;BRRISPDBS020;45.520;9,522727;29/05/2026;0,604723;433.474,53;433.474,53;0,001406;2.605,56;0;0,233612;433.474,53;88,079216;real;9,522727;1;Padrao;11;Financeiro;AGUAS DO RIO 1 SPE S.A;;BTG Pactual;;;;site ANBIMA;35.223;29/05/2026;1;Padrao;spread;spread;;;Debenture;Contrato #50;50;15/07/2023;15/01/2034;45.520;0;40.411.111.111.111;;;;12,3373;Taxa a Mercado;false
+RDORD9;RDORD9 REDE DOR SAO LUIZ S/A CDI+2.25% 25/Jul/31;123;BRRDORDBS0K9;3.650;1.077,88;29/05/2026;0,083609;3.934.253,06;3.934.253,06;0,001773;3.286,64;0;2,120284;3.934.253,06;90,199501;real;1.077,88;1;Padrao;15;Financeiro;REDE DOR SAO LUIZ S/A;;BTG Pactual;;;;site ANBIMA;35.220;29/05/2026;1;Padrao;spread;spread;;;Debenture;Contrato #43;43;25/07/2023;25/07/2031;3.650;0;30.085.317.460.317;;;;1,5074;Taxa a Mercado;false
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Outros;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Caixa;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Id Interno;Moeda;Id da Estrategia;Estrategia;Codigo da Conta;Nome da Conta;Id do Custodiante;Nome do Custodiante;Valor Liquido;PnL (% PL);PnL ($);Id de Origem;Fonte;Criacao;Ultima Atualizacao;% / Total (Liq);;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+10.984;real;2;Caixa;1;Padrao;;BTG Pactual;0;0;0;;;;;0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Provisoes;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Id Interno;Instrumento (Nome);Id de Categoria de Provisao;Id da Estrategia;Estrategia;Codigo da Conta;Nome da Conta;Moeda;Valor Liquido;Data Liquidacao;Status de Liquidacao;Ultima Atualizacao;Criacao;Id do Instrumento de Origem;Id do Contrato de Origem;Id de Provisao de Origem;PnL (% PL);PnL ($);% / Total (Liq);Valor Liquidado;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;ajuste de futuro;24;2;Caixa;1;Padrao;real;285.811,24;;;;;87;;;0;0;0,154032;-180.074,26;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;taxa CVM;122;2;Caixa;1;Padrao;real;28.422,79;;;;;;;;-0,000065;-120,95;0,015318;-30.357,96;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;despesa de auditoria;151;2;Caixa;1;Padrao;real;11.545,39;;;;;;;;-0,000028;-52;0,006222;-13.001,21;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;taxa ANBIMA/ANBID;121;2;Caixa;1;Padrao;real;559,8375;;;;;;;;-0,000019;-34,98;0,000302;-1.434,58;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;liquidacao de compromissada (volta);10;2;Caixa;1;Padrao;real;0;;;;;144;;;0;0;0;5.853.186,76;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;liquidacao de compromissada (ida);7;2;Caixa;1;Padrao;real;0;;;;;92;;;0;0;0;-5.672.841,72;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;ajuste de PL;204;1;Padrao;1;Padrao;real;-0,01;;;;;;;;0;-0,04;0;0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;liquidacao de compra/venda de ativos na BM&F;2;2;Caixa;1;Padrao;real;-13,4;;;;;;;;-0,000007;-13,4;-0,000007;-270,77;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;taxa SELIC;126;2;Caixa;1;Padrao;real;-72,19;;;;;;;;0,000002;4,32;-0,000039;-506,85;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;taxa CETIP;125;2;Caixa;1;Padrao;real;-3.488,24;;;;;;;;-0,000092;-169,63;-0,00188;-3.301,10;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;taxa de custodia;123;2;Caixa;1;Padrao;real;-7.338,64;;;;;;;;-0,000198;-367,67;-0,003955;0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;taxa de administracao;101;2;Caixa;1;Padrao;real;-10.273,14;;;;;;;;-0,000278;-514,69;-0,005536;0;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Aplicacoes e Resgates a Cotizar;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Id Interno;Data de Cotizacao;Valor;Cotizada?;Nº de Cotas;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Ativos com Vencimento Proximo;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Id Interno;Nome;Data Vencimento;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Cambios Utilizados;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Moeda;Instrumento de Cambio Direto;Instrumento de Cambio Indireto;Valor;Data do Cambio;Cambio Direto?;Mesma Data da Carteira?;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Exposicao e Cambio;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+portfolio-front.export-file.footer-sections.fields.currency-exposures;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Moeda;Valor;Percentual;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Real;185.553.079,98;1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+portfolio-front.export-file.footer-sections.fields.delta-adjusted-currency-exposures;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Moeda;Valor;Percentual;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+Real;185.553.079,98;1;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
