@@ -1,29 +1,81 @@
-# Sprint 2 — Paquet de livrables (Semaines 3-4)
+# Sprint 2 - prototype, contrats et run de preuve
 
-**Projet :** Inteli × YvY Capital — Pipeline de gouvernance des données et DataApp
-**Objectif du sprint :** convertir le cadrage et les données sources en une direction produit approuvée avant le début du développement réel (gate W4 — gel du scope).
-**Version :** 0.9 · 20/08/2026 · Statut : Draft pour revue partenaire
-**Équipe :** Thomas (coordination), Viktor (UX/UI), Adrien (data), Isiah (KPI/analytics), Raphael (application)
+**Statut :** Draft pret pour revue technique<br>
+**Decision produit :** `Pending partner validation`<br>
+**Classification du contenu versionne :** synthetique et partageable apres containment du depot
 
-## Contenu
+## Ce qui est livre
 
-| Fichier | Livrable roadmap | Lead |
-|---|---|---|
-| `wireframes/wireframes_sprint2.html` | Maquette cliquable + inventaire d'écrans + états d'interaction (6 vues) | Viktor |
-| `wireframes/mockup_data.json` | Jeu de données figé alimentant la maquette (aliasé, masqué, traçable — run SPRINT2-WF-001) | Viktor |
-| `docs/catalogue_kpi.md` | Catalogue KPI et règles de calcul (K01–K16 instantané ; H01–H08 historique) | Isiah |
-| `docs/audit_donnees_dataflow.md` | Audit des données + proposition de masquage + data-flow Raw/Silver/Gold/Serving | Adrien |
-| `docs/architecture_backlog.md` | Approche technique + backlog priorisé sprint-ready (S3/S4) | Raphael / Thomas |
-| `docs/gate_W4_decisions.md` | Set de décisions D1–D8 demandé à YvY Capital au gate W4 | Thomas |
+Le prototype couvre Overview, Funds, Fund Detail avec allocation et positions, Performance & Risk, Internal Comparison, Peer Comparison, Data Quality, Import & Validation et Run History & Lineage. Les six vues historiques sont preservees et etendues par une navigation plus simple.
 
-## Comment ouvrir la maquette
+Le parcours Direction permet de filtrer un fonds et une periode, consulter les KPI, descendre de l'allocation aux positions, comparer les fonds et voir source, fraicheur, qualite et lineage. Le parcours Analyste execute une simulation complete : source, structure, anomalies, detail, quarantaine, validation, publication locale et journal de run.
 
-Double-cliquer `wireframes/wireframes_sprint2.html` — fichier autonome, aucune connexion réseau requise, testé sans erreur depuis un profil navigateur vierge. Navigation par onglets ; le drill-down (clic sur le donut d'allocation) filtre le tableau des positions ; le survol des chiffres affiche la piste de lineage.
+## Installation
 
-## Règles de confidentialité appliquées
+Le pipeline Python n'a aucune dependance externe.
 
-Fonds aliasés FUND_01–FUND_07 ; instruments privés, ISIN privés, émetteurs et dépositaires masqués ; aucune courbe historique (une seule date métier disponible) ; l'encours transparisé et la classification MASTER/FEEDER portent le label HYPOTHÈSE À VALIDER. Scan zéro-occurrence des noms interdits exécuté sur les sorties partageables (HTML + JSON) le 20/08/2026.
+```powershell
+py -3.12 --version
+py -3.12 "Sprint 2\pipeline\run_pipeline.py"
+```
 
-## Ce que ce paquet ne prétend pas
+La commande genere dans `Sprint 2/pipeline/output/` :
 
-Pas de rendements/risques certifiés (historique absent), pas de consolidation économique validée (registre des fonds non confirmé), pas de groupes de pairs définitifs (validation gérants et données ANBIMA en attente), pas de choix d'outil BI arrêté.
+- `manifest.json` ;
+- `quality_report.json` ;
+- `run_log.json` ;
+- `serving_data.json` ;
+- `output_checksums.json` ;
+- `privacy_report.json`.
+
+Ces sorties sont ignorees par Git et peuvent etre regenerees.
+
+## Lancer la maquette
+
+Depuis la racine :
+
+```powershell
+py -3.12 -m http.server 4173 --directory "Sprint 2"
+```
+
+Ouvrir `http://127.0.0.1:4173/app/`. L'ancien chemin `wireframes/wireframes_sprint2.html` redirige vers cette application. Un serveur HTTP local est requis pour les modules JavaScript ; aucune connexion Internet n'est utilisee.
+
+## Tester
+
+Suite Python :
+
+```powershell
+py -3.12 -m unittest discover -s "Sprint 2\tests" -p "test_*.py" -v
+py -3.12 "Sprint 2\pipeline\run_pipeline.py" --verify
+py -3.12 "Sprint 2\pipeline\run_pipeline.py" --check-shareable "Sprint 2\pipeline\output"
+```
+
+Suite navigateur :
+
+```powershell
+npm install
+npx playwright install chromium
+npm run test:web
+```
+
+Le smoke test couvre les neuf sections, les dix scenarios, le drill-down allocation, le workflow Analyste, la modale et `Escape`, la navigation aux fleches, l'absence de `onclick`, la console, le bureau et le mobile.
+
+## Demonstration en 7 minutes
+
+1. Ouvrir Vue generale et commenter la double couverture 7 snapshot / 14 historique.
+2. Ouvrir Fonds, puis `FUND_01` et filtrer l'allocation `Credit prive`.
+3. Ouvrir Performance et montrer les prerequis H01-H08.
+4. Ouvrir Comparaison puis Pairs et rappeler le statut d'exemple.
+5. Choisir le parcours Analyste et avancer jusqu'a la publication locale.
+6. Ouvrir Runs & lineage et montrer les trois preuves.
+7. Changer le Scenario prototype pour demontrer chargement, retard, incomplet, vide, erreur, acces refuse, aucun resultat et hypothese.
+
+## Sources et confidentialite
+
+La matrice [`docs/source_matrix.md`](docs/source_matrix.md) reconcilie les domaines. Les fichiers reels sont fournis localement selon [`docs/local_data_setup.md`](docs/local_data_setup.md). Les identifiants prives sont exclus de toute sortie partageable selon [`docs/anonymization_policy.md`](docs/anonymization_policy.md).
+
+Le remote GitHub public ne doit recevoir aucun push. Les actions de containment et la procedure de purge non executee sont dans [`docs/security_incident_response.md`](docs/security_incident_response.md).
+
+## Decisions et limites
+
+Le journal [`docs/decision_log_W4.md`](docs/decision_log_W4.md) laisse D1-D8 en attente. Les analytics avances, pairs certifies, RBAC reel, orchestration de production, stockage gere et UAT ne sont pas declares termines ; seuls leurs contrats ou interfaces sont prepares.

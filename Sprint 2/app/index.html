@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Prototype local et synthetique du Funds Manager Sprint 2.">
+  <title>Funds Manager | Prototype Sprint 2</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2335204f'/%3E%3Cpath d='M16 43V31h8v12zm12 0V17h8v26zm12 0V25h8v18z' fill='%23f7f2fa'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/base.css">
+  <link rel="stylesheet" href="styles/layout.css">
+  <link rel="stylesheet" href="styles/components.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Aller au contenu</a>
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
+
+  <div class="app-shell" data-sidebar="open">
+    <aside class="sidebar glass-panel" aria-label="Navigation principale">
+      <div class="brand-lockup">
+        <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+        <span class="brand-copy"><strong>Funds Manager</strong><small>YvY Capital</small></span>
+      </div>
+
+      <nav class="primary-nav" aria-label="Sections du prototype">
+        <p class="nav-label">Direction</p>
+        <button class="nav-item is-active" type="button" data-view="overview" aria-current="page">
+          <span class="nav-icon" aria-hidden="true">01</span><span>Vue generale</span>
+        </button>
+        <button class="nav-item" type="button" data-view="funds">
+          <span class="nav-icon" aria-hidden="true">02</span><span>Fonds</span>
+        </button>
+        <button class="nav-item" type="button" data-view="fund-detail">
+          <span class="nav-icon" aria-hidden="true">03</span><span>Allocation</span>
+        </button>
+        <button class="nav-item" type="button" data-view="performance">
+          <span class="nav-icon" aria-hidden="true">04</span><span>Performance</span>
+        </button>
+        <button class="nav-item" type="button" data-view="comparison">
+          <span class="nav-icon" aria-hidden="true">05</span><span>Comparaison</span>
+        </button>
+        <button class="nav-item" type="button" data-view="peers">
+          <span class="nav-icon" aria-hidden="true">06</span><span>Pairs</span>
+        </button>
+
+        <p class="nav-label">Operations</p>
+        <button class="nav-item" type="button" data-view="quality">
+          <span class="nav-icon" aria-hidden="true">07</span><span>Qualite</span>
+        </button>
+        <button class="nav-item" type="button" data-view="import">
+          <span class="nav-icon" aria-hidden="true">08</span><span>Import & validation</span>
+        </button>
+        <button class="nav-item" type="button" data-view="runs">
+          <span class="nav-icon" aria-hidden="true">09</span><span>Runs & lineage</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-note">
+        <span class="status-dot" aria-hidden="true"></span>
+        <div><strong>Mode prototype</strong><small>Donnees synthetiques</small></div>
+      </div>
+    </aside>
+
+    <div class="main-shell">
+      <header class="topbar glass-panel">
+        <button class="icon-button menu-button" id="menu-button" type="button" aria-label="Ouvrir ou fermer la navigation" aria-expanded="true">
+          <span aria-hidden="true">Menu</span>
+        </button>
+
+        <div class="breadcrumb" aria-label="Emplacement">
+          <span>Funds Manager</span><span aria-hidden="true">/</span><strong id="current-page-label">Vue generale</strong>
+        </div>
+
+        <div class="topbar-actions">
+          <label class="compact-field">
+            <span>Parcours</span>
+            <select id="role-select" aria-label="Choisir le parcours">
+              <option value="direction">Direction</option>
+              <option value="analyst">Analyste</option>
+            </select>
+          </label>
+          <button class="icon-button" id="help-button" type="button" aria-label="Afficher l'aide du prototype">?</button>
+          <button class="avatar-button" type="button" aria-label="Profil de demonstration">YD</button>
+        </div>
+      </header>
+
+      <section class="context-bar" aria-label="Filtres globaux">
+        <label class="filter-field">
+          <span>Fonds</span>
+          <select id="fund-select"></select>
+        </label>
+        <label class="filter-field">
+          <span>Periode</span>
+          <select id="period-select">
+            <option value="1m">1 mois</option>
+            <option value="3m">3 mois</option>
+            <option value="6m">6 mois</option>
+            <option value="12m" selected>12 mois</option>
+          </select>
+        </label>
+        <label class="filter-field prototype-control">
+          <span>Scenario prototype</span>
+          <select id="scenario-select">
+            <option value="sample">Donnees d'exemple</option>
+            <option value="current">Donnees a jour</option>
+            <option value="loading">Chargement</option>
+            <option value="late">Donnees en retard</option>
+            <option value="incomplete">Donnees incompletes</option>
+            <option value="empty">Etat vide</option>
+            <option value="error">Erreur</option>
+            <option value="denied">Acces refuse</option>
+            <option value="no-match">Aucun resultat</option>
+            <option value="hypothesis">Hypothese a valider</option>
+          </select>
+        </label>
+        <div class="source-status" id="source-status">
+          <span class="status-dot" aria-hidden="true"></span>
+          <span><strong>SPRINT2-WF-001</strong><small>Source synthetique · a jour</small></span>
+        </div>
+      </section>
+
+      <main id="main-content" tabindex="-1">
+        <div id="scenario-banner"></div>
+        <div id="app-view" aria-live="polite" aria-busy="true"></div>
+      </main>
+    </div>
+  </div>
+
+  <dialog class="modal" id="anomaly-dialog" aria-labelledby="anomaly-title">
+    <div class="modal-header">
+      <div><span class="eyebrow">Detail de controle</span><h2 id="anomaly-title">Anomalie</h2></div>
+      <button class="icon-button" type="button" data-action="close-dialog" aria-label="Fermer le detail">Fermer</button>
+    </div>
+    <div id="anomaly-content"></div>
+    <div class="modal-actions">
+      <button class="button secondary" type="button" data-action="quarantine-anomaly">Mettre en quarantaine</button>
+      <button class="button primary" type="button" data-action="resolve-anomaly">Marquer resolue</button>
+    </div>
+  </dialog>
+
+  <div class="toast-region" id="toast-region" role="status" aria-live="polite" aria-atomic="true"></div>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

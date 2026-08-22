@@ -1,57 +1,63 @@
-# YvY Capital
+# Funds Manager
 
-Ce depot contient les donnees, la documentation et les livrables du projet YvY Capital.
+Funds Manager est un projet de gouvernance de donnees et d'aide a la decision pour le suivi de fonds. Le produit cible combine un pipeline traçable, des controles de qualite et une interface de consultation. Le Sprint 2 fournit une preuve reproductible et un prototype fonctionnel ; il ne pretend pas remplacer l'industrialisation des Sprints 3 a 5.
 
-## Structure du depot
+## Alerte de confidentialite
 
-- `data_YvY/` : jeux de donnees principaux du projet
-- `docs/` : documentation et livrables PDF/Word
-- `Sprint 1/` : dossier de sprint
-- `data_YvY.zip` : archive des donnees
+Le depot GitHub historique est encore public au 22 aout 2026. **Ne poussez aucun commit vers ce remote** avant son passage en prive, la qualification de l'incident et la validation de l'espace GitLab autorise. Les sources brutes et documents restreints ont ete retires de l'index local sans supprimer les copies de travail.
 
-## Contenu des donnees
+Voir [`Sprint 2/docs/security_incident_response.md`](Sprint%202/docs/security_incident_response.md).
 
-Le dossier `data_YvY/` regroupe des fichiers de suivi et d'analyse autour de fonds d'investissement :
+## Livrables Sprint 2
 
-- `funds.csv` : referentiel des fonds
-- `fund_nav_snapshot.csv` : snapshots de NAV par fonds et par date
-- `portfolio_holdings.csv` : composition detaillee des portefeuilles
-- `returns_navps.csv` : historique de performance
-- `cash_flow_daily.csv` : flux quotidiens
-- `corporate_payments.csv` : paiements et evenements corporate
-- `drawdown.csv` : historique des drawdowns
-- `dv01.csv` : sensibilite taux
-- `liquidity_by_horizon.csv` : projections de liquidite
-- `stress_risk.csv` : resultats de stress tests
-- `transactions_summary.csv` : synthese des souscriptions et rachats
-- `bond_instruments.csv` : informations sur les instruments obligataires
-- `var_mask_configs.csv` : configuration des scenarios VaR
-- `external_debenture_data_raw.csv` : fichier brut actuellement vide
+- application statique modulaire, responsive et accessible ;
+- parcours Direction et Analyste ;
+- dix etats de demonstration ;
+- matrice unifiee des sources : snapshot detaille de 7 fonds et historique structure de 14 fonds ;
+- catalogue canonique K01-K16 et H01-H08 ;
+- architecture, ADR, contrats Silver/Gold/Serving et droits proposes ;
+- backlog Sprint 3 estime et testable ;
+- run deterministe `SPRINT2-WF-001` avec manifests, DQ, quarantaine et lineage ;
+- fixtures synthetiques et tests Python/navigateur ;
+- decision log D1-D8, tous en `Pending partner validation`.
 
-Le dossier contient aussi :
+## Demarrage rapide
 
-- `Fund-administration-database-Inteli/` : extractions et documentation source
-- `Fund-administration-database-peers-Inteli/` : comparaison de fonds pairs
+Prerequis : Python 3.12 et, pour les tests navigateur, Node.js 20+.
 
-## Documentation
+```powershell
+py -3.12 "Sprint 2\pipeline\run_pipeline.py"
+py -3.12 -m http.server 4173 --directory "Sprint 2"
+```
 
-Le dossier `docs/` contient :
+Ouvrir ensuite `http://127.0.0.1:4173/app/`. Le prototype ne fait aucun appel externe. Si le payload genere est absent, il utilise un fallback synthetique local.
 
-- `2026_TAPI_YvY_Capital_Inteli_ENGLISH.docx`
-- `Special Projects -4o year.docx`
-- `FEATURE_GUIDE.pdf`
-- `DATA_DICTIONARY.pdf`
+## Tests
 
-## Usage
+```powershell
+py -3.12 -m unittest discover -s "Sprint 2\tests" -p "test_*.py" -v
+py -3.12 "Sprint 2\pipeline\run_pipeline.py" --verify
+```
 
-Ce depot sert de base de travail pour :
+Pour les tests navigateur :
 
-- l'analyse de portefeuille
-- le suivi de performance
-- l'etude des flux et de la liquidite
-- l'analyse de risque
-- la centralisation de la documentation projet
+```powershell
+npm install
+npx playwright install chromium
+npm run test:web
+```
 
-## Synchronisation locale
+La documentation complete d'installation, de demonstration et de verification se trouve dans [`Sprint 2/README.md`](Sprint%202/README.md).
 
-Le depot local est configure pour recopier automatiquement le contenu du repo vers le dossier `C:\Users\thdub\OneDrive\Bureau\YvY` avant chaque `git push`.
+## Structure partageable
+
+| Chemin | Role |
+|---|---|
+| `Sprint 2/app/` | prototype web et design system |
+| `Sprint 2/pipeline/` | run reproductible et controles |
+| `Sprint 2/tests/fixtures/` | cas synthetiques uniquement |
+| `Sprint 2/tests/` | tests Python et navigateur |
+| `Sprint 2/contracts/` | schemas et catalogue KPI |
+| `Sprint 2/docs/` | architecture, gouvernance, backlog et gate |
+
+Les dossiers locaux de donnees, documents sources, archives et bundles sont ignores par Git.
