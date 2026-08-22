@@ -1,0 +1,12 @@
+{
+  "run_id": "SPRINT2-WF-001",
+  "input_dir": "./Sprint 2/tests/fixtures",
+  "output_dir": "./Sprint 2/pipeline/output",
+  "data_mode": "synthetic",
+  "publication_target": "local-only",
+  "denylist": [
+    "FORBIDDEN_ENTITY_TEST"
+  ],
+  "allow_private_identifiers": false,
+  "staleness_threshold_days": 30
+}

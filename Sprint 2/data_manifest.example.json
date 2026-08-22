@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "run_id": "SPRINT2-WF-001",
+  "classification": "synthetic-example",
+  "sources": [
+    {
+      "source_id": "SRC_SNAPSHOT_EXPORTS",
+      "category": "portfolio_snapshot",
+      "expected_files": 7,
+      "fund_coverage": 7,
+      "temporal_scope": "single_business_date",
+      "location_env": "FUNDS_MANAGER_LOCAL_INPUT_DIR"
+    },
+    {
+      "source_id": "SRC_STRUCTURED_HISTORY",
+      "category": "structured_history",
+      "expected_files": 14,
+      "fund_coverage": 14,
+      "temporal_scope": "daily_history",
+      "location_env": "FUNDS_MANAGER_LOCAL_INPUT_DIR"
+    },
+    {
+      "source_id": "SRC_PEER_UNIVERSE",
+      "category": "peer_reference",
+      "expected_files": 1,
+      "fund_coverage": "pending partner validation",
+      "temporal_scope": "versioned_snapshot",
+      "location_env": "FUNDS_MANAGER_LOCAL_INPUT_DIR"
+    }
+  ],
+  "notes": [
+    "This manifest contains no real file name, identifier, checksum or business value.",
+    "Runtime manifests are generated locally and must remain outside Git."
+  ]
+}

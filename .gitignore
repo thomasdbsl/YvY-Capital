@@ -1,0 +1,22 @@
+# Confidential project inputs: keep local, never commit.
+/data_YvY/
+/data_YvY.zip
+/docs/
+/Sprint 1/*.pdf
+/Sprint 2/sprint2_commit.bundle
+/local_data/
+
+# Generated pipeline and test artefacts.
+/Sprint 2/pipeline/output/
+/Sprint 2/pipeline/.work/
+/artifacts/
+/test-results/
+/playwright-report/
+
+# Local environments and caches.
+.venv/
+node_modules/
+__pycache__/
+*.py[cod]
+.DS_Store
+Thumbs.db
