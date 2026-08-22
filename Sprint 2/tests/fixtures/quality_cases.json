@@ -1,0 +1,12 @@
+[
+  {"case_id":"DURATION","kind":"invalid_duration","value":"59.192.460.317.460"},
+  {"case_id":"STALE","kind":"stale_price","business_date":"2026-08-22","price_date":"2026-07-01"},
+  {"case_id":"NAV_NEGATIVE","kind":"nav","value":-1},
+  {"case_id":"DRAWDOWN","kind":"drawdown","value":-1.2},
+  {"case_id":"FORBIDDEN","kind":"forbidden_name","value":"FORBIDDEN_ENTITY_TEST"},
+  {"case_id":"PRIVATE_ID","kind":"private_identifier","value":"PRIVATE_ID_TEST_001"},
+  {"case_id":"PEER_A","kind":"peer_identifier","value":"SYNTH_CNPJ_01"},
+  {"case_id":"PEER_B","kind":"peer_identifier","value":"SYNTH_CNPJ_01"},
+  {"case_id":"EMPTY","kind":"empty_section"},
+  {"case_id":"BRIDGE","kind":"uncertain_bridge"}
+]

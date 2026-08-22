@@ -1,0 +1,2 @@
+section,fund_id,business_date,record_status,amount_br,price_date,duration_raw,asset_class,instrument_alias,issuer_alias,custodian_alias,indexer,maturity_date,contract_alias,col15,col16,col17,col18,col19,col20,col21,col22,col23,col24,col25,col26,col27,col28,col29,col30,col31,col32,col33,col34,col35,col36,col37,col38,col39,col40,col41,col42,col43,col44,col45,col46,col47,col48,col49,col50,col51
+Positions,FUND_02,2026-08-22,valid,"2.345,67",2026-08-18,2.50,Souverain,INSTR_02,EMET_02,CUSTO_02,IPCA,2028-08-22,CONTRACT_02,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,

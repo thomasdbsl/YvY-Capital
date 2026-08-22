@@ -1,0 +1,19 @@
+{
+  "business_date": "2026-08-22",
+  "funds": [
+    {"fund_id":"FUND_01","nav_brl":13375000,"nav_per_share":99.25,"share_count":134760.7053},
+    {"fund_id":"FUND_02","nav_brl":14750000,"nav_per_share":100.50,"share_count":146766.1692},
+    {"fund_id":"FUND_03","nav_brl":16125000,"nav_per_share":101.75,"share_count":158476.6585},
+    {"fund_id":"FUND_04","nav_brl":17500000,"nav_per_share":103.00,"share_count":169902.9126},
+    {"fund_id":"FUND_05","nav_brl":18875000,"nav_per_share":104.25,"share_count":181055.1559},
+    {"fund_id":"FUND_06","nav_brl":20250000,"nav_per_share":105.50,"share_count":191943.1280},
+    {"fund_id":"FUND_07","nav_brl":21625000,"nav_per_share":106.75,"share_count":202576.1124},
+    {"fund_id":"FUND_08","nav_brl":23000000,"nav_per_share":108.00,"share_count":212962.9630},
+    {"fund_id":"FUND_09","nav_brl":24375000,"nav_per_share":109.25,"share_count":223112.1281},
+    {"fund_id":"FUND_10","nav_brl":25750000,"nav_per_share":110.50,"share_count":233031.6742},
+    {"fund_id":"FUND_11","nav_brl":27125000,"nav_per_share":111.75,"share_count":242729.3065},
+    {"fund_id":"FUND_12","nav_brl":28500000,"nav_per_share":113.00,"share_count":252212.3894},
+    {"fund_id":"FUND_13","nav_brl":29875000,"nav_per_share":114.25,"share_count":261487.9650},
+    {"fund_id":"FUND_14","nav_brl":31250000,"nav_per_share":115.50,"share_count":270562.7706}
+  ]
+}

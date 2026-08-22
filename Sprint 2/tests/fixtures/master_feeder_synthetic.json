@@ -1,0 +1,6 @@
+{
+  "relationships": [
+    {"holder_fund":"FUND_02","held_fund":"FUND_01","status":"synthetic-confirmed"},
+    {"holder_fund":"FUND_03","held_fund":"FUND_01","status":"hypothesis"}
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/contracts/silver.schema.json",
+  "title": "Silver record",
+  "type": "object",
+  "required": ["run_id", "source_id", "source_record_id", "fund_id", "business_date", "record_type", "quality_status", "lineage"],
+  "properties": {
+    "run_id": {"const": "SPRINT2-WF-001"},
+    "source_id": {"type": "string", "pattern": "^SRC_[A-Z0-9_]+$"},
+    "source_record_id": {"type": "string", "pattern": "^REC_[A-Z0-9_]+$"},
+    "fund_id": {"type": "string", "pattern": "^FUND_[0-9]{2}$"},
+    "business_date": {"type": "string", "format": "date"},
+    "record_type": {"enum": ["fund_snapshot", "position", "history", "peer", "cash", "provision"]},
+    "values": {"type": "object", "additionalProperties": {"type": ["number", "string", "null"]}},
+    "quality_status": {"enum": ["valid", "warning", "quarantined"]},
+    "lineage": {
+      "type": "object",
+      "required": ["manifest_ref", "source_row", "transform_version"],
+      "properties": {
+        "manifest_ref": {"type": "string"},
+        "source_row": {"type": "integer", "minimum": 1},
+        "transform_version": {"type": "string"}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

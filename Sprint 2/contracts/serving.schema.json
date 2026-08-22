@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/contracts/serving.schema.json",
+  "title": "Prototype Serving payload",
+  "type": "object",
+  "required": ["meta", "funds", "kpis", "positions", "anomalies", "runs"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": ["run_id", "classification", "generated_at", "publication_allowed"],
+      "properties": {
+        "run_id": {"const": "SPRINT2-WF-001"},
+        "classification": {"const": "synthetic-example"},
+        "generated_at": {"type": "string", "format": "date-time"},
+        "publication_allowed": {"const": true}
+      },
+      "additionalProperties": true
+    },
+    "funds": {"type": "array", "minItems": 14},
+    "kpis": {"type": "array", "minItems": 24},
+    "positions": {"type": "array"},
+    "anomalies": {"type": "array"},
+    "runs": {"type": "array", "minItems": 1}
+  },
+  "additionalProperties": true
+}

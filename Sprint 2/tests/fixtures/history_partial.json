@@ -1,0 +1,10 @@
+{
+  "fund_id":"FUND_01",
+  "series":[
+    {"date":"2026-01-02","nav":100.0},
+    {"date":"2026-01-05","nav":101.2},
+    {"date":"2026-01-07","nav":null},
+    {"date":"2026-01-08","nav":102.1}
+  ],
+  "coverage_status":"partial"
+}

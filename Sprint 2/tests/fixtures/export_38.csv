@@ -1,0 +1,2 @@
+section,fund_id,business_date,record_status,amount_br,price_date,duration_raw,asset_class,instrument_alias,issuer_alias,custodian_alias,indexer,maturity_date,contract_alias,col15,col16,col17,col18,col19,col20,col21,col22,col23,col24,col25,col26,col27,col28,col29,col30,col31,col32,col33,col34,col35,col36,col37,col38
+Positions,FUND_01,2026-08-22,valid,"1.234,56",2026-08-20,1.25,Credit,INSTR_01,EMET_01,CUSTO_01,CDI,2027-08-22,CONTRACT_01,,,,,,,,,,,,,,,,,,,,,,,,

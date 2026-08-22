@@ -1,0 +1,4 @@
+[
+  {"case_id":"PRIVACY_NAME","value":"FORBIDDEN_ENTITY_TEST","expected_rule":"DQ20"},
+  {"case_id":"PRIVACY_ID","value":"PRIVATE_ID_TEST_001","expected_rule":"DQ21"}
+]

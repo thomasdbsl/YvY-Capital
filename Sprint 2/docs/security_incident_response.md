@@ -1,6 +1,6 @@
 # Reponse a l'incident de confidentialite
 
-**Statut :** containment local realise ; containment distant `Pending repository owner action`  
+**Statut :** containment local realise ; containment distant `Pending repository owner action`<br>
 **Portee :** procedure de travail, sans donnee ni identifiant reel
 
 ## Categories concernees

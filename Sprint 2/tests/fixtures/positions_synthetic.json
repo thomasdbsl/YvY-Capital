@@ -1,0 +1,5 @@
+[
+  {"position_id":"POS_01","fund_id":"FUND_01","instrument":"INSTR_01","issuer":"EMET_01","custodian":"CUSTO_01","asset_class":"Credit prive","value_brl":2600000,"price_date":"2026-08-20"},
+  {"position_id":"POS_02","fund_id":"FUND_01","instrument":"INSTR_02","issuer":"EMET_02","custodian":"CUSTO_01","asset_class":"Souverain","value_brl":2200000,"price_date":"2026-08-21"},
+  {"position_id":"POS_03","fund_id":"FUND_01","instrument":"INSTR_03","issuer":"EMET_03","custodian":"CUSTO_02","asset_class":"Fonds","value_brl":1700000,"price_date":"2026-08-19"}
+]

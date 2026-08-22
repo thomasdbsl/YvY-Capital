@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://local.invalid/contracts/gold.schema.json",
+  "title": "Gold KPI record",
+  "type": "object",
+  "required": ["run_id", "kpi_id", "fund_id", "business_date", "value", "unit", "quality_status", "lineage_refs"],
+  "properties": {
+    "run_id": {"const": "SPRINT2-WF-001"},
+    "kpi_id": {"pattern": "^(K(0[1-9]|1[0-6])|H0[1-8])$"},
+    "fund_id": {"pattern": "^FUND_[0-9]{2}$"},
+    "business_date": {"type": "string", "format": "date"},
+    "value": {"type": ["number", "null"]},
+    "unit": {"type": "string"},
+    "quality_status": {"enum": ["current", "late", "incomplete", "hypothesis", "unavailable", "error"]},
+    "lineage_refs": {"type": "array", "minItems": 1, "items": {"type": "string", "pattern": "^LIN_[A-Z0-9_]+$"}}
+  },
+  "additionalProperties": false
+}
