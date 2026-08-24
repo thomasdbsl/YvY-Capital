@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maquette cliquable — Sprint 2 — DataApp Fonds (FUND_01–07)</title>
+<style>
+:root{
+  color-scheme: light;
+  --page:#f9f9f7; --surface:#fcfcfb; --ink:#0b0b0b; --ink2:#52514e; --muted:#898781;
+  --grid:#e1e0d9; --axis:#c3c2b7; --ring:rgba(11,11,11,.10);
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#008300;
+  --good:#0ca30c; --warn:#fab219; --serious:#ec835a; --critical:#d03b3b;
+  --good-text:#006300;
+  --accent:#2a78d6;
+}
+*{box-sizing:border-box; margin:0}
+body{background:var(--page); color:var(--ink); font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;}
+.banner{background:#3b2f45; color:#fff; padding:8px 20px; font-size:12.5px; letter-spacing:.02em; display:flex; gap:14px; align-items:center; flex-wrap:wrap;}
+.banner b{color:#ffd166}
+.gatebar{background:#fdf3e2; border-bottom:1px solid #efdcb8; color:#6b5416; padding:6px 20px; font-size:12px;}
+header.app{display:flex; align-items:center; gap:16px; padding:14px 20px 10px; flex-wrap:wrap;}
+header.app h1{font-size:19px; font-weight:650;}
+header.app .sub{color:var(--ink2); font-size:12.5px;}
+nav.tabs{display:flex; gap:4px; padding:0 20px; border-bottom:1px solid var(--grid); flex-wrap:wrap;}
+nav.tabs button{appearance:none; border:none; background:none; padding:9px 13px; font:inherit; font-size:13.5px; color:var(--ink2); cursor:pointer; border-bottom:2px solid transparent;}
+nav.tabs button.on{color:var(--ink); font-weight:600; border-bottom-color:var(--accent);}
+nav.tabs button:hover{color:var(--ink);}
+main{padding:18px 20px 40px; max-width:1240px; margin:0 auto;}
+.row{display:flex; gap:14px; flex-wrap:wrap; align-items:stretch;}
+.card{background:var(--surface); border:1px solid var(--ring); border-radius:10px; padding:14px 16px; flex:1 1 260px; min-width:240px;}
+.card h3{font-size:13px; font-weight:650; color:var(--ink2); text-transform:uppercase; letter-spacing:.04em; margin-bottom:8px;}
+.hero{font-size:27px; font-weight:700; letter-spacing:-.01em;}
+.hero small{font-size:13px; font-weight:500; color:var(--ink2);}
+.tag{display:inline-block; font-size:10.5px; font-weight:700; letter-spacing:.05em; padding:2px 7px; border-radius:4px; vertical-align:middle;}
+.tag.hyp{background:#fdeaea; color:#8f1f1f; border:1px dashed #d03b3b;}
+.tag.master{background:#e4edfa; color:#1c5cab;}
+.tag.feeder{background:#fdefe8; color:#a8431c;}
+.tag.auto{background:#e7f5ee; color:#0d6b45;}
+.tag.futur{background:#eeeeec; color:#6f6e69; border:1px dashed var(--axis);}
+.alert{border-left:4px solid var(--serious); background:#fdf1ec; padding:10px 14px; border-radius:6px; margin:12px 0; font-size:13px;}
+.alert.crit{border-left-color:var(--critical); background:#fdecec;}
+.alert.info{border-left-color:var(--s1); background:#eef4fc;}
+.chips{display:flex; gap:6px; flex-wrap:wrap; margin:10px 0;}
+.chip{border:1px solid var(--axis); background:var(--surface); border-radius:999px; padding:3px 11px; font-size:12px; cursor:pointer; color:var(--ink2);}
+.chip.on{background:var(--ink); color:#fff; border-color:var(--ink);}
+.chip.dis{opacity:.45; cursor:not-allowed; text-decoration:line-through;}
+.tiles{display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:12px; margin-top:12px;}
+.tile{background:var(--surface); border:1px solid var(--ring); border-radius:10px; padding:12px 14px; cursor:pointer; position:relative;}
+.tile:hover{border-color:var(--accent); box-shadow:0 1px 4px rgba(42,120,214,.15);}
+.tile .alias{font-weight:700; font-size:14.5px;}
+.tile .pl{font-size:17px; font-weight:650; margin:4px 0 2px;}
+.tile .meta{font-size:11.5px; color:var(--ink2);}
+.tile.excluded{opacity:.55; background:repeating-linear-gradient(45deg,var(--surface),var(--surface) 8px,#f3f2ee 8px,#f3f2ee 10px);}
+.tile .excl-note{font-size:10.5px; color:#8f1f1f; margin-top:4px; font-weight:600;}
+.delta-up{color:var(--good-text); font-weight:600;}
+.delta-down{color:var(--critical); font-weight:600;}
+table.tbl{width:100%; border-collapse:collapse; font-size:12.5px;}
+table.tbl th{font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); text-align:left; padding:6px 8px; border-bottom:1px solid var(--grid); white-space:nowrap;}
+table.tbl td{padding:6px 8px; border-bottom:1px solid var(--grid); vertical-align:top;}
+table.tbl td.num, table.tbl th.num{text-align:right; font-variant-numeric:tabular-nums;}
+table.tbl tr:hover td{background:#f4f6fa;}
+.scroll{overflow-x:auto;}
+.sev{display:inline-flex; align-items:center; gap:5px; font-size:11.5px; font-weight:600;}
+.sev::before{content:""; width:9px; height:9px; border-radius:50%;}
+.sev.crit::before{background:var(--critical)} .sev.crit{color:#8f1f1f}
+.sev.serious::before{background:var(--serious)} .sev.serious{color:#a8431c}
+.sev.warn::before{background:var(--warn)} .sev.warn{color:#6b5416}
+.sev.ok::before{background:var(--good)} .sev.ok{color:var(--good-text)}
+.src{border-bottom:1px dotted var(--muted); cursor:help; position:relative;}
+.src:hover::after{content:attr(data-src); position:absolute; left:0; top:120%; z-index:30; background:var(--ink); color:#fff; font-size:11px; padding:6px 9px; border-radius:6px; white-space:pre; box-shadow:0 3px 10px rgba(0,0,0,.25);}
+.futurzone{border:1px dashed var(--axis); border-radius:10px; padding:14px 16px; background:repeating-linear-gradient(135deg,#f6f5f2,#f6f5f2 10px,#efeeea 10px,#efeeea 12px); color:var(--ink2); flex:1 1 260px;}
+.futurzone h3{color:var(--muted); font-size:13px; text-transform:uppercase; letter-spacing:.04em; margin-bottom:6px;}
+.legend{display:flex; gap:14px; flex-wrap:wrap; font-size:12px; color:var(--ink2); margin-top:8px;}
+.legend span{display:inline-flex; align-items:center; gap:6px;}
+.legend i{width:10px; height:10px; border-radius:3px; display:inline-block;}
+.toggle{display:inline-flex; border:1px solid var(--axis); border-radius:8px; overflow:hidden; font-size:12.5px;}
+.toggle button{appearance:none; border:none; background:var(--surface); padding:6px 12px; font:inherit; cursor:pointer; color:var(--ink2);}
+.toggle button.on{background:var(--ink); color:#fff;}
+.bar-row{display:flex; align-items:center; gap:10px; margin:7px 0;}
+.bar-row .lbl{width:120px; font-size:12.5px; text-align:right; color:var(--ink2); flex:none;}
+.bar-track{flex:1; position:relative; height:22px;}
+.bar-fill{position:absolute; left:0; top:0; bottom:0; border-radius:0 4px 4px 0; background:var(--s1);}
+.bar-fill.hatch{background:repeating-linear-gradient(45deg,#c9d9f0,#c9d9f0 5px,#eef2f8 5px,#eef2f8 8px); border:1px dashed var(--s1);}
+.bar-val{position:absolute; left:calc(100% + 8px); top:2px; font-size:11.5px; color:var(--ink2); white-space:nowrap; font-variant-numeric:tabular-nums;}
+.tooltip{position:fixed; z-index:50; background:var(--ink); color:#fff; padding:7px 10px; border-radius:6px; font-size:11.5px; pointer-events:none; display:none; max-width:300px; white-space:pre-line;}
+svg text{font-family:inherit;}
+.statecard{flex:1 1 300px; background:var(--surface); border:1px solid var(--ring); border-radius:10px; padding:14px 16px;}
+.statecard h4{font-size:13px; margin-bottom:8px;}
+.skel{height:12px; border-radius:6px; background:linear-gradient(90deg,#eeede9 25%,#e2e1db 37%,#eeede9 63%); background-size:400% 100%; animation:sk 1.4s infinite; margin:8px 0;}
+@keyframes sk{0%{background-position:100% 0}100%{background-position:0 0}}
+.btn{appearance:none; border:1px solid var(--axis); background:var(--surface); border-radius:7px; padding:6px 13px; font:inherit; font-size:12.5px; cursor:pointer;}
+.btn.primary{background:var(--accent); border-color:var(--accent); color:#fff;}
+.note{font-size:11.5px; color:var(--muted); margin-top:8px;}
+.kpiline{display:flex; gap:22px; flex-wrap:wrap; margin:6px 0 2px;}
+.kpiline .k{min-width:110px;}
+.kpiline .k .l{font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted);}
+.kpiline .k .v{font-size:16px; font-weight:650; font-variant-numeric:tabular-nums;}
+.kpiline .k .v small{font-size:11px; color:var(--ink2); font-weight:500;}
+footer{border-top:1px solid var(--grid); color:var(--muted); font-size:11.5px; padding:14px 20px 30px; margin-top:30px;}
+section.view{display:none;} section.view.on{display:block;}
+h2.vt{font-size:16px; margin:6px 0 4px;}
+p.vd{color:var(--ink2); font-size:12.5px; margin-bottom:12px;}
+.flag{color:#a8431c; cursor:help; border-bottom:1px dotted #a8431c;}
+@media (max-width:720px){ .bar-row .lbl{width:76px} .bar-val{display:none} }
+</style>
+</head>
+<body>
+<div class="banner">⚠︎ <b>DONNÉES D'EXEMPLE</b> · Instantané unique au <b>29/05/2026</b> · Fonds aliasés <b>FUND_01–FUND_07</b> · Instruments et émetteurs masqués · Aucune série historique disponible</div>
+<div class="gatebar">Maquette Sprint 2 — support du gate de décision W4. À approuver : utilisateurs cibles · jeu d'écrans · logique KPI · univers de fonds actif · sources prioritaires · traitement des pairs. Statut : <b>Draft pour revue partenaire</b></div>
+<header class="app">
+  <h1>DataApp Fonds — Maquette cliquable</h1>
+  <span class="sub">Sprint 2 · v0.9 · run_id SPRINT2-WF-001 · UX : Viktor S.</span>
+</header>
+<nav class="tabs" id="tabs"></nav>
+<main>
+  <section class="view" id="view-exec"></section>
+  <section class="view" id="view-fund"></section>
+  <section class="view" id="view-comp"></section>
+  <section class="view" id="view-pairs"></section>
+  <section class="view" id="view-quality"></section>
+  <section class="view" id="view-states"></section>
+</main>
+<div class="tooltip" id="tt"></div>
+<footer>
+  Maquette non connectée — jeu de données figé extrait des 7 exports PortfolioView du 29/05/2026 (run SPRINT2-WF-001, généré le 20/08/2026).
+  Toute mention « transparisé » et toute classification MASTER/FEEDER portent le statut <b>HYPOTHÈSE À VALIDER</b> par les gérants.
+  Confidentialité : aucun nom réel de fonds, d'instrument privé, d'émetteur ou de dépositaire ne figure dans ce fichier.
+</footer>
+<script>
+const DATA = {"meta": {"source": "7 exports PortfolioView", "business_date": "2026-05-29", "export_ts_fichiers": "2026-06-22", "generated_at": "2026-08-20", "run_id": "SPRINT2-WF-001", "avertissement": "DONNÉES D'EXEMPLE — instantané unique, aliasé, instruments masqués"}, "kpis_globaux": {"somme_brute_pl": 1084593077.84, "valeur_participations_internes": 528989608.36, "encours_transparise_hypothese": 555603469.48, "facteur_surevaluation": 1.95}, "fonds": {"FUND_01": {"alias": "FUND_01", "role": "AUTONOME", "parent": null, "business_date": "2026-05-29", "pl": 45228313.18, "cota_liq": 1030.76, "cota_bruta": 1030.76, "parts": 43878.77, "cota_congelada": true, "var": {"j": 0.000114, "m": 0.004164, "ytd": 0.018803, "m6": 0.018803, "m12": 0.018803, "depuis_debut": 0.018803}, "exposicao_total": 45228313.18, "allocation": [{"classe": "Titulos Publicos", "valeur": 11968436.54}, {"classe": "Titulos Privados", "valeur": 33314573.72}], "positions": [{"classe": "Titulos Publicos", "instrument": "OVER @ LTN 01/04/2027", "masquage": "public", "isin": null, "quantite": 0.0, "prix": 892.865003, "date_prix": "29/05/2026", "valeur": 0.0, "pct_pl": 0.0, "exposition": 0.0, "pnl": 7540.83, "secteur": "Desconhecido", "emetteur": "EMET_01", "custodien": "CUSTO_01", "indexeur_type": null, "duration_ambigue": false, "source_prix": "carteira adm", "source_ligne": 49}, {"classe": "Titulos Publicos", "instrument": "OVER @ NTNB 15/08/2050", "masquage": "public", "isin": null, "quantite": 0.0, "prix": 3983.39, "date_prix": "29/05/2026", "valeur": 0.0, "pct_pl": 0.0, "exposition": 0.0, "pnl": 259.59, "secteur": "Desconhecido", "emetteur": "EMET_01", "custodien": "CUSTO_01", "indexeur_type": null, "duration_ambigue": false, "source_prix": "carteira adm", "source_ligne": 50}, {"classe": "Titulos Publicos", "instrument": "OVER @ NTNB 15/08/2040", "masquage": "public", "isin": null, "quantite": 2913.0, "prix": 4108.63, "date_prix": "29/05/2026", "valeur": 11968436.54, "pct_pl": 0.26462265997778694, "exposition": 11968436.54, "pnl": 0.0, "secteur": "Desconhecido", "emetteur": "EMET_01", "custodien": "CUSTO_01", "indexeur_type": null, "duration_ambigue": false, "source_prix": "carteira adm", "source_ligne": 51}, {"classe": "Titulos Privados", "instrument": "Débenture privé — INSTR_142", "masquage": "masque", "isin": null, "quantite": 1.0, "prix": 33314573.72, "date_prix": "29/05/2026", "valeur": 33314573.72, "pct_pl": 0.7365866948743898, "exposition": 33314573.72, "pnl": 6174.64, "secteur": "Servicos", "emetteur": "EMET_02", "custodien": "CUSTO_01", "indexeur_type": "CPR PRE", "duration_ambigue": true, "source_prix": "carteira adm", "source_ligne": 55}], "provisions": [{"type": "taxa CVM", "valeur": 11345.92, "date_liquidation": null}, {"type": "liquidacao de compromissada (volta)", "valeur": 0.0, "date_liquidation": null}, {"type": "imposto", "valeur": 0.0, "date_liquidation": null}, {"type": "liquidacao de compromissada (ida)", "valeur": 0.0, "date_liquidation": null}, {"type": "ajuste de saldo em conta", "valeur": 0.0, "date_liquidation": null}, {"type": "taxa ANBIMA/ANBID", "valeur": -418.0, "date_liquidation": null}, {"type": "taxa de administracao", "valeur": -14000.0, "date_liquidation": null}, {"type": "taxa de gestao", "valeur": -51625.0, "date_liquidation": null}], "caisse": 0.0, "qualite": {"source_file": "PortfolioView (dossier FUND_01)", "lignes": 92, "colonnes_max": 51, "sections_detectees": 23, "sections_avec_donnees": 2, "provisions_section": "présente", "durations_ambigues": 1, "noms_internes_dans_source": 0, "identite_nav_ecart": -167.79}}, "FUND_02": {"alias": "FUND_02", "role": "FEEDER", "parent": "FUND_04", "business_date": "2026-05-29", "pl": 302698176.05, "cota_liq": 1181.49, "cota_bruta": 1181.49, "parts": 256200.0, "cota_congelada": true, "var": {"j": -0.000913, "m": -0.000913, "ytd": 0.100874, "m6": 0.100874, "m12": 0.100874, "depuis_debut": 0.100874}, "exposicao_total": 302698176.05, "allocation": [{"classe": "Cotas de Fundos", "valeur": 303000920.12}], "positions": [{"classe": "Cotas de Fundos", "instrument": "FUND_04 (parts)", "masquage": "interne", "isin": null, "quantite": 252378.32, "prix": 1200.58, "date_prix": "29/05/2026", "valeur": 303000920.12, "pct_pl": 1.0010001516162093, "exposition": 303000920.12, "pnl": 26005.19, "secteur": null, "emetteur": null, "custodien": "CUSTO_01", "indexeur_type": null, "duration_ambigue": false, "source_prix": "aprovacao de cota externa", "source_ligne": 46}], "provisions": [{"type": "outros/nao categorizado", "valeur": 0.0, "date_liquidation": null}, {"type": "ajuste de PL", "valeur": -0.01, "date_liquidation": null}, {"type": "taxa de gestao", "valeur": -302744.06, "date_liquidation": null}], "caisse": 0.0, "qualite": {"source_file": "PortfolioView (dossier FUND_02)", "lignes": 84, "colonnes_max": 38, "sections_detectees": 23, "sections_avec_donnees": 1, "provisions_section": "présente", "durations_ambigues": 0, "noms_internes_dans_source": 1, "identite_nav_ecart": 438.05}}, "FUND_03": {"alias": "FUND_03", "role": "FEEDER", "parent": "FUND_04", "business_date": "2026-05-29", "pl": 22426875.57, "cota_liq": 1200.58, "cota_bruta": 1200.58, "parts": 18680.0, "cota_congelada": true, "var": {"j": 8.6e-05, "m": 8.6e-05, "ytd": 0.105397, "m6": 0.105397, "m12": 0.105397, "depuis_debut": 0.105397}, "exposicao_total": 22426875.57, "allocation": [{"classe": "Cotas de Fundos", "valeur": 22426875.57}], "positions": [{"classe": "Cotas de Fundos", "instrument": "FUND_04 (parts)", "masquage": "interne", "isin": null, "quantite": 18680.0, "prix": 1200.58, "date_prix": "29/05/2026", "valeur": 22426875.57, "pct_pl": 1.0, "exposition": 22426875.57, "pnl": 1924.79, "secteur": null, "emetteur": null, "custodien": "CUSTO_01", "indexeur_type": null, "duration_ambigue": false, "source_prix": "aprovacao de cota externa", "source_ligne": 46}], "provisions": [], "caisse": 0.0, "qualite": {"source_file": "PortfolioView (dossier FUND_03)", "lignes": 81, "colonnes_max": 38, "sections_detectees": 23, "sections_avec_donnees": 1, "provisions_section": "vide", "durations_ambigues": 0, "noms_internes_dans_source": 1, "identite_nav_ecart": 41.17}}, "FUND_04": {"alias": "FUND_04", "role": "MASTER", "parent": null, "business_date": "2026-05-29", "pl": 325427795.71, "cota_liq": 1200.58, "cota_bruta": 1200.58, "parts": 271058.32, "cota_congelada": true, "var": {"j": 8.6e-05, "m": 8.6e-05, "ytd": 0.105397, "m6": 0.105397, "m12": 0.105397, "depuis_debut": 0.105397}, "exposicao_total": 325427795.71, "allocation": [{"classe": "Acoes e Recibos", "valeur": 315466418.25}, {"classe": "Titulos Publicos", "valeur": 10064739.12}], "positions": [{"classe": "Acoes e Recibos", "instrument": "Action — INSTR_158", "masquage": "masque", "isin": null, "quantite": 4436818.0, "prix": 71.102, "date_prix": "31/03/2026", "valeur": 315466418.25, "pct_pl": 0.9693898997217899, "exposition": 315466418.25, "pnl": 0.0, "secteur": "Desconhecido", "emetteur": "EMET_03", "custodien": "CUSTO_01", "indexeur_type": null, "duration_ambigue": false, "source_prix": "carteira adm", "source_ligne": 13, "anomalie_prix": "Prix du 31/03/2026 pour une date de référence au 29/05/2026 (actif non coté — staleness 59 jours)"}, {"classe": "Titulos Publicos", "instrument": "OVER @ LFT 01/06/2032", "masquage": "public", "isin": null, "quantite": 0.0, "prix": 18883.19, "date_prix": "29/05/2026", "valeur": 0.0, "pct_pl": 0.0, "exposition": 0.0, "pnl": 5354.2, "secteur": "Desconhecido", "emetteur": "EMET_01", "custodien": "CUSTO_01", "indexeur_type": null, "duration_ambigue": false, "source_prix": "carteira adm", "source_ligne": 50}, {"classe": "Titulos Publicos", "instrument": "OVER @ NTNB 15/08/2050", "masquage": "public", "isin": null, "quantite": 2528.0, "prix": 3981.31, "date_prix": "29/05/2026", "valeur": 10064739.12, "pct_pl": 0.03092771807657462, "exposition": 10064739.12, "pnl": 0.0, "secteur": "Desconhecido", "emetteur": "EMET_01", "custodien": "CUSTO_01", "indexeur_type": null, "duration_ambigue": false, "source_prix": "carteira adm", "source_ligne": 51}], "provisions": [{"type": "taxa CETIP", "valeur": 318.846957, "date_liquidation": null}, {"type": "taxa SELIC", "valeur": 37.733913, "date_liquidation": null}, {"type": "liquidacao de compromissada (volta)", "valeur": 0.0, "date_liquidation": null}, {"type": "liquidacao de compromissada (ida)", "valeur": 0.0, "date_liquidation": null}, {"type": "outros/nao categorizado", "valeur": 0.0, "date_liquidation": null}, {"type": "ajuste de PL", "valeur": -0.01, "date_liquidation": null}, {"type": "taxa de administracao", "valeur": -38718.24, "date_liquidation": null}, {"type": "despesa de auditoria", "valeur": -65000.0, "date_liquidation": null}], "caisse": 0.0, "qualite": {"source_file": "PortfolioView (dossier FUND_04)", "lignes": 95, "colonnes_max": 51, "sections_detectees": 23, "sections_avec_donnees": 2, "provisions_section": "présente", "durations_ambigues": 0, "noms_internes_dans_source": 0, "identite_nav_ecart": 597.88}}, "FUND_05": {"alias": "FUND_05", "role": "FEEDER", "parent": "FUND_06", "business_date": "2026-05-29", "pl": 185234434.56, "cota_liq": 99.197907, "cota_bruta": 99.197907, "parts": 1867322.0, "cota_congelada": true, "var": {"j": 0.001024, "m": 0.001569, "ytd": 0.014966, "m6": 0.033757, "m12": 0.039995, "depuis_debut": 0.033441}, "exposicao_total": 185234434.56, "allocation": [{"classe": "Cotas de Fundos", "valeur": 185553079.61}], "positions": [{"classe": "Cotas de Fundos", "instrument": "FUND_06 (parts)", "masquage": "interne", "isin": null, "quantite": 160437680.57, "prix": 1.156543, "date_prix": "29/05/2026", "valeur": 185553079.61, "pct_pl": 1.0017202257817608, "exposition": 185553079.61, "pnl": 197200.37, "secteur": null, "emetteur": "EMET_04", "custodien": "CUSTO_01", "indexeur_type": null, "duration_ambigue": false, "source_prix": "aprovacao de cota externa", "source_ligne": 46}], "provisions": [{"type": "ajuste de PL", "valeur": 0.35, "date_liquidation": null}, {"type": "taxa SELIC", "valeur": -106.12, "date_liquidation": null}, {"type": "despesa de auditoria", "valeur": -1220.91, "date_liquidation": null}, {"type": "taxa de custodia", "valeur": -14740.97, "date_liquidation": null}, {"type": "Taxa de escrituracao", "valeur": -14740.97, "date_liquidation": null}, {"type": "taxa CETIP", "valeur": -23612.44, "date_liquidation": null}, {"type": "taxa de administracao", "valeur": -264224.0, "date_liquidation": null}], "caisse": 0.0, "qualite": {"source_file": "PortfolioView (dossier FUND_05)", "lignes": 88, "colonnes_max": 38, "sections_detectees": 23, "sections_avec_donnees": 1, "provisions_section": "présente", "durations_ambigues": 0, "noms_internes_dans_source": 1, "identite_nav_ecart": 0.46}}, "FUND_06": {"alias": "FUND_06", "role": "MASTER", "parent": null, "business_date": "2026-05-29", "pl": 185553079.98, "cota_liq": 1.156543, "cota_bruta": 1.156543, "parts": 160437680.57, "cota_congelada": true, "var": {"j": 0.001064, "m": 0.002402, "ytd": 0.019156, "m6": 0.028262, "m12": 0.123004, "depuis_debut": 0.02791}, "exposicao_total": 185553079.98, "allocation": [{"classe": "Titulos Publicos", "valeur": 17879974.93}, {"classe": "Titulos Privados", "valeur": 163483983.4}], "positions": [{"classe": "Futuros", "instrument": "Futuro de DI1 01/2030", "masquage": "public", "isin": null, "quantite": -21.0, "prix": 62981.02, "date_prix": "29/05/2026", "valeur": 0.0, "pct_pl": 0.0, "exposition": -1322601.42, "pnl": 272.58, "secteur": null, "emetteur": null, "custodien": "CUSTO_01", "indexeur_type": null, "duration_ambigue": false, "source_prix": "arquivo B3", "source_ligne": 34}, {"classe": "Futuros", "instrument": "Futuro de DI1 01/2029", "masquage": "public", "isin": null, "quantite": -21.0, "prix": 71650.97, "date_prix": "29/05/2026", "valeur": 0.0, "pct_pl": 0.0, "exposition": -1504670.37, "pnl": 1255.38, "secteur": null, "emetteur": null, "custodien": "CUSTO_01", "indexeur_type": null, "duration_ambigue": false, "source_prix": "arquivo B3", "source_ligne": 35}, {"classe": "Futuros", "instrument": "Futuro de DI1 01/2028", "masquage": "public", "isin": null, "quantite": -22.0, "prix": 81347.91, "date_prix": "29/05/2026", "valeur": 0.0, "pct_pl": 0.0, "exposition": -1789654.02, "pnl": 1633.06, "secteur": null, "emetteur": null, "custodien": "CUSTO_01", "indexeur_type": null, "duration_ambigue": false, "source_prix": "arquivo B3", "source_ligne": 36}, {"classe": "Futuros", "instrument": "Futuro de DI1 01/2027", "masquage": "public", "isin": null, "quantite": -23.0, "prix": 92504.42, "date_prix": "29/05/2026", "valeur": 0.0, "pct_pl": 0.0, "exposition": -2127601.66, "pnl": 356.27, "secteur": null, "emetteur": null, "custodien": "CUSTO_01", "indexeur_type": null, "duration_ambigue": false, "source_prix": "arquivo B3", "source_ligne": 37}, {"classe": "Futuros", "instrument": "Futuro de DI1 01/2032", "masquage": "public", "isin": null, "quantite": -82.0, "prix": 48411.62, "date_prix": "29/05/2026", "valeur": 0.0, "pct_pl": 0.0, "exposition": -3969752.84, "pnl": -2455.08, "secteur": null, "emetteur": null, "custodien": "CUSTO_01", "indexeur_type": null, "duration_ambigue": false, "source_prix": "arquivo B3", "source_ligne": 38}, {"classe": "Futuros", "instrument": "Futuro de DI1 01/2031", "masquage": "public", "isin": null, "quantite": -94.0, "prix": 55278.58, "date_prix": "29/05/2026", "valeur": 0.0, "pct_pl": 0.0, "exposition": -5196186.52, "pnl": -2195.84, "secteur": null, "emetteur": null, "custodien": "CUSTO_01", "indexeur_type": null, "duration_ambigue": false, "source_prix": "arquivo B3", "source_ligne": 39}, {"classe": "Futuros", "instrument": "Futuro de DAP 08/2026", "masquage": "public", "isin": null, "quantite": -51.0, "prix": 97921.88, "date_prix": "29/05/2026", "valeur": 0.0, "pct_pl": 0.0, "exposition": -9507432.64, "pnl": 31.62, "secteur": null, "emetteur": null, "custodien": "CUSTO_01", "indexeur_type": null, "duration_ambigue": false, "source_prix": "arquivo B3", "source_ligne": 40}, {"classe": "Futuros", "instrument": "Futuro de DAP 08/2028", "masquage": "public", "isin": null, "quantite": -76.0, "prix": 84305.7, "date_prix": "29/05/2026", "valeur": 0.0, "pct_pl": 0.0, "exposition": -12197866.31, "pnl": 15918.2, "secteur": null, "emetteur": null, "custodien": "CUSTO_01", "indexeur_type": null, "duration_ambigue": false, "source_prix": "arquivo B3", "source_ligne": 41}, {"classe": "Futuros", "instrument": "Futuro de DAP 05/2029", "masquage": "public", "isin": null, "quantite": -86.0, "prix": 79926.58, "date_prix": "29/05/2026", "valeur": 0.0, "pct_pl": 0.0, "exposition": -13085882.6, "pnl": 14002.52, "secteur": null, "emetteur": null, "custodien": "CUSTO_01", "indexeur_type": null, "duration_ambigue": false, "source_prix": "arquivo B3", "source_ligne": 42}, {"classe": "Futuros", "instrument": "Futuro de DAP 05/2033", "masquage": "public", "isin": null, "quantite": -130.0, "prix": 59674.85, "date_prix": "29/05/2026", "valeur": 0.0, "pct_pl": 0.0, "exposition": -14768895.81, "pnl": 33088.9, "secteur": null, "emetteur": null, "custodien": "CUSTO_01", "indexeur_type": null, "duration_ambigue": false, "source_prix": "arquivo B3", "source_ligne": 43}, {"classe": "Futuros", "instrument": "Futuro de DAP 05/2027", "masquage": "public", "isin": null, "quantite": -87.0, "prix": 92752.61, "date_prix": "29/05/2026", "valeur": 0.0, "pct_pl": 0.0, "exposition": -15362388.01, "pnl": 2267.22, "secteur": null, "emetteur": null, "custodien": "CUSTO_01", "indexeur_type": null, "duration_ambigue": false, "source_prix": "arquivo B3", "source_ligne": 44}, {"classe": "Futuros", "instrument": "Futuro de DAP 08/2030", "masquage": "public", "isin": null, "quantite": -131.0, "prix": 72612.05, "date_prix": "29/05/2026", "valeur": 0.0, "pct_pl": 0.0, "exposition": -18108952.6, "pnl": 31246.12, "secteur": null, "emetteur": null, "custodien": "CUSTO_01", "indexeur_type": null, "duration_ambigue": false, "source_prix": "arquivo B3", "source_ligne": 45}, {"classe": "Futuros", "instrument": "Futuro de DAP 08/2032", "masquage": "public", "isin": null, "quantite": -196.0, "prix": 62782.76, "date_prix": "29/05/2026", "valeur": 0.0, "pct_pl": 0.0, "exposition": -23426629.73, "pnl": 60193.56, "secteur": null, "emetteur": null, "custodien": "CUSTO_01", "indexeur_type": null, "duration_ambigue": false, "source_prix": "arquivo B3", "source_ligne": 46}, {"classe": "Futuros", "instrument": "Futuro de DAP 05/2035", "masquage": "public", "isin": null, "quantite": -453.0, "prix": 52144.06, "date_prix": "29/05/2026", "valeur": 0.0, "pct_pl": 0.0, "exposition": -44969326.48, "pnl": 130196.73, "secteur": null, "emetteur": null, "custodien": "CUSTO_01", "indexeur_type": null, "duration_ambigue": false, "source_prix": "arquivo B3", "source_ligne": 47}, {"classe": "Titulos Publicos", "instrument": "210100 vencimento 01/03/2028", "masquage": "public", "isin": "BRSTNCLF1RI1", "quantite": 639.0, "prix": 19103.49, "date_prix": "29/05/2026", "valeur": 12207133.21, "pct_pl": 0.06578782314643206, "exposition": 12207133.21, "pnl": 6502.93, "secteur": "Desconhecido", "emetteur": "EMET_01", "custodien": "CUSTO_01", "indexeur_type": "LFT", "duration_ambigue": false, "source_prix": "site ANBIMA", "source_ligne": 63}, {"classe": "Titulos Publicos", "instrument": "OVER @ LTN 01/04/2027", "masquage": "public", "isin": null, "quantite": 0.0, "prix": 892.798468, "date_prix": "29/05/2026", "valeur": 0.0, "pct_pl": 0.0, "exposition": 0.0, "pnl": 3113.76, "secteur": "Desconhecido", "emetteur": "EMET_01", "custodien": "CUSTO_01", "indexeur_type": null, "duration_ambigue": false, "source_prix": "carteira adm", "source_ligne": 64}, {"classe": "Titulos Publicos", "instrument": "OVER @ NTNB 15/08/2028", "masquage": "public", "isin": null, "quantite": 1238.0, "prix": 4582.26, "date_prix": "29/05/2026", "valeur": 5672841.72, "pct_pl": 0.03057260876839906, "exposition": 5672841.72, "pnl": 0.0, "secteur": "Desconhecido", "emetteur": "EMET_01", "custodien": "CUSTO_01", "indexeur_type": null, "duration_ambigue": false, "source_prix": "carteira adm", "source_ligne": 65}, {"classe": "Titulos Privados", "instrument": "Débenture IPCA+12.4111% éch. 15/Set/39 — INSTR_80", "masquage": "masque", "isin": null, "quantite": 30000.0, "prix": 1061.37, "date_prix": "29/05/2026", "valeur": 31841175.72, "pct_pl": 0.17160143999459362, "exposition": 31841175.72, "pnl": -34783.26, "secteur": "Financeiro", "emetteur": "EMET_05", "custodien": "CUSTO_01", "indexeur_type": "Debenture", "duration_ambigue": true, "source_prix": "calculo interno", "source_ligne": 69}, {"classe": "Titulos Privados", "instrument": "Débenture IPCA+7.7% éch. 15/Mai/35 — INSTR_75", "masquage": "masque", "isin": null, "quantite": 14803.0, "prix": 924.444209, "date_prix": "29/05/2026", "valeur": 13684547.63, "pct_pl": 0.073750043014511, "exposition": 13684547.63, "pnl": 19470.02, "secteur": "Financeiro", "emetteur": "EMET_06", "custodien": "CUSTO_01", "indexeur_type": "Debenture", "duration_ambigue": true, "source_prix": "site ANBIMA", "source_ligne": 70}, {"classe": "Titulos Privados", "instrument": "Débenture IPCA+8.2857% éch. 15/Out/32 — INSTR_76", "masquage": "masque", "isin": null, "quantite": 18500.0, "prix": 980.944334, "date_prix": "29/05/2026", "valeur": 18147470.18, "pct_pl": 0.09780204231563304, "exposition": 18147470.18, "pnl": -29889.34, "secteur": "Financeiro", "emetteur": "EMET_06", "custodien": "CUSTO_01", "indexeur_type": "Debenture", "duration_ambigue": true, "source_prix": "site ANBIMA", "source_ligne": 71}, {"classe": "Titulos Privados", "instrument": "Débenture IPCA+7.8293% éch. 15/Dez/48 — INSTR_81", "masquage": "masque", "isin": null, "quantite": 15640.0, "prix": 1091.52, "date_prix": "29/05/2026", "valeur": 17071365.14, "pct_pl": 0.09200259646371838, "exposition": 17071365.14, "pnl": 44784.3, "secteur": "Financeiro", "emetteur": "EMET_07", "custodien": "CUSTO_01", "indexeur_type": "Debenture", "duration_ambigue": true, "source_prix": "site ANBIMA", "source_ligne": 72}, {"classe": "Titulos Privados", "instrument": "Débenture IPCA+7.8868% éch. 15/Mar/42 — INSTR_79", "masquage": "masque", "isin": null, "quantite": 15000.0, "prix": 1020.94, "date_prix": "29/05/2026", "valeur": 15314154.5, "pct_pl": 0.08253247265769262, "exposition": 15314154.5, "pnl": -53334.69, "secteur": "Financeiro", "emetteur": "EMET_08", "custodien": "CUSTO_01", "indexeur_type": "Debenture", "duration_ambigue": true, "source_prix": "site ANBIMA", "source_ligne": 73}, {"classe": "Titulos Privados", "instrument": "Débenture IPCA+7.8868% éch. 15/Mar/42 — INSTR_79", "masquage": "masque", "isin": null, "quantite": 1000.0, "prix": 1020.94, "date_prix": "29/05/2026", "valeur": 1020943.63, "pct_pl": 0.005502164825881862, "exposition": 1020943.63, "pnl": -3555.65, "secteur": "Financeiro", "emetteur": "EMET_08", "custodien": "CUSTO_01", "indexeur_type": "Debenture", "duration_ambigue": true, "source_prix": "site ANBIMA", "source_ligne": 74}, {"classe": "Titulos Privados", "instrument": "Débenture PRE+15.05% éch. 15/Abr/32 — INSTR_77", "masquage": "masque", "isin": null, "quantite": 15180.0, "prix": 1007.86, "date_prix": "29/05/2026", "valeur": 15299298.66, "pct_pl": 0.08245241017637137, "exposition": 15299298.66, "pnl": 43314.23, "secteur": "Financeiro", "emetteur": "EMET_09", "custodien": "CUSTO_01", "indexeur_type": "Debenture", "duration_ambigue": true, "source_prix": "site ANBIMA", "source_ligne": 75}, {"classe": "Titulos Privados", "instrument": "Débenture IPCA+8.203% éch. 15/Mar/49 — INSTR_173", "masquage": "masque", "isin": null, "quantite": 13840.0, "prix": 1020.68, "date_prix": "29/05/2026", "valeur": 14126181.13, "pct_pl": 0.0761301355467805, "exposition": 14126181.13, "pnl": -35839.91, "secteur": "Financeiro", "emetteur": "EMET_10", "custodien": "CUSTO_01", "indexeur_type": "Debenture", "duration_ambigue": true, "source_prix": "site ANBIMA", "source_ligne": 76}, {"classe": "Titulos Privados", "instrument": "Débenture IPCA+5.55% éch. 15/Dez/34 — INSTR_84", "masquage": "masque", "isin": null, "quantite": 9811.0, "prix": 1222.61, "date_prix": "29/05/2026", "valeur": 11995062.53, "pct_pl": 0.06464491201812925, "exposition": 11995062.53, "pnl": -57399.12, "secteur": "Financeiro", "emetteur": "EMET_11", "custodien": "CUSTO_01", "indexeur_type": "Debenture", "duration_ambigue": true, "source_prix": "site ANBIMA", "source_ligne": 77}, {"classe": "Titulos Privados", "instrument": "Débenture IPCA+5.55% éch. 15/Dez/34 — INSTR_84", "masquage": "masque", "isin": null, "quantite": 46.0, "prix": 1222.61, "date_prix": "29/05/2026", "valeur": 56240.23, "pct_pl": 0.00030309510360087747, "exposition": 56240.23, "pnl": -269.12, "secteur": "Financeiro", "emetteur": "EMET_11", "custodien": "CUSTO_01", "indexeur_type": "Debenture", "duration_ambigue": true, "source_prix": "site ANBIMA", "source_ligne": 78}, {"classe": "Titulos Privados", "instrument": "Débenture IPCA+8.7219% éch. 14/Dez/41 — INSTR_78", "masquage": "masque", "isin": null, "quantite": 9985.0, "prix": 885.585203, "date_prix": "29/05/2026", "valeur": 8842568.25, "pct_pl": 0.04765519521935774, "exposition": 8842568.25, "pnl": -10485.79, "secteur": "Financeiro", "emetteur": "EMET_12", "custodien": "CUSTO_01", "indexeur_type": "Debenture", "duration_ambigue": true, "source_prix": "site ANBIMA", "source_ligne": 79}, {"classe": "Titulos Privados", "instrument": "Débenture IPCA+8.7219% éch. 14/Dez/41 — INSTR_78", "masquage": "masque", "isin": null, "quantite": 204.0, "prix": 885.585203, "date_prix": "29/05/2026", "valeur": 180659.38, "pct_pl": 0.0009736264147136364, "exposition": 180659.38, "pnl": -214.23, "secteur": "Financeiro", "emetteur": "EMET_12", "custodien": "CUSTO_01", "indexeur_type": "Debenture", "duration_ambigue": true, "source_prix": "site ANBIMA", "source_ligne": 80}, {"classe": "Titulos Privados", "instrument": "Débenture IPCA+8.7219% éch. 14/Dez/41 — INSTR_78", "masquage": "masque", "isin": null, "quantite": 400.0, "prix": 885.585203, "date_prix": "29/05/2026", "valeur": 354234.08, "pct_pl": 0.0019090714098530808, "exposition": 354234.08, "pnl": -420.06, "secteur": "Financeiro", "emetteur": "EMET_12", "custodien": "CUSTO_01", "indexeur_type": "Debenture", "duration_ambigue": true, "source_prix": "site ANBIMA", "source_ligne": 81}, {"classe": "Titulos Privados", "instrument": "Débenture IPCA+11.5593% éch. 15/Mar/32 — INSTR_83", "masquage": "masque", "isin": null, "quantite": 5508.0, "prix": 1033.13, "date_prix": "29/05/2026", "valeur": 5690478.01, "pct_pl": 0.03066765591071489, "exposition": 5690478.01, "pnl": -10624.67, "secteur": "Financeiro", "emetteur": "EMET_13", "custodien": "CUSTO_01", "indexeur_type": "Debenture", "duration_ambigue": true, "source_prix": "site ANBIMA", "source_ligne": 82}, {"classe": "Titulos Privados", "instrument": "Débenture CDI+2.7% éch. 18/Mar/30 — INSTR_120", "masquage": "masque", "isin": null, "quantite": 392.0, "prix": 1042.89, "date_prix": "29/05/2026", "valeur": 408814.22, "pct_pl": 0.002203219801277696, "exposition": 408814.22, "pnl": 227.07, "secteur": "Financeiro", "emetteur": "EMET_14", "custodien": "CUSTO_01", "indexeur_type": "Debenture", "duration_ambigue": true, "source_prix": "site ANBIMA", "source_ligne": 83}, {"classe": "Titulos Privados", "instrument": "Débenture CDI+2.7% éch. 18/Mar/30 — INSTR_120", "masquage": "masque", "isin": null, "quantite": 1000.0, "prix": 1042.89, "date_prix": "29/05/2026", "valeur": 1042893.42, "pct_pl": 0.0056204586855276625, "exposition": 1042893.42, "pnl": 579.26, "secteur": "Financeiro", "emetteur": "EMET_14", "custodien": "CUSTO_01", "indexeur_type": "Debenture", "duration_ambigue": true, "source_prix": "site ANBIMA", "source_ligne": 84}, {"classe": "Titulos Privados", "instrument": "Débenture CDI+2.7% éch. 18/Mar/30 — INSTR_120", "masquage": "masque", "isin": null, "quantite": 1000.0, "prix": 1042.89, "date_prix": "29/05/2026", "valeur": 1042893.42, "pct_pl": 0.0056204586855276625, "exposition": 1042893.42, "pnl": 579.26, "secteur": "Financeiro", "emetteur": "EMET_14", "custodien": "CUSTO_01", "indexeur_type": "Debenture", "duration_ambigue": true, "source_prix": "site ANBIMA", "source_ligne": 85}, {"classe": "Titulos Privados", "instrument": "Débenture CDI+2.7% éch. 18/Mar/30 — INSTR_120", "masquage": "masque", "isin": null, "quantite": 934.0, "prix": 1042.89, "date_prix": "29/05/2026", "valeur": 974062.45, "pct_pl": 0.005249508389216661, "exposition": 974062.45, "pnl": 541.02, "secteur": "Financeiro", "emetteur": "EMET_14", "custodien": "CUSTO_01", "indexeur_type": "Debenture", "duration_ambigue": true, "source_prix": "site ANBIMA", "source_ligne": 86}, {"classe": "Titulos Privados", "instrument": "Débenture CDI+2.7% éch. 18/Mar/30 — INSTR_120", "masquage": "masque", "isin": null, "quantite": 930.0, "prix": 1042.89, "date_prix": "29/05/2026", "valeur": 969890.88, "pct_pl": 0.0052270265743071505, "exposition": 969890.88, "pnl": 538.71, "secteur": "Financeiro", "emetteur": "EMET_14", "custodien": "CUSTO_01", "indexeur_type": "Debenture", "duration_ambigue": true, "source_prix": "site ANBIMA", "source_ligne": 87}, {"classe": "Titulos Privados", "instrument": "Débenture CDI+2.7% éch. 18/Mar/30 — INSTR_120", "masquage": "masque", "isin": null, "quantite": 1010.0, "prix": 1042.89, "date_prix": "29/05/2026", "valeur": 1053322.35, "pct_pl": 0.0056766632497479074, "exposition": 1053322.35, "pnl": 585.05, "secteur": "Financeiro", "emetteur": "EMET_14", "custodien": "CUSTO_01", "indexeur_type": "Debenture", "duration_ambigue": true, "source_prix": "site ANBIMA", "source_ligne": 88}, {"classe": "Titulos Privados", "instrument": "Débenture IPCA+6.9% éch. 15/Jan/34 — INSTR_82", "masquage": "masque", "isin": null, "quantite": 45520.0, "prix": 9.522727, "date_prix": "29/05/2026", "valeur": 433474.53, "pct_pl": 0.0023361214486265734, "exposition": 433474.53, "pnl": 2605.56, "secteur": "Financeiro", "emetteur": "EMET_15", "custodien": "CUSTO_01", "indexeur_type": "Debenture", "duration_ambigue": true, "source_prix": "site ANBIMA", "source_ligne": 90}, {"classe": "Titulos Privados", "instrument": "Débenture CDI+2.25% éch. 25/Jul/31 — INSTR_123", "masquage": "masque", "isin": null, "quantite": 3650.0, "prix": 1077.88, "date_prix": "29/05/2026", "valeur": 3934253.06, "pct_pl": 0.021202844277357493, "exposition": 3934253.06, "pnl": 3286.64, "secteur": "Financeiro", "emetteur": "EMET_16", "custodien": "CUSTO_01", "indexeur_type": "Debenture", "duration_ambigue": true, "source_prix": "site ANBIMA", "source_ligne": 91}], "provisions": [{"type": "ajuste de futuro", "valeur": 285811.24, "date_liquidation": null}, {"type": "taxa CVM", "valeur": 28422.79, "date_liquidation": null}, {"type": "despesa de auditoria", "valeur": 11545.39, "date_liquidation": null}, {"type": "taxa ANBIMA/ANBID", "valeur": 559.8375, "date_liquidation": null}, {"type": "liquidacao de compromissada (volta)", "valeur": 0.0, "date_liquidation": null}, {"type": "liquidacao de compromissada (ida)", "valeur": 0.0, "date_liquidation": null}, {"type": "ajuste de PL", "valeur": -0.01, "date_liquidation": null}, {"type": "liquidacao de compra/venda de ativos na BM&F", "valeur": -13.4, "date_liquidation": null}, {"type": "taxa SELIC", "valeur": -72.19, "date_liquidation": null}, {"type": "taxa CETIP", "valeur": -3488.24, "date_liquidation": null}, {"type": "taxa de custodia", "valeur": -7338.64, "date_liquidation": null}, {"type": "taxa de administracao", "valeur": -10273.14, "date_liquidation": null}], "caisse": 0.0, "qualite": {"source_file": "PortfolioView (dossier FUND_06)", "lignes": 132, "colonnes_max": 51, "sections_detectees": 23, "sections_avec_donnees": 3, "provisions_section": "présente", "durations_ambigues": 22, "noms_internes_dans_source": 0, "identite_nav_ecart": 3.58}}, "FUND_07": {"alias": "FUND_07", "role": "FEEDER", "parent": "FUND_03", "business_date": "2026-05-29", "pl": 18024402.79, "cota_liq": 1172.7, "cota_bruta": 1172.7, "parts": 15370.0, "cota_congelada": true, "var": {"j": -0.000853, "m": -0.000853, "ytd": 0.099648, "m6": 0.099648, "m12": 0.099648, "depuis_debut": -0.001588}, "exposicao_total": 18024402.79, "allocation": [{"classe": "Cotas de Fundos", "valeur": 18034159.53}], "positions": [{"classe": "Cotas de Fundos", "instrument": "FUND_03 (parts)", "masquage": "interne", "isin": null, "quantite": 15000.0, "prix": 1200.58, "date_prix": "29/05/2026", "valeur": 18008733.06, "pct_pl": 0.9991306380476198, "exposition": 18008733.06, "pnl": 1545.6, "secteur": null, "emetteur": null, "custodien": "CUSTO_01", "indexeur_type": null, "duration_ambigue": false, "source_prix": "aprovacao de cota externa", "source_ligne": 46}, {"classe": "Cotas de Fundos", "instrument": "Fonds Tesouro Selic RF (parts)", "masquage": "public", "isin": "BRCSH4CTF005", "quantite": 2474.94, "prix": 5.470817, "date_prix": "29/05/2026", "valeur": 13539.94, "pct_pl": 0.0007512004784708876, "exposition": 13539.94, "pnl": 7.1, "secteur": null, "emetteur": "EMET_17", "custodien": "CUSTO_01", "indexeur_type": null, "duration_ambigue": false, "source_prix": "CVM", "source_ligne": 47}, {"classe": "Cotas de Fundos", "instrument": "Fonds Tesouro Selic RF (parts)", "masquage": "public", "isin": "BRCSH4CTF005", "quantite": 2172.72, "prix": 5.470817, "date_prix": "29/05/2026", "valeur": 11886.53, "pct_pl": 0.0006594687290607315, "exposition": 11886.53, "pnl": 6.23, "secteur": null, "emetteur": "EMET_17", "custodien": "CUSTO_01", "indexeur_type": null, "duration_ambigue": false, "source_prix": "CVM", "source_ligne": 48}], "provisions": [{"type": "taxa CVM", "valeur": 6661.59, "date_liquidation": null}, {"type": "taxa CETIP", "valeur": 328.302857, "date_liquidation": null}, {"type": "taxa ANBIMA/ANBID", "valeur": 76.487805, "date_liquidation": null}, {"type": "taxa SELIC", "valeur": 1.166493, "date_liquidation": null}, {"type": "ajuste de PL", "valeur": 0.0, "date_liquidation": null}, {"type": "outros/nao categorizado", "valeur": 0.0, "date_liquidation": null}, {"type": "despesa de auditoria", "valeur": -843.61, "date_liquidation": null}, {"type": "taxa de administracao", "valeur": -15980.68, "date_liquidation": null}], "caisse": 0.0, "qualite": {"source_file": "PortfolioView (dossier FUND_07)", "lignes": 91, "colonnes_max": 38, "sections_detectees": 23, "sections_avec_donnees": 1, "provisions_section": "présente", "durations_ambigues": 0, "noms_internes_dans_source": 1, "identite_nav_ecart": 3.79}}}, "bridge_fund_of_fund": [{"parent": "FUND_02", "enfant": "FUND_04", "quantite": 252378.32, "valeur": 303000920.12, "pct_du_pl_enfant": 0.9311, "statut": "HYPOTHESE_A_VALIDER"}, {"parent": "FUND_03", "enfant": "FUND_04", "quantite": 18680.0, "valeur": 22426875.57, "pct_du_pl_enfant": 0.0689, "statut": "HYPOTHESE_A_VALIDER"}, {"parent": "FUND_05", "enfant": "FUND_06", "quantite": 160437680.57, "valeur": 185553079.61, "pct_du_pl_enfant": 1.0, "statut": "HYPOTHESE_A_VALIDER"}, {"parent": "FUND_07", "enfant": "FUND_03", "quantite": 15000.0, "valeur": 18008733.06, "pct_du_pl_enfant": 0.803, "statut": "HYPOTHESE_A_VALIDER"}], "anomalies": [{"sev": "crit", "titre": "Noms réels de fonds internes dans les colonnes Instrumento", "detail": "4 exports contiennent le nom réel d'un fonds interne en position (vecteur de fuite non couvert par le masquage du nom de fichier). Masqué dans cette maquette, ISIN compris.", "source": "Positions 'Cotas de Fundos' des 4 feeders · ligne 46 de chaque export", "action": "Masquage instrument + ISIN obligatoire dans toute sortie partageable (gate CI/CD)"}, {"sev": "serious", "titre": "Structures feeder non déclarées → double comptage", "detail": "4 liens fonds-dans-fonds détectés ; la somme brute surévalue l'encours ×1,95 (+529,0 M BRL).", "source": "Rapprochement quantités/valeurs de parts entre exports (bridge, 4 liens)", "action": "Table bridge_fund_of_fund + double lecture juridique/transparisée ; validation gérants (P0-5)"}, {"sev": "serious", "titre": "Durations illisibles (points multiples)", "detail": "23 positions portent une duration au format non interprétable (ex. 59.192.460.317.460) — unité et séparateur inconnus.", "source": "FUND_01 (1 position) et FUND_06 (22 positions) · colonne Duration", "action": "Conserver duration_raw ; bloquer duration_normalized jusqu'à règle source (P1-12)"}, {"sev": "serious", "titre": "Prix obsolète sur actif non coté (FUND_04)", "detail": "Action non cotée valorisée au 31/03/2026 pour une date de référence au 29/05/2026 (staleness 59 jours).", "source": "FUND_04 · section Acoes e Recibos · ligne 13 · col. Data Preco", "action": "Seuil de staleness par classe d'actif + politique de valorisation à valider (P1-10)"}, {"sev": "serious", "titre": "Univers de pairs FIP non exploitable en l'état", "detail": "8 rentabilités 12 m > 100 % (jusqu'à 43 216 648 %), 5 CNPJ dupliqués, frais renseignés 4/15.", "source": "Classeur pairs · onglet FIP Multi · colonnes A, E, I", "action": "Déduplication CNPJ, quarantaine des extrêmes, validation gérants avant tout classement (P1-8/9)"}, {"sev": "warn", "titre": "Date métier ≠ horodatage des fichiers", "detail": "Date métier 29/05/2026 ; noms de fichiers horodatés 22/06/2026 — écart de 24 jours inexpliqué.", "source": "Ligne 1 des 7 exports vs nom de fichier", "action": "Clarifier la règle de nommage/export INOA ; stocker les deux dates en Bronze"}, {"sev": "warn", "titre": "Cota Congelada = true sur les 7 fonds", "detail": "Le sens métier du drapeau n'est pas documenté.", "source": "Section Resumo · ligne 5 · col. Cota Congelada (7/7)", "action": "Question P1-11 à INOA / Back Office"}, {"sev": "warn", "titre": "Largeur de fichier variable (38 vs 51 colonnes)", "detail": "3 exports à 51 colonnes, 4 à 38 — un read_csv rectangulaire est impossible.", "source": "7 exports · nombre de colonnes max par fichier", "action": "Parseur par sections avec en-têtes locaux (registre de sections versionné)"}, {"sev": "warn", "titre": "Section Provisões présente mais vide (FUND_03)", "detail": "Les 6 autres fonds portent 3 à 12 lignes de provisions ; FUND_03 en a 0 avec la section présente.", "source": "FUND_03 · section Provisoes", "action": "Règle DQ distinguant « section vide » et « section absente »"}, {"sev": "warn", "titre": "Écart identité PL ≠ part × nombre de parts", "detail": "Écarts de −167,79 à +597,88 BRL selon les fonds (arrondis probables).", "source": "Section Resumo des 7 exports (calcul reproduit)", "action": "Tolérance DQ09 : max(10 BRL ; 1 pb du PL) — seuil à valider Back Office"}, {"sev": "warn", "titre": "Fenêtres YTD / 6 m / 12 m identiques (4 fonds)", "detail": "Suggère des fonds récents ou un historique incomplet — les métriques 12 m ne sont pas certifiables.", "source": "Section Resumo · colonnes Variacao Anual / 6 Meses / 12 Meses", "action": "Question P0-4 : profondeur d'historique NAV par fonds"}, {"sev": "warn", "titre": "En-têtes techniques non traduits (portfolio-front.*)", "detail": "Clés brutes du front INOA dans les en-têtes et libellés de sections.", "source": "En-têtes Resumo (col. 6) et sections de pied de fichier", "action": "Dictionnaire de renommage versionné (Silver)"}]};
+const PAIRS = {"resumo": [{"fonds": "FUND_01", "categorie": "FIAGRO", "onglet": "Pares - FIAGRO", "n": 25, "statut": "Completo"}, {"fonds": "FUND_06", "categorie": "RF Infra (Deb. Incentivadas 12.431)", "onglet": "Pares - RF Infra Incentivadas", "n": 15, "statut": "Top 15 por PL (universo RFDLCL=485 infra)"}, {"fonds": "FUND_05", "categorie": "RF Infra - FIC", "onglet": "Pares - RF Infra Incentivadas", "n": 15, "statut": "Mesma classe ANBIMA (compartilha pares)"}, {"fonds": "FUND_07", "categorie": "Multimercado", "onglet": "Pares - Multimercado (parcial)", "n": 15, "statut": "PARCIAL - subclasse ANBIMA a confirmar"}, {"fonds": "FUND_04", "categorie": "FIP Multiestrategia", "onglet": "Pares - FIP Multi", "n": 15, "statut": "Top 15 (universo 281)"}], "univers": [{"univers": "FIAGRO", "n": 25, "rentab_12m_mediane": 0.4, "vol_12m_mediane": 4.53, "rentab_completude": "17/25", "frais_completude": "16/25", "cnpj_dupliques": 2, "valeurs_extremes_rentab": 0}, {"univers": "RF Infra Incentivadas", "n": 15, "rentab_12m_mediane": 12.65, "vol_12m_mediane": 1.7, "rentab_completude": "15/15", "frais_completude": "14/15", "cnpj_dupliques": 0, "valeurs_extremes_rentab": 0}, {"univers": "Multimercado (parcial)", "n": 15, "rentab_12m_mediane": 11.41, "vol_12m_mediane": 1.31, "rentab_completude": "15/15", "frais_completude": "15/15", "cnpj_dupliques": 0, "valeurs_extremes_rentab": 0}, {"univers": "FIP Multi", "n": 15, "rentab_12m_mediane": 103.5, "vol_12m_mediane": 133.57, "rentab_completude": "15/15", "frais_completude": "4/15", "cnpj_dupliques": 5, "valeurs_extremes_rentab": 8}]};
+</script>
+<script>
+/* ===== état global ===== */
+const S = { tab:'exec', fund:'FUND_06', transparise:false, classFilter:null, fundFilter:new Set() };
+const CLASS_COLORS = {'Titulos Publicos':'var(--s1)','Titulos Privados':'var(--s2)','Cotas de Fundos':'var(--s3)','Acoes e Recibos':'var(--s4)','Futuros':'var(--s5)','Caixa':'var(--s6)'};
+const CLASS_HEX = {'Titulos Publicos':'#2a78d6','Titulos Privados':'#eb6834','Cotas de Fundos':'#1baf7a','Acoes e Recibos':'#eda100','Futuros':'#e87ba4','Caixa':'#008300'};
+const FUNDS = Object.keys(DATA.fonds);
+const nf = new Intl.NumberFormat('fr-FR',{minimumFractionDigits:2, maximumFractionDigits:2});
+const nf0 = new Intl.NumberFormat('fr-FR',{maximumFractionDigits:0});
+const brl = v => v==null?'—':nf.format(v)+' BRL';
+const brlM = v => v==null?'—':nf.format(v/1e6)+' M BRL';
+const pct = (v,d=2) => v==null?'—':(v*100).toFixed(d).replace('.',',')+' %';
+const pctSigned = v => { if(v==null) return '—'; const s=(v*100).toFixed(3).replace('.',','); return (v>0?'+':'')+s+' %'; };
+const deltaCls = v => v>0?'delta-up':(v<0?'delta-down':'');
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
+
+/* fenêtres identiques ? */
+function identicalWindows(f){ const v=f.var; return v.ytd!=null && v.ytd===v.m6 && (v.ytd===v.m12 || v.m6===v.m12); }
+
+/* ===== onglets ===== */
+const TABS = [['exec','1 · Vue exécutive'],['fund','2 · Vue fonds'],['comp','3 · Comparaison interne'],['pairs','4 · Pairs (état futur)'],['quality','5 · Vue qualité'],['states','6 · États d’interaction']];
+function renderTabs(){
+  document.getElementById('tabs').innerHTML = TABS.map(([id,l])=>`<button class="${S.tab===id?'on':''}" onclick="go('${id}')">${l}</button>`).join('');
+  document.querySelectorAll('section.view').forEach(sec=>sec.classList.toggle('on', sec.id==='view-'+S.tab));
+}
+function go(t){ S.tab=t; renderTabs(); render(); }
+
+/* ===== VUE EXÉCUTIVE ===== */
+function renderExec(){
+  const g = DATA.kpis_globaux;
+  const shown = FUNDS.filter(a=>!S.fundFilter.size || S.fundFilter.has(a));
+  const maxPL = Math.max(...FUNDS.map(a=>DATA.fonds[a].pl));
+  const tiles = shown.map(a=>{
+    const f=DATA.fonds[a];
+    const excluded = S.transparise && f.role==='FEEDER';
+    const roleTag = f.role==='MASTER'?'<span class="tag master">MASTER</span>':f.role==='FEEDER'?'<span class="tag feeder">FEEDER</span>':'<span class="tag auto">AUTONOME</span>';
+    return `<div class="tile ${excluded?'excluded':''}" onclick="S.fund='${a}';go('fund')" title="Ouvrir la vue fonds ${a}">
+      <div class="alias">${a} ${roleTag} <span class="tag hyp" title="Classification inférée des positions — à confirmer par les gérants">HYP.</span></div>
+      <div class="pl src" data-src="Source : PortfolioView ${a}\nSection : Resumo da Carteira - Conteudo\nLigne 5 · col. Patrimonio Liquido\nRun : SPRINT2-WF-001">${brlM(f.pl)}</div>
+      <div class="meta">Part ${nf.format(f.cota_liq)} · <span class="${deltaCls(f.var.j)}">${pctSigned(f.var.j)}</span> jour</div>
+      ${f.parent?`<div class="meta">Feeder de ${f.parent}${f.role==='FEEDER'?'':''}</div>`:''}
+      ${excluded?'<div class="excl-note">exclu de l’encours transparisé</div>':''}
+    </div>`;
+  }).join('');
+  const bars = FUNDS.map(a=>{
+    const f=DATA.fonds[a];
+    const w=(f.pl/maxPL*100).toFixed(1);
+    const hatch = S.transparise && f.role==='FEEDER';
+    return `<div class="bar-row"><div class="lbl">${a}</div>
+      <div class="bar-track" onmousemove="tt(event,'${a} — ${brl(f.pl)}\\n${f.role}${hatch?' — exclu de la vue transparisée':''}')" onmouseleave="ttHide()">
+        <div class="bar-fill ${hatch?'hatch':''}" style="width:${w}%"></div>
+        <div class="bar-val">${brlM(f.pl)}</div>
+      </div></div>`;
+  }).join('');
+  const dq = DATA.anomalies;
+  document.getElementById('view-exec').innerHTML = `
+  <h2 class="vt">Vue exécutive</h2>
+  <p class="vd">Décision de direction : lire l'encours, repérer les structures internes et les alertes qualité en moins d'une minute.</p>
+  <div class="alert crit"><b>Double comptage détecté :</b> la somme brute des 7 PL (${brlM(g.somme_brute_pl)}) compte ${brlM(g.valeur_participations_internes)} de participations entre fonds internes.
+  L'encours économique estimé est de ${brlM(g.encours_transparise_hypothese)} — un tableau naïf surévaluerait de ×${String(g.facteur_surevaluation).replace('.',',')}. <span class="tag hyp">HYPOTHÈSE À VALIDER</span></div>
+  <div class="row">
+    <div class="card"><h3>Encours brut (vue juridique)</h3>
+      <div class="hero src" data-src="Somme des 7 champs Patrimonio Liquido\nSection Resumo · ligne 5 de chaque export\nRun : SPRINT2-WF-001">${nf.format(g.somme_brute_pl)} <small>BRL</small></div>
+      <div class="note">Ce que produit un simple SUM des 7 exports.</div></div>
+    <div class="card"><h3>Encours transparisé <span class="tag hyp">HYPOTHÈSE À VALIDER</span></h3>
+      <div class="hero">${nf.format(g.encours_transparise_hypothese)} <small>BRL</small></div>
+      <div class="note">Somme brute − participations internes détectées (bridge fonds-dans-fonds, 4 liens). Nécessite la confirmation du registre des fonds par les gérants.</div></div>
+    <div class="card"><h3>Fraîcheur des données</h3>
+      <div class="hero">1 <small>date métier</small></div>
+      <div class="note">29/05/2026 — aucune série historique. Horodatage des fichiers : 22/06/2026 (écart de 24 j, <span class="src" data-src="Anomalie A1 — voir Vue qualité">inexpliqué</span>).</div></div>
+    <div class="card"><h3>Alertes qualité</h3>
+      <div class="kpiline">
+        <div class="k"><div class="l">Bloquant</div><div class="v" style="color:var(--critical)">${dq.filter(x=>x.sev==='crit').length}</div></div>
+        <div class="k"><div class="l">Majeur</div><div class="v" style="color:#a8431c">${dq.filter(x=>x.sev==='serious').length}</div></div>
+        <div class="k"><div class="l">Avertissement</div><div class="v" style="color:#6b5416">${dq.filter(x=>x.sev==='warn').length}</div></div>
+      </div>
+      <button class="btn" onclick="go('quality')">Ouvrir la vue qualité →</button></div>
+  </div>
+  <div class="row" style="margin-top:14px; align-items:center;">
+    <div class="toggle"><button class="${S.transparise?'':'on'}" onclick="S.transparise=false;render()">Vue juridique</button><button class="${S.transparise?'on':''}" onclick="S.transparise=true;render()">Vue transparisée <span class="tag hyp" style="margin-left:4px">HYP.</span></button></div>
+    <span class="chip dis" title="Une seule date métier disponible (29/05/2026) — le sélecteur sera actif quand l'historique NAV sera livré (question P0-4)">Date : 29/05/2026 ▾</span>
+    <div class="chips" style="margin:0">${FUNDS.map(a=>`<button class="chip ${!S.fundFilter.size||S.fundFilter.has(a)?'on':''}" onclick="toggleFund('${a}')">${a}</button>`).join('')}</div>
+  </div>
+  <div class="tiles">${tiles}</div>
+  <div class="card" style="margin-top:14px">
+    <h3>Patrimoine par fonds — ${S.transparise?'vue transparisée (feeders hachurés = exclus)':'vue juridique (somme brute)'}</h3>
+    <div style="max-width:820px; padding-right:150px">${bars}</div>
+    <div class="legend"><span><i style="background:var(--s1)"></i>PL du fonds</span><span><i style="background:repeating-linear-gradient(45deg,#c9d9f0,#c9d9f0 3px,#eef2f8 3px,#eef2f8 5px); border:1px dashed var(--s1)"></i>Feeder exclu (vue transparisée)</span></div>
+  </div>`;
+}
+function toggleFund(a){ if(S.fundFilter.has(a)) S.fundFilter.delete(a); else S.fundFilter.add(a); if(S.fundFilter.size===FUNDS.length) S.fundFilter.clear(); render(); }
+
+/* ===== VUE FONDS ===== */
+function donutSVG(f){
+  const alloc=[...f.allocation]; if(f.caisse) alloc.push({classe:'Caixa', valeur:f.caisse});
+  const total=alloc.reduce((s,x)=>s+Math.abs(x.valeur),0)||1;
+  let a0=-Math.PI/2; const cx=95, cy=95, r=72, ri=44; let paths='';
+  alloc.forEach(x=>{
+    const frac=Math.abs(x.valeur)/total; const a1=a0+frac*2*Math.PI;
+    const large=frac>0.5?1:0;
+    const p=[cx+r*Math.cos(a0),cy+r*Math.sin(a0),cx+r*Math.cos(a1),cy+r*Math.sin(a1),cx+ri*Math.cos(a1),cy+ri*Math.sin(a1),cx+ri*Math.cos(a0),cy+ri*Math.sin(a0)].map(v=>v.toFixed(1));
+    const sel=S.classFilter===x.classe;
+    paths+=`<path d="M${p[0]} ${p[1]} A${r} ${r} 0 ${large} 1 ${p[2]} ${p[3]} L${p[4]} ${p[5]} A${ri} ${ri} 0 ${large} 0 ${p[6]} ${p[7]} Z"
+      fill="${CLASS_HEX[x.classe]||'#898781'}" stroke="var(--surface)" stroke-width="2" style="cursor:pointer; opacity:${S.classFilter&&!sel?0.35:1}"
+      onclick="S.classFilter=S.classFilter==='${x.classe}'?null:'${x.classe}';render()"
+      onmousemove="tt(event,'${x.classe}\\n${brl(x.valeur)} · ${pct(Math.abs(x.valeur)/total)} de l’actif\\nClic : filtrer le tableau des positions')" onmouseleave="ttHide()"></path>`;
+    a0=a1;
+  });
+  return `<svg viewBox="0 0 190 190" width="190" height="190" role="img" aria-label="Allocation par classe d'actif">${paths}
+    <text x="95" y="90" text-anchor="middle" font-size="11" fill="var(--muted)">Actif total</text>
+    <text x="95" y="106" text-anchor="middle" font-size="12" font-weight="600" fill="var(--ink)">${nf0.format(total/1e6)} M</text></svg>`;
+}
+function renderFund(){
+  const f=DATA.fonds[S.fund];
+  const iw = identicalWindows(f);
+  const alloc=[...f.allocation]; if(f.caisse) alloc.push({classe:'Caixa',valeur:f.caisse});
+  const positions=f.positions.filter(p=>!S.classFilter||p.classe===S.classFilter);
+  const posRows=positions.map(p=>`<tr>
+    <td><span style="display:inline-flex;align-items:center;gap:6px"><i style="width:9px;height:9px;border-radius:3px;background:${CLASS_HEX[p.classe]||'#898781'};display:inline-block"></i>${esc(p.classe)}</span></td>
+    <td><span class="src" data-src="Source : PortfolioView ${f.alias}\nSection : ${esc(p.classe)} · ligne ${p.source_ligne}\nMasquage : ${p.masquage}">${esc(p.instrument)}</span>${p.anomalie_prix?` <span class="flag" title="${esc(p.anomalie_prix)}">prix obsolète</span>`:''}</td>
+    <td>${p.isin||'—'}</td>
+    <td class="num">${p.quantite==null?'—':nf.format(p.quantite)}</td>
+    <td class="num">${p.prix==null?'—':nf.format(p.prix)}</td>
+    <td class="num">${p.date_prix||'—'}</td>
+    <td class="num">${p.valeur==null?'—':nf.format(p.valeur)}</td>
+    <td class="num">${p.pct_pl==null?'—':pct(p.pct_pl)}</td>
+    <td>${p.emetteur||'—'}</td>
+    <td>${p.custodien||'—'}</td>
+    <td>${p.source_prix||'—'}</td></tr>`).join('');
+  const provTotal=f.provisions.reduce((s,p)=>s+(p.valeur||0),0);
+  const provRows=f.provisions.map(p=>`<tr><td>${esc(p.type)}</td><td class="num">${nf.format(p.valeur)}</td><td class="num">${p.date_liquidation||'—'}</td></tr>`).join('');
+  document.getElementById('view-fund').innerHTML=`
+  <h2 class="vt">Vue fonds</h2>
+  <p class="vd">Décision de gérant : composition, concentrations et provisions d'un fonds, avec drill-down fonds → classe → contrat.</p>
+  <div class="chips">${FUNDS.map(a=>`<button class="chip ${S.fund===a?'on':''}" onclick="S.fund='${a}';S.classFilter=null;render()">${a}</button>`).join('')}</div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div><span style="font-size:17px;font-weight:700">${f.alias}</span>
+      ${f.role==='MASTER'?'<span class="tag master">MASTER</span>':f.role==='FEEDER'?'<span class="tag feeder">FEEDER</span>':'<span class="tag auto">AUTONOME</span>'}
+      <span class="tag hyp" title="Classification inférée — à confirmer">HYPOTHÈSE À VALIDER</span>
+      ${f.parent?`<span class="note">feeder de ${f.parent}</span>`:''}</div>
+      <span class="note">Date métier : ${'29/05/2026'} · Cota congelada : <span class="flag" title="true sur les 7 fonds — signification métier à confirmer (question P1-11)">true</span></span>
+    </div>
+    <div class="kpiline" style="margin-top:10px">
+      <div class="k"><div class="l">Patrimoine (PL)</div><div class="v src" data-src="Source : PortfolioView ${f.alias}\nSection Resumo · ligne 5 · col. Patrimonio Liquido">${nf.format(f.pl)} <small>BRL</small></div></div>
+      <div class="k"><div class="l">Part nette / brute</div><div class="v">${nf.format(f.cota_liq)} <small>/ ${nf.format(f.cota_bruta)}</small></div></div>
+      <div class="k"><div class="l">Nombre de parts</div><div class="v">${nf.format(f.parts)}</div></div>
+      <div class="k"><div class="l">Var. jour</div><div class="v ${deltaCls(f.var.j)}">${pctSigned(f.var.j)}</div></div>
+      <div class="k"><div class="l">Var. mois</div><div class="v ${deltaCls(f.var.m)}">${pctSigned(f.var.m)}</div></div>
+      <div class="k"><div class="l">YTD ${iw?'<span class="flag" title="Fenêtres YTD / 6 m / 12 m identiques — fonds récent ou historique incomplet, à confirmer (question P0-4)">⚑</span>':''}</div><div class="v">${pctSigned(f.var.ytd)}</div></div>
+      <div class="k"><div class="l">6 mois</div><div class="v">${pctSigned(f.var.m6)}</div></div>
+      <div class="k"><div class="l">12 mois</div><div class="v">${pctSigned(f.var.m12)}</div></div>
+      <div class="k"><div class="l">Écart identité PL−part×parts</div><div class="v"><small>${f.qualite.identite_nav_ecart==null?'—':nf.format(f.qualite.identite_nav_ecart)+' BRL'}</small></div></div>
+    </div>
+  </div>
+  <div class="row" style="margin-top:14px">
+    <div class="card" style="flex:0 1 330px">
+      <h3>Allocation par classe d'actif</h3>
+      <div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap">${donutSVG(f)}
+      <div class="legend" style="flex-direction:column;align-items:flex-start;gap:7px">
+        ${alloc.map(x=>`<span style="cursor:pointer;${S.classFilter===x.classe?'font-weight:700;color:var(--ink)':''}" onclick="S.classFilter=S.classFilter==='${x.classe}'?null:'${x.classe}';render()"><i style="background:${CLASS_HEX[x.classe]||'#898781'}"></i>${x.classe} · ${nf0.format(Math.abs(x.valeur)/1e6)} M</span>`).join('')}
+      </div></div>
+      ${S.classFilter?`<div class="note">Filtre actif : <b>${S.classFilter}</b> — <a href="#" onclick="S.classFilter=null;render();return false">réinitialiser</a></div>`:'<div class="note">Cliquer une part filtre le tableau des positions (drill-down fonds → classe → contrat).</div>'}
+    </div>
+    <div class="card" style="flex:2 1 420px">
+      <h3>Positions ${S.classFilter?`— ${S.classFilter}`:''} (${positions.length})</h3>
+      <div class="scroll"><table class="tbl"><thead><tr><th>Classe</th><th>Instrument (masqué)</th><th>ISIN</th><th class="num">Quantité</th><th class="num">Prix</th><th class="num">Date prix</th><th class="num">Valeur (BRL)</th><th class="num">% PL</th><th>Émetteur</th><th>Dépositaire</th><th>Source prix</th></tr></thead>
+      <tbody>${posRows||'<tr><td colspan="11" style="color:var(--muted)">Aucune position pour ce filtre.</td></tr>'}</tbody></table></div>
+      <div class="note">Survoler un instrument affiche sa piste de lineage (fichier · section · ligne). Les ISIN des instruments privés et internes sont masqués (l'ISIN permet de retrouver l'émetteur) ; seuls les titres publics conservent le leur. Les lignes répétées d'un même instrument sont des contrats distincts (agrégation en vue instrument prévue en Silver/Gold).</div>
+    </div>
+  </div>
+  <div class="row" style="margin-top:14px">
+    <div class="card" style="flex:1 1 320px">
+      <h3>Provisions (${f.provisions.length}) — total ${nf.format(provTotal)} BRL</h3>
+      ${f.provisions.length?`<div class="scroll"><table class="tbl"><thead><tr><th>Type</th><th class="num">Valeur (BRL)</th><th class="num">Liquidation</th></tr></thead><tbody>${provRows}</tbody></table></div>`:`<div class="alert" style="margin:4px 0">Section Provisões <b>présente mais vide</b> pour ce fonds — à distinguer d'une section absente (règle DQ « section vide vs absente »).</div>`}
+    </div>
+    <div class="futurzone">
+      <h3>État futur — nécessite l'historique NAV <span class="tag futur">SPRINT 4</span></h3>
+      <p style="font-size:12.5px">Courbe de performance · Volatilité · Sharpe / Sortino · Drawdown · DV01 · Attribution · Flux.</p>
+      <p class="note">Aucune courbe historique n'est affichée dans cette maquette : une seule date métier est disponible. Livraison conditionnée à la question P0-4 (historique quotidien NAV/positions).</p>
+    </div>
+  </div>`;
+}
+
+/* ===== COMPARAISON INTERNE ===== */
+function renderComp(){
+  const rows=FUNDS.map(a=>{
+    const f=DATA.fonds[a]; const iw=identicalWindows(f);
+    return `<tr><td><b>${a}</b> ${f.role==='MASTER'?'<span class="tag master">M</span>':f.role==='FEEDER'?'<span class="tag feeder">F</span>':'<span class="tag auto">A</span>'}</td>
+    <td class="num">${nf.format(f.pl)}</td><td class="num">${nf.format(f.cota_liq)}</td>
+    <td class="num ${deltaCls(f.var.j)}">${pctSigned(f.var.j)}</td>
+    <td class="num ${deltaCls(f.var.m)}">${pctSigned(f.var.m)}</td>
+    <td class="num">${pctSigned(f.var.ytd)} ${iw?'<span class="flag" title="Fenêtres YTD/6m/12m identiques — à confirmer">⚑</span>':''}</td>
+    <td class="num">${pctSigned(f.var.m6)}</td><td class="num">${pctSigned(f.var.m12)}</td></tr>`;
+  }).join('');
+  const b=DATA.bridge_fund_of_fund;
+  document.getElementById('view-comp').innerHTML=`
+  <h2 class="vt">Comparaison interne</h2>
+  <p class="vd">Comparer les fonds de la société entre eux — et rendre visibles les liens fonds-dans-fonds qui interdisent une somme naïve.</p>
+  <div class="alert info">Les variations affichées sont les valeurs <b>pré-calculées INOA</b> de l'instantané. Les rendements officiels seront recalculés dans le pipeline à partir de la série NAV (règle du dictionnaire de données) — <span class="tag futur">ÉTAT FUTUR</span>.</div>
+  <div class="card"><h3>Synthèse des 7 fonds — 29/05/2026</h3>
+  <div class="scroll"><table class="tbl"><thead><tr><th>Fonds</th><th class="num">PL (BRL)</th><th class="num">Part nette</th><th class="num">Jour</th><th class="num">Mois</th><th class="num">YTD</th><th class="num">6 m</th><th class="num">12 m</th></tr></thead><tbody>${rows}</tbody></table></div></div>
+  <div class="row" style="margin-top:14px">
+    <div class="card" style="flex:1 1 420px">
+      <h3>Structure master / feeder détectée <span class="tag hyp">HYPOTHÈSE À VALIDER</span></h3>
+      <svg viewBox="0 0 560 240" style="max-width:100%" role="img" aria-label="Structures fonds-dans-fonds">
+        <defs><marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#52514e"/></marker></defs>
+        <g font-size="12" fill="var(--ink)">
+        <rect x="20" y="20" width="110" height="34" rx="7" fill="#e4edfa" stroke="#2a78d6"/><text x="75" y="41" text-anchor="middle" font-weight="700">FUND_04</text><text x="75" y="12" text-anchor="middle" font-size="10" fill="#52514e">MASTER</text>
+        <rect x="20" y="100" width="110" height="34" rx="7" fill="#fdefe8" stroke="#eb6834"/><text x="75" y="121" text-anchor="middle" font-weight="700">FUND_02</text>
+        <rect x="20" y="160" width="110" height="34" rx="7" fill="#fdefe8" stroke="#eb6834"/><text x="75" y="181" text-anchor="middle" font-weight="700">FUND_03</text>
+        <rect x="150" y="196" width="110" height="34" rx="7" fill="#fdefe8" stroke="#eb6834"/><text x="205" y="217" text-anchor="middle" font-weight="700">FUND_07</text>
+        <line x1="75" y1="100" x2="75" y2="56" stroke="#52514e" marker-end="url(#arr)"/><text x="82" y="82" font-size="10.5" fill="#52514e">93,1 % du PL</text>
+        <line x1="75" y1="160" x2="75" y2="140" stroke="#52514e"/><line x1="75" y1="140" x2="75" y2="140" stroke="#52514e"/><path d="M75 160 C 60 130, 60 90, 73 58" fill="none" stroke="#52514e" marker-end="url(#arr)"/><text x="10" y="150" font-size="10.5" fill="#52514e">6,9 %</text>
+        <path d="M205 196 C 205 176, 140 186, 132 179" fill="none" stroke="#52514e" marker-end="url(#arr)"/><text x="212" y="182" font-size="10.5" fill="#52514e">80,3 % des parts</text>
+        <rect x="330" y="20" width="110" height="34" rx="7" fill="#e4edfa" stroke="#2a78d6"/><text x="385" y="41" text-anchor="middle" font-weight="700">FUND_06</text><text x="385" y="12" text-anchor="middle" font-size="10" fill="#52514e">MASTER</text>
+        <rect x="330" y="100" width="110" height="34" rx="7" fill="#fdefe8" stroke="#eb6834"/><text x="385" y="121" text-anchor="middle" font-weight="700">FUND_05</text>
+        <line x1="385" y1="100" x2="385" y2="56" stroke="#52514e" marker-end="url(#arr)"/><text x="392" y="82" font-size="10.5" fill="#52514e">100 %</text>
+        <rect x="330" y="160" width="110" height="34" rx="7" fill="#e7f5ee" stroke="#008300"/><text x="385" y="181" text-anchor="middle" font-weight="700">FUND_01</text><text x="385" y="207" text-anchor="middle" font-size="10" fill="#52514e">AUTONOME</text>
+        </g></svg>
+      <div class="note">Flèche = « détient des parts de ». Inféré des colonnes Instrumento des exports — aucun registre officiel des fonds n'a été fourni (question P0-5).</div>
+    </div>
+    <div class="card" style="flex:1 1 380px">
+      <h3>Bridge fonds-dans-fonds (table Gold proposée)</h3>
+      <div class="scroll"><table class="tbl"><thead><tr><th>Parent</th><th>Détient</th><th class="num">Quantité</th><th class="num">Valeur (BRL)</th><th class="num">% du PL détenu</th><th>Statut</th></tr></thead>
+      <tbody>${b.map(x=>`<tr><td>${x.parent}</td><td>${x.enfant}</td><td class="num">${nf.format(x.quantite)}</td><td class="num">${nf.format(x.valeur)}</td><td class="num">${pct(x.pct_du_pl_enfant,1)}</td><td><span class="tag hyp">HYP. À VALIDER</span></td></tr>`).join('')}</tbody></table></div>
+      <div class="note">C'est cette table qui permet la double lecture juridique / transparisée de la vue exécutive.</div>
+    </div>
+  </div>`;
+}
+
+/* ===== PAIRS ===== */
+function renderPairs(){
+  const u=PAIRS.univers; const r=PAIRS.resumo;
+  document.getElementById('view-pairs').innerHTML=`
+  <h2 class="vt">Pairs de marché <span class="tag futur">ÉTAT FUTUR — SPRINT 4</span></h2>
+  <p class="vd">Écran conditionné à la remise du jeu de données ANBIMA et à la validation des groupes de pairs par les gérants (questions P1-8/9/10).</p>
+  <div class="alert"><b>Statut :</b> le classeur de pairs fourni permet de préparer l'adaptateur et la méthode, pas de certifier un classement. L'univers FIP présente des valeurs extrêmes et des CNPJ dupliqués — voir Vue qualité.</div>
+  <div class="card"><h3>Rattachement des fonds internes aux univers de pairs</h3>
+  <div class="scroll"><table class="tbl"><thead><tr><th>Fonds interne</th><th>Catégorie</th><th class="num">N pairs</th><th>Statut du groupe</th></tr></thead>
+  <tbody>${r.map(x=>`<tr><td><b>${x.fonds}</b></td><td>${esc(x.categorie)}</td><td class="num">${x.n}</td><td>${/PARCIAL|confirmar/i.test(x.statut)?'<span class="sev warn">à confirmer</span> ':''}${esc(x.statut)}</td></tr>`).join('')}</tbody></table></div>
+  <div class="note">FUND_02 et FUND_03 (feeders du master FUND_04) n'ont pas d'univers propre — comparaison au niveau du master.</div></div>
+  <div class="card" style="margin-top:14px"><h3>Qualité des univers de pairs (indicatif — méthode non validée)</h3>
+  <div class="scroll"><table class="tbl"><thead><tr><th>Univers</th><th class="num">N</th><th class="num">Rentab. 12 m médiane</th><th class="num">Volat. 12 m médiane</th><th class="num">Complétude rentab.</th><th class="num">Complétude frais</th><th class="num">CNPJ dupliqués</th><th class="num">Rentab. extrêmes (&gt;100 %)</th><th>Verdict</th></tr></thead>
+  <tbody>${u.map(x=>{
+    const bad=x.cnpj_dupliques>0||x.valeurs_extremes_rentab>0;
+    return `<tr><td>${esc(x.univers)}</td><td class="num">${x.n}</td><td class="num">${x.rentab_12m_mediane==null?'—':String(x.rentab_12m_mediane).replace('.',',')+' %'}</td><td class="num">${x.vol_12m_mediane==null?'—':String(x.vol_12m_mediane).replace('.',',')+' %'}</td><td class="num">${x.rentab_completude}</td><td class="num">${x.frais_completude}</td><td class="num">${x.cnpj_dupliques}</td><td class="num">${x.valeurs_extremes_rentab}</td><td>${bad?'<span class="sev serious">nettoyage requis</span>':'<span class="sev ok">exploitable</span>'}</td></tr>`;}).join('')}</tbody></table></div></div>
+  <div class="futurzone" style="margin-top:14px"><h3>Aperçu de l'écran cible (non fonctionnel)</h3>
+  <p style="font-size:12.5px">Nuage rendement × volatilité du fonds vs pairs validés · rang par fenêtre · méthodologie affichée (entonnoir CVM → ANBIMA → benchmark → duration → liquidité → PL) · version du groupe de pairs.</p>
+  <p class="note">Aucune métrique de pairs n'est présentée comme certifiée tant que la sélection n'est pas approuvée et versionnée.</p></div>`;
+}
+
+/* ===== QUALITÉ ===== */
+function renderQuality(){
+  const runs=FUNDS.map(a=>{
+    const q=DATA.fonds[a].qualite;
+    const warn=q.provisions_section==='vide'||q.durations_ambigues>0||q.noms_internes_dans_source>0;
+    return `<tr><td><b>${a}</b></td><td><span class="src" data-src="Fichier source masqué — dossier ${a}\nHorodatage export : 22/06/2026">${q.source_file}</span></td>
+    <td class="num">${q.lignes}</td><td class="num">${q.colonnes_max}</td><td class="num">${q.sections_detectees}</td><td class="num">${q.sections_avec_donnees}</td>
+    <td class="num">${q.identite_nav_ecart==null?'—':nf.format(q.identite_nav_ecart)}</td>
+    <td>${warn?'<span class="sev warn">avec avertissements</span>':'<span class="sev ok">OK</span>'}</td></tr>`;
+  }).join('');
+  const an=DATA.anomalies.map(x=>`<tr><td><span class="sev ${x.sev}">${x.sev==='crit'?'bloquant':x.sev==='serious'?'majeur':'avertissement'}</span></td>
+    <td>${esc(x.titre)}</td><td>${esc(x.detail)}</td>
+    <td><span class="src" data-src="${esc(x.source)}">source ⓘ</span></td><td>${esc(x.action)}</td></tr>`).join('');
+  document.getElementById('view-quality').innerHTML=`
+  <h2 class="vt">Vue qualité</h2>
+  <p class="vd">Décision de responsable data : état des runs, anomalies et traçabilité — chaque chiffre remonte au fichier et à la ligne source.</p>
+  <div class="card"><h3>Runs de parsing — 7 fichiers du 29/05/2026</h3>
+  <div class="scroll"><table class="tbl"><thead><tr><th>Alias</th><th>Fichier</th><th class="num">Lignes</th><th class="num">Col. max</th><th class="num">Sections détectées</th><th class="num">Sections avec données</th><th class="num">Écart identité NAV (BRL)</th><th>Statut</th></tr></thead><tbody>${runs}</tbody></table></div>
+  <div class="note">Écart identité = PL − (part nette × nombre de parts). Tolérance proposée : max(10 BRL ; 1 pb du PL) — règle DQ09, seuil à valider par le Back Office.</div></div>
+  <div class="card" style="margin-top:14px"><h3>Anomalies — reproduites depuis les sources (${DATA.anomalies.length})</h3>
+  <div class="scroll"><table class="tbl"><thead><tr><th>Sévérité</th><th>Anomalie</th><th>Détail</th><th>Lineage</th><th>Traitement proposé</th></tr></thead><tbody>${an}</tbody></table></div></div>`;
+}
+
+/* ===== ÉTATS D'INTERACTION ===== */
+function renderStates(){
+  document.getElementById('view-states').innerHTML=`
+  <h2 class="vt">États d'interaction</h2>
+  <p class="vd">Comportements attendus de l'application — hors « happy path ». Chaque écran de la DataApp devra implémenter ces cinq états.</p>
+  <div class="row">
+    <div class="statecard"><h4>1 · Chargement</h4><div class="skel" style="width:70%"></div><div class="skel" style="width:90%"></div><div class="skel" style="width:55%"></div><p class="note">Squelette animé, pas de spinner bloquant. Les filtres restent visibles et désactivés.</p></div>
+    <div class="statecard"><h4>2 · Vide (filtre sans résultat)</h4><p style="color:var(--ink2);font-size:13px;padding:10px 0">Aucune position ne correspond à « Futuros » pour FUND_03.</p><button class="btn">Réinitialiser les filtres</button><p class="note">Toujours proposer l'action de sortie. Distinguer « vide » (0 ligne légitime) de « absent » (section non livrée).</p></div>
+    <div class="statecard"><h4>3 · Erreur de pipeline</h4><div class="alert crit" style="margin:6px 0"><b>Run 2026-08-19 en échec :</b> 2 fichiers en quarantaine (colonnes décalées).</div><button class="btn primary">Voir le rapport de run</button> <button class="btn">Afficher la dernière date certifiée</button><p class="note">L'application n'affiche jamais silencieusement des données partielles : bandeau + repli explicite sur le dernier lot certifié.</p></div>
+    <div class="statecard"><h4>4 · Accès restreint (RBAC)</h4><p style="color:var(--ink2);font-size:13px;padding:10px 0">🔒 Votre profil « Gérant — FUND_05/FUND_06 » ne permet pas de consulter FUND_01.</p><p class="note">Le fonds non autorisé n'apparaît ni dans les listes ni dans les totaux. Matrice d'accès : question P0-6.</p></div>
+    <div class="statecard"><h4>5 · Lineage (survol ⓘ)</h4><p style="font-size:13px;padding:6px 0">Chaque chiffre expose au survol : <span class="src" data-src="Source : PortfolioView FUND_02\nSection : Resumo da Carteira - Conteudo\nLigne 5 · col. 1 · valeur brute 302.698.176,05\nSilver : stg_fund_daily_summary.net_asset_value_brl\nGold : fact_fund_daily_summary (is_feeder=true, parent=FUND_04)">exemple — PL de FUND_02 ⓘ</span></p><p class="note">Réponse à « comment savez-vous que ce chiffre est juste ? » : fichier → section → ligne → Silver → Gold → écran.</p></div>
+    <div class="statecard"><h4>6 · Donnée non certifiable</h4><p style="font-size:13px;padding:6px 0">Volatilité 12 m : <span class="tag futur">ÉTAT FUTUR</span></p><p class="note">Un indicateur sans base certifiée est grisé avec sa condition de déblocage — jamais affiché avec une valeur simulée.</p></div>
+  </div>`;
+}
+
+/* ===== tooltip ===== */
+function tt(ev,txt){ const t=document.getElementById('tt'); t.textContent=txt; t.style.display='block'; t.style.left=Math.min(ev.clientX+14, innerWidth-260)+'px'; t.style.top=(ev.clientY+16)+'px'; }
+function ttHide(){ document.getElementById('tt').style.display='none'; }
+
+function render(){ renderTabs(); renderExec(); renderFund(); renderComp(); renderPairs(); renderQuality(); renderStates(); }
+render();
+</script>
+</body>
+</html>

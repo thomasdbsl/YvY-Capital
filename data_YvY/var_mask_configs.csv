@@ -1,0 +1,2 @@
+var_mask_id,name,time_horizon,period,probability,type,monte_carlo_iterations,benchmark_id
+1,VaR 95 (FUNDQ11 v1),1,252,95,5,,
