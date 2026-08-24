@@ -4,11 +4,15 @@
   "private": true,
   "description": "Local-only synthetic Sprint 2 prototype and verification suite.",
   "scripts": {
-    "generate": "py -3.12 \"Sprint 2/pipeline/run_pipeline.py\"",
+    "generate": "py -3.12 \"Sprint 2/src/pipeline/run_pipeline.py\"",
+    "build": "npm run generate",
     "start": "py -3.12 -m http.server 4173 --directory \"Sprint 2\"",
     "test:python": "py -3.12 -m unittest discover -s \"Sprint 2/tests\" -p \"test_*.py\"",
     "test:web": "node \"Sprint 2/tests/web/smoke.mjs\"",
-    "test": "npm run test:python && npm run test:web"
+    "test": "npm run test:python && npm run test:web",
+    "lint:python": "py -3.12 -m compileall -q \"Sprint 2/src/pipeline\" \"Sprint 2/tests\" \"Sprint 2/reports/progress/source\"",
+    "lint:web": "node --check \"Sprint 2/src/app/js/app.js\" && node --check \"Sprint 2/src/app/js/charts.js\" && node --check \"Sprint 2/src/app/js/components.js\" && node --check \"Sprint 2/src/app/js/data.js\" && node --check \"Sprint 2/src/app/js/pages.js\" && node --check \"Sprint 2/src/app/js/state.js\" && node --check \"Sprint 2/tests/web/smoke.mjs\"",
+    "lint": "npm run lint:python && npm run lint:web"
   },
   "devDependencies": {
     "playwright": "^1.52.0"

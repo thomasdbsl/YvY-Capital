@@ -6,7 +6,7 @@ Ce journal est pret a recevoir les validations officielles. Aucune ligne n'est m
 |---|---|---|---|---|---|---|---|---|
 | D1 | Profils et priorite | Direction, gestion et Analyste data ; priorite a confirmer | Pending partner validation | A valider | A valider | compte rendu de gate | S3-06, S3-07 | branche de remediation, commit final a renseigner |
 | D2 | Ecrans MVP | inventaire consolide en navigation simple | Pending partner validation | A valider | A valider | prototype revu et observations bornees | S3-06, S3-07 | branche de remediation, commit final a renseigner |
-| D3 | KPI et tolerances | K01-K16 MVP ; H01-H08 avec controles/dependances | Pending partner validation | A valider | A valider | catalogue et seuils signes | S3-03, S3-08, S3-09 | `contracts/kpi_catalog.json` |
+| D3 | KPI et tolerances | K01-K16 MVP ; H01-H08 avec controles/dependances | Pending partner validation | A valider | A valider | catalogue et seuils signes | S3-03, S3-08, S3-09 | `data/contracts/kpi_catalog.json` |
 | D4 | Univers et bridge | 7 fonds snapshot, 14 historiques ; bridge reste hypothese | Pending partner validation | A valider | A valider | registre autorise | S3-06 | `source_matrix.md` |
 | D5 | Sources et acces | dossier controle en preuve ; canal cible a confirmer | Pending partner validation | A valider | A valider | matrice d'acces et source owner | S3-01, S3-02 | `data_manifest.example.json` |
 | D6 | Pairs | adaptateur synthetique si source non certifiee | Pending partner validation | A valider | A valider | univers versionne et nettoye | S3-09 / Sprint 4 | contrat H07 |

@@ -1,6 +1,6 @@
 # Catalogue KPI testable
 
-Le contrat canonique est [`../contracts/kpi_catalog.json`](../contracts/kpi_catalog.json). Les tests imposent pour chaque indicateur : question de decision, definition, formule, source, grain, unite, fenetre, prerequis, controles, tolerances, cas d'echec, affichage, lineage, fixture, statut d'implementation et sprint cible.
+Le contrat canonique est [`../data/contracts/kpi_catalog.json`](../data/contracts/kpi_catalog.json). Les tests imposent pour chaque indicateur : question de decision, definition, formule, source, grain, unite, fenetre, prerequis, controles, tolerances, cas d'echec, affichage, lineage, fixture, statut d'implementation et sprint cible.
 
 ## Indicateurs snapshot
 

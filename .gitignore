@@ -2,14 +2,21 @@
 /data_YvY/
 /data_YvY.zip
 /docs/
-/Sprint 1/*.pdf
+/Sprint 1/
 /Sprint 2/sprint2_commit.bundle
-/SPRINT_2_AUDIT_REPORT.md
+/Sprint 2/reports/audit/SPRINT_2_AUDIT_REPORT.md
 /local_data/
 
 # Generated pipeline and test artefacts.
-/Sprint 2/pipeline/output/
-/Sprint 2/pipeline/.work/
+/Sprint 2/src/pipeline/output/
+/Sprint 2/src/pipeline/.work/
+/Sprint 2/assets/report-captures/
+/Sprint 2/assets/test-artifacts/
+/Sprint 2/reports/**/*.pdf
+/Sprint 2/reports/**/*.docx
+/Sprint 2/reports/**/*.pptx
+/Sprint 2/reports/presentations/source/
+/Sprint 2/presentations/
 /artifacts/
 /test-results/
 /playwright-report/

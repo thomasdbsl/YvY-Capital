@@ -6,20 +6,21 @@ import unittest
 from pathlib import Path
 
 SPRINT2_ROOT = Path(__file__).resolve().parents[1]
-if str(SPRINT2_ROOT) not in sys.path:
-    sys.path.insert(0, str(SPRINT2_ROOT))
+SRC_ROOT = SPRINT2_ROOT / "src"
+if str(SRC_ROOT) not in sys.path:
+    sys.path.insert(0, str(SRC_ROOT))
 
 from pipeline.run_pipeline import run
 
 
 FIXTURES = SPRINT2_ROOT / "tests" / "fixtures"
-WORK_ROOT = SPRINT2_ROOT / "pipeline" / ".work"
+WORK_ROOT = SPRINT2_ROOT / "src" / "pipeline" / ".work"
 
 
 class TestContracts(unittest.TestCase):
     def test_contracts_are_valid_json(self) -> None:
         for name in ("silver.schema.json", "gold.schema.json", "serving.schema.json", "kpi_catalog.json"):
-            value = json.loads((SPRINT2_ROOT / "contracts" / name).read_text(encoding="utf-8"))
+            value = json.loads((SPRINT2_ROOT / "data" / "contracts" / name).read_text(encoding="utf-8"))
             self.assertTrue(value)
 
     def test_serving_payload_cardinality_and_lineage(self) -> None:

@@ -4,15 +4,15 @@ import { renderPage } from "./pages.js";
 import { setState, state, subscribe, updateAnomaly } from "./state.js";
 
 const labels = {
-  overview: "Vue generale",
-  funds: "Fonds",
+  overview: "Overview",
+  funds: "Funds",
   "fund-detail": "Allocation",
   performance: "Performance",
-  comparison: "Comparaison interne",
-  peers: "Comparaison aux pairs",
-  quality: "Qualite des donnees",
-  import: "Import et validation",
-  runs: "Runs et lineage",
+  comparison: "Internal comparison",
+  peers: "Peer comparison",
+  quality: "Data quality",
+  import: "Import and validation",
+  runs: "Runs and lineage",
 };
 
 const shell = document.querySelector(".app-shell");
@@ -60,7 +60,7 @@ function render() {
   scenarioSelect.value = state.scenario;
   roleSelect.value = state.role;
   const sourceSmall = document.querySelector("#source-status small");
-  if (sourceSmall) sourceSmall.textContent = `Source synthetique · ${state.scenario === "late" ? "en retard" : state.scenario === "incomplete" ? "incomplete" : "a jour"}`;
+  if (sourceSmall) sourceSmall.textContent = `Synthetic source · ${state.scenario === "late" ? "late" : state.scenario === "incomplete" ? "incomplete" : "current"}`;
 }
 
 function openAnomaly(anomalyId) {
@@ -69,11 +69,11 @@ function openAnomaly(anomalyId) {
   state.selectedAnomaly = anomalyId;
   anomalyTitle.textContent = anomaly.title;
   anomalyContent.innerHTML = `<div class="detail-grid">
-    <div class="detail-item"><small>Regle</small><strong>${escapeHtml(anomaly.rule_id)}</strong></div>
-    <div class="detail-item"><small>Severite</small><strong>${escapeHtml(anomaly.severity)}</strong></div>
-    <div class="detail-item"><small>Reference opaque</small><code>${escapeHtml(anomaly.record_ref)}</code></div>
-    <div class="detail-item"><small>Action proposee</small><strong>${escapeHtml(anomaly.action)}</strong></div>
-  </div><p style="margin:1rem 0 0">La valeur d'entree n'est jamais affichee dans ce prototype ni dans le journal partageable.</p>`;
+    <div class="detail-item"><small>Rule</small><strong>${escapeHtml(anomaly.rule_id)}</strong></div>
+    <div class="detail-item"><small>Severity</small><strong>${escapeHtml(anomaly.severity)}</strong></div>
+    <div class="detail-item"><small>Opaque reference</small><code>${escapeHtml(anomaly.record_ref)}</code></div>
+    <div class="detail-item"><small>Proposed action</small><strong>${escapeHtml(anomaly.action)}</strong></div>
+  </div><p style="margin:1rem 0 0">The input value is never displayed in this prototype or in the shareable log.</p>`;
   dialog.showModal();
 }
 
@@ -87,17 +87,17 @@ function handleAction(action, target) {
   if (action === "resolve-anomaly" && state.selectedAnomaly) {
     updateAnomaly(state.selectedAnomaly, "resolved");
     dialog.close();
-    toast("Anomalie marquee resolue dans la simulation.");
+    toast("Anomaly marked as resolved in the simulation.");
   }
   if (action === "quarantine-anomaly" && state.selectedAnomaly) {
     updateAnomaly(state.selectedAnomaly, "quarantined");
     dialog.close();
-    toast("Enregistrement synthetique place en quarantaine.");
+    toast("Synthetic record quarantined.");
   }
   if (action === "select-source") setState({ workflowStep: 1 });
   if (action === "run-structure") {
     setState({ workflowStep: 2 });
-    toast("Controle de structure termine.");
+    toast("Structure check completed.");
   }
   if (action === "quarantine-all") {
     state.data.anomalies.filter((item) => item.severity === "blocking").forEach((item) => { item.status = "quarantined"; });
@@ -106,11 +106,11 @@ function handleAction(action, target) {
   if (action === "prepare-validation") setState({ workflowStep: 4 });
   if (action === "validate-dataset") {
     setState({ workflowStep: 5 });
-    toast("Jeu synthetique valide.");
+    toast("Synthetic dataset validated.");
   }
   if (action === "publish-dataset") {
     setState({ workflowStep: 6 });
-    toast("Publication locale terminee. Aucun envoi externe.");
+    toast("Local publication completed. No external transfer occurred.");
   }
   if (action === "reset-workflow") setState({ workflowStep: 0 });
 }
@@ -142,7 +142,7 @@ document.querySelector("#menu-button").addEventListener("click", () => {
   document.querySelector("#menu-button").setAttribute("aria-expanded", String(!open));
 });
 
-document.querySelector("#help-button").addEventListener("click", () => toast("Utilisez le selecteur Scenario prototype pour demontrer tous les etats."));
+document.querySelector("#help-button").addEventListener("click", () => toast("Use the Prototype scenario selector to demonstrate every state."));
 
 document.querySelector(".primary-nav").addEventListener("keydown", (event) => {
   if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;

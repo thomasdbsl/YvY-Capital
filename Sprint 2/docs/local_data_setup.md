@@ -14,7 +14,7 @@ Les donnees brutes, documents contractuels, exports de portefeuille, historiques
 
 ```powershell
 $env:FUNDS_MANAGER_LOCAL_INPUT_DIR = "C:\chemin\securise\entrees"
-python "Sprint 2\pipeline\run_pipeline.py" --input "$env:FUNDS_MANAGER_LOCAL_INPUT_DIR" --output "Sprint 2\pipeline\output" --mode local-sensitive
+python "Sprint 2\src\pipeline\run_pipeline.py" --input "$env:FUNDS_MANAGER_LOCAL_INPUT_DIR" --output "Sprint 2\src\pipeline\output" --mode local-sensitive
 ```
 
 Le mode `local-sensitive` refuse toute publication et n'ecrit jamais les lignes source dans les logs. Le mode de demonstration par defaut utilise uniquement les fixtures synthetiques versionnees.
@@ -23,7 +23,7 @@ Le mode `local-sensitive` refuse toute publication et n'ecrit jamais les lignes 
 
 ```powershell
 python -m unittest discover -s "Sprint 2\tests" -p "test_*.py"
-python "Sprint 2\pipeline\run_pipeline.py" --check-shareable "Sprint 2\pipeline\output"
+python "Sprint 2\src\pipeline\run_pipeline.py" --check-shareable "Sprint 2\src\pipeline\output"
 ```
 
 Une sortie n'est partageable que si le rapport indique `publication_allowed: true`, `denylist_hits: 0` et `private_identifier_hits: 0`.

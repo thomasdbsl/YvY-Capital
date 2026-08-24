@@ -1,4 +1,4 @@
-const classes = ["Credit prive", "Souverain", "Fonds", "Actions", "Caisse", "Derives"];
+const classes = ["Private credit", "Sovereign debt", "Funds", "Equities", "Cash", "Derivatives"];
 
 function fallbackFunds() {
   return Array.from({ length: 14 }, (_, index) => {
@@ -49,7 +49,7 @@ function fallbackKpis() {
   const ids = [...Array.from({ length: 16 }, (_, index) => `K${String(index + 1).padStart(2, "0")}`), ...Array.from({ length: 8 }, (_, index) => `H${String(index + 1).padStart(2, "0")}`)];
   return ids.map((id, index) => ({
     id,
-    name: id.startsWith("K") ? `KPI snapshot ${id}` : `KPI historique ${id}`,
+    name: id.startsWith("K") ? `Snapshot KPI ${id}` : `Historical KPI ${id}`,
     value: ["H04", "H06", "H08"].includes(id) ? null : 0.0125 * (index + 1),
     unit: id === "K01" ? "BRL" : "percent",
     quality_status: ["K13", "K14", "H04", "H06", "H08"].includes(id) ? "hypothesis" : "current",
@@ -65,18 +65,18 @@ export function createFallbackData() {
     history: fallbackHistory(),
     kpis: fallbackKpis(),
     allocation: [
-      { asset_class: "Credit prive", weight: 0.32 },
-      { asset_class: "Souverain", weight: 0.24 },
-      { asset_class: "Fonds", weight: 0.18 },
-      { asset_class: "Actions", weight: 0.13 },
-      { asset_class: "Caisse", weight: 0.08 },
-      { asset_class: "Derives", weight: 0.05 },
+      { asset_class: "Private credit", weight: 0.32 },
+      { asset_class: "Sovereign debt", weight: 0.24 },
+      { asset_class: "Funds", weight: 0.18 },
+      { asset_class: "Equities", weight: 0.13 },
+      { asset_class: "Cash", weight: 0.08 },
+      { asset_class: "Derivatives", weight: 0.05 },
     ],
     anomalies: [
-      { anomaly_id: "ANOM_DURATION", rule_id: "DQ12", severity: "warning", status: "open", title: "Duration non convertible", record_ref: "REC_DURATION", action: "quarantine" },
-      { anomaly_id: "ANOM_STALE", rule_id: "DQ15", severity: "warning", status: "open", title: "Prix en retard", record_ref: "REC_STALE", action: "review" },
-      { anomaly_id: "ANOM_NAV", rule_id: "DQ07", severity: "blocking", status: "open", title: "NAV non positive", record_ref: "REC_NAV_NEGATIVE", action: "quarantine" },
-      { anomaly_id: "ANOM_BRIDGE", rule_id: "DQ30", severity: "warning", status: "open", title: "Relation fonds-dans-fonds a valider", record_ref: "REC_BRIDGE", action: "review" },
+      { anomaly_id: "ANOM_DURATION", rule_id: "DQ12", severity: "warning", status: "open", title: "Duration cannot be converted", record_ref: "REC_DURATION", action: "quarantine" },
+      { anomaly_id: "ANOM_STALE", rule_id: "DQ15", severity: "warning", status: "open", title: "Stale price", record_ref: "REC_STALE", action: "review" },
+      { anomaly_id: "ANOM_NAV", rule_id: "DQ07", severity: "blocking", status: "open", title: "Non-positive NAV", record_ref: "REC_NAV_NEGATIVE", action: "quarantine" },
+      { anomaly_id: "ANOM_BRIDGE", rule_id: "DQ30", severity: "warning", status: "open", title: "Fund-of-funds relationship pending validation", record_ref: "REC_BRIDGE", action: "review" },
     ],
     runs: [{ run_id: "SPRINT2-WF-001", status: "published-synthetic", generated_at: "2026-08-22T00:00:00Z", accepted_records: 49, quarantined_records: 5, manifest_ref: "manifest.json" }],
     lineage_proofs: [

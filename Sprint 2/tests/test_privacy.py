@@ -5,15 +5,16 @@ import unittest
 from pathlib import Path
 
 SPRINT2_ROOT = Path(__file__).resolve().parents[1]
-if str(SPRINT2_ROOT) not in sys.path:
-    sys.path.insert(0, str(SPRINT2_ROOT))
+SRC_ROOT = SPRINT2_ROOT / "src"
+if str(SRC_ROOT) not in sys.path:
+    sys.path.insert(0, str(SRC_ROOT))
 
 from pipeline.privacy import scan_shareable_tree, scan_text
 from pipeline.run_pipeline import run
 
 
 FIXTURES = SPRINT2_ROOT / "tests" / "fixtures"
-WORK_ROOT = SPRINT2_ROOT / "pipeline" / ".work"
+WORK_ROOT = SPRINT2_ROOT / "src" / "pipeline" / ".work"
 
 
 class TestPrivacy(unittest.TestCase):

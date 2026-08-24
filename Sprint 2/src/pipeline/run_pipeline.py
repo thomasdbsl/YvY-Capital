@@ -6,9 +6,10 @@ import sys
 from pathlib import Path
 
 PIPELINE_DIR = Path(__file__).resolve().parent
-SPRINT2_ROOT = PIPELINE_DIR.parent
-if str(SPRINT2_ROOT) not in sys.path:
-    sys.path.insert(0, str(SPRINT2_ROOT))
+SRC_ROOT = PIPELINE_DIR.parent
+SPRINT2_ROOT = SRC_ROOT.parent
+if str(SRC_ROOT) not in sys.path:
+    sys.path.insert(0, str(SRC_ROOT))
 
 from pipeline import LOGICAL_TIMESTAMP, RUN_ID, TRANSFORM_VERSION
 from pipeline.core import build_manifest, output_checksums, sha256_file, write_json

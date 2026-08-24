@@ -10,7 +10,7 @@ FIXTURES = SPRINT2_ROOT / "tests" / "fixtures"
 
 class TestKpis(unittest.TestCase):
     def test_catalog_is_complete(self) -> None:
-        catalog = json.loads((SPRINT2_ROOT / "contracts" / "kpi_catalog.json").read_text(encoding="utf-8"))
+        catalog = json.loads((SPRINT2_ROOT / "data" / "contracts" / "kpi_catalog.json").read_text(encoding="utf-8"))
         required = {
             "id", "name", "decision_question", "definition", "formula", "source", "grain", "unit", "window",
             "prerequisites", "controls", "tolerances", "failure_cases", "display_state", "lineage",

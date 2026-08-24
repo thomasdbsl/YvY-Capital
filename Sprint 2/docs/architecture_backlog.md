@@ -4,7 +4,7 @@ Le document monolithique initial est remplace par des artefacts testables :
 
 - [`architecture.md`](architecture.md) : couches, invariants, composants et droits proposes ;
 - [`adr/`](adr/) : decisions techniques avec statut `Proposed - Pending partner validation` ;
-- [`../contracts/`](../contracts/) : schemas Silver, Gold, Serving et catalogue KPI ;
+- [`../data/contracts/`](../data/contracts/) : schemas Silver, Gold, Serving et catalogue KPI ;
 - [`backlog_sprint3.md`](backlog_sprint3.md) : stories ordonnees, estimees et testables ;
 - [`decision_log_W4.md`](decision_log_W4.md) : decisions D1-D8 sans approbation inventee.
 

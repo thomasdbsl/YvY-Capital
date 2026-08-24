@@ -2,7 +2,7 @@
 
 **Branche :** `codex/fix-sprint2-audit-remediation`<br>
 **Base auditee :** `f2a9930e73ebba17f04c757b9a763aadb040c7cf`<br>
-**Statut :** remediation locale realisee ; remote public non contenu faute d'outil authentifie
+**Statut :** remediation locale realisee ; remote confirme public, push interdit
 
 ## Etat des constats
 
@@ -39,4 +39,4 @@
 
 ## Limites et decisions
 
-Le changement de visibilite GitHub reste bloque parce qu'aucun client GitHub authentifie exploitable n'est disponible dans la session. Le depot distant est toujours public ; tous les commits restent locaux. Les decisions D1-D8, la purge d'historique, la migration GitLab, les tolerances metier et le RBAC de production restent `Pending partner validation`.
+La visibilite du remote GitHub a ete confirmee comme publique via l'API GitHub le 23 aout 2026. Aucun push n'est autorise tant que le depot n'est pas prive ou explicitement approuve. Les decisions D1-D8, la purge d'historique, la migration GitLab, les tolerances metier et le RBAC de production restent `Pending partner validation`.

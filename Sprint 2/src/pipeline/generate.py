@@ -7,7 +7,7 @@ from typing import Any
 from pipeline import LOGICAL_TIMESTAMP, RUN_ID
 
 
-SPRINT2_ROOT = Path(__file__).resolve().parents[1]
+SPRINT2_ROOT = Path(__file__).resolve().parents[2]
 
 
 def _funds() -> list[dict[str, Any]]:
@@ -31,7 +31,7 @@ def _funds() -> list[dict[str, Any]]:
 
 
 def _positions() -> list[dict[str, Any]]:
-    classes = ["Credit prive", "Souverain", "Fonds", "Actions", "Caisse", "Derives"]
+    classes = ["Private credit", "Sovereign debt", "Funds", "Equities", "Cash", "Derivatives"]
     positions = []
     for index in range(1, 19):
         positions.append(
@@ -67,7 +67,7 @@ def _history() -> list[dict[str, Any]]:
 
 
 def build_serving_data(quality_report: dict[str, Any]) -> dict[str, Any]:
-    catalog = json.loads((SPRINT2_ROOT / "contracts" / "kpi_catalog.json").read_text(encoding="utf-8"))
+    catalog = json.loads((SPRINT2_ROOT / "data" / "contracts" / "kpi_catalog.json").read_text(encoding="utf-8"))
     kpis = []
     for index, item in enumerate(catalog, start=1):
         value = None if item["implementation_status"] == "contract-only" else round(0.0125 * index, 4)
@@ -96,12 +96,12 @@ def build_serving_data(quality_report: dict[str, Any]) -> dict[str, Any]:
         "history": _history(),
         "kpis": kpis,
         "allocation": [
-            {"asset_class": "Credit prive", "weight": 0.32},
-            {"asset_class": "Souverain", "weight": 0.24},
-            {"asset_class": "Fonds", "weight": 0.18},
-            {"asset_class": "Actions", "weight": 0.13},
-            {"asset_class": "Caisse", "weight": 0.08},
-            {"asset_class": "Derives", "weight": 0.05}
+            {"asset_class": "Private credit", "weight": 0.32},
+            {"asset_class": "Sovereign debt", "weight": 0.24},
+            {"asset_class": "Funds", "weight": 0.18},
+            {"asset_class": "Equities", "weight": 0.13},
+            {"asset_class": "Cash", "weight": 0.08},
+            {"asset_class": "Derivatives", "weight": 0.05}
         ],
         "anomalies": quality_report["anomalies"],
         "runs": [{"run_id": RUN_ID, "status": "published-synthetic", "generated_at": LOGICAL_TIMESTAMP, "accepted_records": 49, "quarantined_records": quality_report["quarantined"], "manifest_ref": "manifest.json"}],

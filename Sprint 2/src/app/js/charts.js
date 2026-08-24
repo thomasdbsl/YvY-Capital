@@ -27,7 +27,7 @@ export function lineChart(primary, secondary, label) {
         ${secondaryPath ? `<path class="secondary-line" d="${secondaryPath}"/>` : ""}
         <path class="primary-line" d="${primaryPath}"/>
       </svg>
-      <div class="chart-legend"><span class="legend-key">FUND_01</span>${secondaryPath ? '<span class="legend-key secondary">Reference synthetique</span>' : ""}</div>
+      <div class="chart-legend"><span class="legend-key">FUND_01</span>${secondaryPath ? '<span class="legend-key secondary">Synthetic benchmark</span>' : ""}</div>
     </div>`;
 }
 

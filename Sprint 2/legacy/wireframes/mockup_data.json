@@ -1,7 +1,7 @@
 {
   "deprecated": true,
   "classification": "synthetic-example",
-  "generated_source": "../pipeline/output/serving_data.json",
-  "fallback_source": "../app/js/data.js",
+  "generated_source": "../../src/pipeline/output/serving_data.json",
+  "fallback_source": "../../src/app/js/data.js",
   "message": "Run SPRINT2-WF-001 before demonstration; no former business value is retained here."
 }

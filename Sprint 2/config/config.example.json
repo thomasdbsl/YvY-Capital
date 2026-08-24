@@ -1,7 +1,7 @@
 {
   "run_id": "SPRINT2-WF-001",
   "input_dir": "./Sprint 2/tests/fixtures",
-  "output_dir": "./Sprint 2/pipeline/output",
+  "output_dir": "./Sprint 2/src/pipeline/output",
   "data_mode": "synthetic",
   "publication_target": "local-only",
   "denylist": [

@@ -7,8 +7,9 @@ from decimal import Decimal
 from pathlib import Path
 
 SPRINT2_ROOT = Path(__file__).resolve().parents[1]
-if str(SPRINT2_ROOT) not in sys.path:
-    sys.path.insert(0, str(SPRINT2_ROOT))
+SRC_ROOT = SPRINT2_ROOT / "src"
+if str(SRC_ROOT) not in sys.path:
+    sys.path.insert(0, str(SRC_ROOT))
 
 from pipeline.core import build_manifest, sha256_file
 from pipeline.quality import inspect_csv, parse_br_decimal
@@ -16,7 +17,7 @@ from pipeline.run_pipeline import run, verify
 
 
 FIXTURES = SPRINT2_ROOT / "tests" / "fixtures"
-WORK_ROOT = SPRINT2_ROOT / "pipeline" / ".work"
+WORK_ROOT = SPRINT2_ROOT / "src" / "pipeline" / ".work"
 
 
 class TestPipeline(unittest.TestCase):

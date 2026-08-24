@@ -42,7 +42,7 @@ flowchart LR
 - `data_steward` : validation et publication simulees dans le prototype ; production future.
 - `administrator` : interface seulement, reservee aux sprints ulterieurs.
 
-Les contrats sont versionnes dans `Sprint 2/contracts/`. Le modele de droits de production et l'outil Serving final restent `Pending partner validation`.
+Les contrats sont versionnes dans `Sprint 2/data/contracts/`. Le modele de droits de production et l'outil Serving final restent `Pending partner validation`.
 
 ## Limites de sprint
 
