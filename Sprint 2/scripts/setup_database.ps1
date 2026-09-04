@@ -1,12 +1,16 @@
 [CmdletBinding()]
 param(
-    [string]$InputPath = (Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'data_YvY'),
-    [string]$DatabaseName = $(if ($env:FUNDS_MANAGER_DB_NAME) { $env:FUNDS_MANAGER_DB_NAME } else { 'yvy_funds_manager' })
+    [string]$InputPath,
+    [string]$DatabaseName = $(if ($env:FUNDS_MANAGER_DB_NAME) { $env:FUNDS_MANAGER_DB_NAME } else { 'yvy_funds_manager' }),
+    [switch]$Reset
 )
 
 $ErrorActionPreference = 'Stop'
 $repositoryRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $pipeline = Join-Path $PSScriptRoot '..\src\pipeline\run_sprint3.py'
+if (-not $InputPath) {
+    $InputPath = Join-Path $repositoryRoot 'data_YvY'
+}
 
 if (-not (Test-Path -LiteralPath $InputPath -PathType Container)) {
     throw "Source directory not found: $InputPath"
@@ -17,7 +21,11 @@ if (-not $env:FUNDS_MANAGER_DB_PASSWORD -and -not $env:MYSQL_PWD) {
 
 Push-Location $repositoryRoot
 try {
-    py -3.12 $pipeline --input $InputPath --database $DatabaseName
+    $arguments = @($pipeline, '--input', $InputPath, '--database', $DatabaseName)
+    if ($Reset) {
+        $arguments += '--reset-database'
+    }
+    py -3.12 @arguments
     if ($LASTEXITCODE -ne 0) {
         throw "Sprint 3 ingestion failed with exit code $LASTEXITCODE."
     }
@@ -25,4 +33,4 @@ try {
     Pop-Location
 }
 
-Write-Output "The governed Sprint 3 database '$DatabaseName' is ready. Running this command again is idempotent."
+Write-Output "The governed Sprint 3 database '$DatabaseName' is ready. Running this command again is idempotent. Use -Reset for a complete rebuild."

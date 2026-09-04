@@ -16,7 +16,7 @@ if str(SRC_ROOT) not in sys.path:
 
 from pipeline.config import DatabaseConfig
 from pipeline.ingest import ingest_sources, sha256_file
-from pipeline.mysql_loader import apply_schema, load_bundle, run_mysql
+from pipeline.mysql_loader import DELETE_ORDER, TABLE_COLUMNS, apply_schema, load_bundle, run_mysql
 from pipeline.run_sprint3 import safe_report
 from pipeline.transform import transform_to_curated
 
@@ -73,6 +73,38 @@ class TestSprint3Pipeline(unittest.TestCase):
         self.assertTrue(source.run_blocked)
         self.assertTrue(any(item.rule_id == "DQ03" and item.action == "reject_run" for item in source.issues))
 
+    def test_required_instrument_and_bond_reference_are_validated(self) -> None:
+        missing_id = self.copied_fixture()
+        holdings = missing_id / "portfolio_holdings.csv"
+        lines = holdings.read_text(encoding="utf-8").splitlines()
+        columns = lines[1].split(",")
+        columns[6] = ""
+        holdings.write_text("\n".join([lines[0], ",".join(columns), lines[2]]) + "\n", encoding="utf-8", newline="\n")
+        source = ingest_sources(missing_id)
+        self.assertTrue(any(item.rule_id == "DQ15" for item in source.issues))
+
+        missing_reference = self.copied_fixture()
+        holdings = missing_reference / "portfolio_holdings.csv"
+        lines = holdings.read_text(encoding="utf-8").splitlines()
+        columns = lines[1].split(",")
+        columns[3] = "bonds"
+        columns[6] = "UNKNOWN_BOND"
+        holdings.write_text("\n".join([lines[0], ",".join(columns), lines[2]]) + "\n", encoding="utf-8", newline="\n")
+        source = ingest_sources(missing_reference)
+        self.assertTrue(any(item.rule_id == "DQ16" for item in source.issues))
+
+    def test_warning_only_run_has_explicit_status(self) -> None:
+        source = ingest_sources(FIXTURES)
+        curated = transform_to_curated(source)
+        report = safe_report(source, curated)
+        self.assertEqual(source.warning_count, 1)
+        self.assertEqual(report["status"], "completed_with_warnings")
+        self.assertEqual(report["stage_counts"]["raw"], 17)
+        self.assertEqual(report["stage_counts"]["bronze"], 17)
+        self.assertEqual(report["stage_counts"]["silver"], 17)
+        self.assertEqual(report["stage_counts"]["gold"], 3)
+        self.assertEqual(report["stage_counts"]["serving"], 3)
+
     def test_schema_contains_relations_and_governance_tables(self) -> None:
         schema = SCHEMA.read_text(encoding="utf-8")
         for table in (
@@ -90,6 +122,7 @@ class TestSprint3Pipeline(unittest.TestCase):
             self.assertIn(f"CREATE TABLE IF NOT EXISTS {table}", schema)
         self.assertGreaterEqual(schema.count("FOREIGN KEY"), 25)
         self.assertGreaterEqual(schema.count("PRIMARY KEY"), 20)
+        self.assertEqual(set(DELETE_ORDER), set(TABLE_COLUMNS), "Every curated table must participate in the canonical load")
 
 
 @unittest.skipUnless(os.environ.get("FUNDS_MANAGER_RUN_DB_TESTS") == "1", "set FUNDS_MANAGER_RUN_DB_TESTS=1 for the MAMP integration test")
@@ -109,6 +142,7 @@ class TestSprint3DatabaseIdempotence(unittest.TestCase):
             self.assertEqual(second["ingestion_runs"], 1)
             self.assertEqual(second["funds"], 1)
             self.assertEqual(second["portfolio_holdings"], 2)
+            self.assertEqual(second["var_mask_configs"], 1)
         finally:
             run_mysql(config, f"DROP DATABASE IF EXISTS `{self.database_name}`;", select_database=False)
 

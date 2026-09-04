@@ -13,7 +13,7 @@ if str(SRC_ROOT) not in sys.path:
 from pipeline.config import DEFAULT_INPUT, DEFAULT_OUTPUT, DEFAULT_SCHEMA, DatabaseConfig
 from pipeline.ingest import ingest_sources
 from pipeline.models import json_ready
-from pipeline.mysql_loader import apply_schema, load_bundle
+from pipeline.mysql_loader import apply_schema, load_bundle, run_mysql
 from pipeline.transform import transform_to_curated
 
 
@@ -23,7 +23,7 @@ def safe_report(source, curated, database_counts=None) -> dict[str, object]:
         "bundle_sha256": source.bundle_sha256,
         "generated_at": source.generated_at,
         "classification": "local-restricted",
-        "status": "blocked" if source.run_blocked else ("completed_with_quarantine" if source.quarantined_count else "completed"),
+        "status": "blocked" if source.run_blocked else ("completed_with_quarantine" if source.quarantined_count else ("completed_with_warnings" if source.warning_count else "completed")),
         "source_files": source.manifests,
         "quality": {
             "blocking": source.blocking_count,
@@ -45,7 +45,10 @@ def safe_report(source, curated, database_counts=None) -> dict[str, object]:
         },
         "stage_counts": {
             "raw": sum(item["row_count"] for item in source.manifests),
+            "bronze": source.bronze_record_count,
             "silver": sum(len(rows) for rows in source.tables.values()),
+            "gold": 0 if curated is None else sum(len(curated.tables.get(name, [])) for name in ("gold_allocations", "gold_fund_latest")),
+            "serving": 0 if curated is None else sum(len(curated.tables.get(name, [])) for name in ("gold_allocations", "gold_fund_latest")),
             "curated": 0 if curated is None else curated.record_count,
             "lineage": 0 if curated is None else len(curated.lineage),
         },
@@ -67,6 +70,7 @@ def main() -> int:
     parser.add_argument("--database", default=None)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--skip-schema", action="store_true")
+    parser.add_argument("--reset-database", action="store_true")
     args = parser.parse_args()
 
     source = ingest_sources(args.input.resolve())
@@ -74,6 +78,8 @@ def main() -> int:
     counts = None
     if not args.dry_run:
         config = DatabaseConfig.from_environment(args.database)
+        if args.reset_database:
+            run_mysql(config, f"DROP DATABASE IF EXISTS `{config.database}`;", select_database=False)
         if not args.skip_schema:
             apply_schema(config, args.schema.resolve())
         counts = load_bundle(config, source, curated)

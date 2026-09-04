@@ -32,6 +32,7 @@ TABLE_COLUMNS: dict[str, tuple[str, ...]] = {
 }
 
 DELETE_ORDER = (
+    "var_mask_configs",
     "gold_allocations",
     "gold_fund_latest",
     "bond_instruments",
@@ -116,7 +117,7 @@ def apply_schema(config: DatabaseConfig, schema_path: Path) -> None:
 
 def load_bundle(config: DatabaseConfig, source: PipelineBundle, curated: CuratedBundle | None) -> dict[str, int]:
     blocked = source.run_blocked
-    status = "blocked" if blocked else ("completed_with_quarantine" if source.quarantined_count else "completed")
+    status = "blocked" if blocked else ("completed_with_quarantine" if source.quarantined_count else ("completed_with_warnings" if source.warning_count else "completed"))
     completed_at = datetime.fromisoformat(source.generated_at.replace("Z", "+00:00")).strftime("%Y-%m-%d %H:%M:%S")
     curated_count = 0 if curated is None else curated.record_count
     sql = ["SET NAMES utf8mb4;\nSTART TRANSACTION;\n"]
@@ -183,8 +184,10 @@ def load_bundle(config: DatabaseConfig, source: PipelineBundle, curated: Curated
     gold_count = 0 if curated is None else sum(len(curated.tables.get(name, [])) for name in ("gold_allocations", "gold_fund_latest"))
     stage_rows = [
         {"run_id": source.run_id, "stage_name": "raw", "accepted_records": raw_count, "warning_records": 0, "quarantined_records": 0},
+        {"run_id": source.run_id, "stage_name": "bronze", "accepted_records": source.bronze_record_count, "warning_records": 0, "quarantined_records": 0},
         {"run_id": source.run_id, "stage_name": "silver", "accepted_records": silver_count, "warning_records": source.warning_count, "quarantined_records": source.quarantined_count},
         {"run_id": source.run_id, "stage_name": "gold", "accepted_records": gold_count, "warning_records": 0, "quarantined_records": 0},
+        {"run_id": source.run_id, "stage_name": "serving", "accepted_records": gold_count, "warning_records": 0, "quarantined_records": 0},
     ]
     stage_columns = ("run_id", "stage_name", "accepted_records", "warning_records", "quarantined_records")
     sql.append(insert_statement("pipeline_stage_counts", stage_columns, stage_rows, upsert=True))

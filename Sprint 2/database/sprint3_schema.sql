@@ -122,6 +122,7 @@ CREATE TABLE IF NOT EXISTS portfolio_holdings (
   UNIQUE KEY uq_holdings_code_date (source_fund_id, snapshot_date, holding_code),
   KEY idx_holdings_fund_date_group (source_fund_id, snapshot_date, group_identifier),
   CONSTRAINT fk_holdings_fund FOREIGN KEY (source_fund_id) REFERENCES funds (source_fund_id),
+  CONSTRAINT fk_holdings_nav FOREIGN KEY (source_fund_id, snapshot_date) REFERENCES fund_nav_snapshots (source_fund_id, snapshot_date),
   CONSTRAINT fk_holdings_run FOREIGN KEY (last_run_id) REFERENCES ingestion_runs (run_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -287,6 +288,7 @@ CREATE TABLE IF NOT EXISTS gold_allocations (
   PRIMARY KEY (source_fund_id, snapshot_date, group_identifier),
   KEY idx_gold_allocations_date (snapshot_date),
   CONSTRAINT fk_gold_allocations_fund FOREIGN KEY (source_fund_id) REFERENCES funds (source_fund_id),
+  CONSTRAINT fk_gold_allocations_nav FOREIGN KEY (source_fund_id, snapshot_date) REFERENCES fund_nav_snapshots (source_fund_id, snapshot_date),
   CONSTRAINT fk_gold_allocations_run FOREIGN KEY (last_run_id) REFERENCES ingestion_runs (run_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -302,6 +304,7 @@ CREATE TABLE IF NOT EXISTS gold_fund_latest (
   PRIMARY KEY (source_fund_id),
   KEY idx_gold_latest_date (snapshot_date),
   CONSTRAINT fk_gold_latest_fund FOREIGN KEY (source_fund_id) REFERENCES funds (source_fund_id),
+  CONSTRAINT fk_gold_latest_nav FOREIGN KEY (source_fund_id, snapshot_date) REFERENCES fund_nav_snapshots (source_fund_id, snapshot_date),
   CONSTRAINT fk_gold_latest_run FOREIGN KEY (last_run_id) REFERENCES ingestion_runs (run_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

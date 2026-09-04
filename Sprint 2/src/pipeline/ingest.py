@@ -141,6 +141,19 @@ def validate_domains(tables: dict[str, list[dict[str, Any]]]) -> list[QualityIss
             findings.append(issue("liquidity_by_horizon.csv", row["_source_row"], (row["fund_id"], row["as_of_date"], row["projection_days"]), "DQ11", "blocking", "quarantine", "Liquidity percentage is outside [0, 1]"))
             invalid_rows["liquidity_by_horizon.csv"].add(row["_source_row"])
 
+    bond_keys = {(row["fund_id"], row["instrument_id"]) for row in tables["bond_instruments.csv"]}
+    instrument_optional_groups = {"cash", "provisions"}
+    bond_groups = {"bonds", "private_bonds"}
+    for row in tables["portfolio_holdings.csv"]:
+        group = row["group_identifier"]
+        instrument_id = row["instrument_id"]
+        if group not in instrument_optional_groups and not instrument_id:
+            findings.append(issue("portfolio_holdings.csv", row["_source_row"], (row["fund_id"], row["snapshot_date"], group, row["item_id"]), "DQ15", "blocking", "quarantine", "Instrument identifier is required for this holding group"))
+            invalid_rows["portfolio_holdings.csv"].add(row["_source_row"])
+        elif group in bond_groups and (row["fund_id"], instrument_id) not in bond_keys:
+            findings.append(issue("portfolio_holdings.csv", row["_source_row"], (row["fund_id"], instrument_id), "DQ16", "blocking", "quarantine", "Bond holding does not reference bond_instruments"))
+            invalid_rows["portfolio_holdings.csv"].add(row["_source_row"])
+
     for filename, source_rows in invalid_rows.items():
         if source_rows:
             tables[filename] = [row for row in tables[filename] if row["_source_row"] not in source_rows]
@@ -182,9 +195,10 @@ def ingest_sources(input_dir: Path) -> PipelineBundle:
         tables[contract.filename] = rows
         manifests.append(manifest)
         findings.extend(contract_findings)
+    bronze_count = sum(len(rows) for rows in tables.values())
     findings.extend(validate_domains(tables))
     bundle_sha = stable_hash([(item["logical_name"], item["sha256"]) for item in manifests], TRANSFORM_VERSION)
     run_id = f"S3-{bundle_sha[:20].upper()}"
     generated_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     quarantine = [item for item in findings if item.action == "quarantine"]
-    return PipelineBundle(run_id, bundle_sha, generated_at, manifests, tables, findings, quarantine)
+    return PipelineBundle(run_id, bundle_sha, generated_at, manifests, tables, findings, quarantine, bronze_count)

@@ -157,6 +157,23 @@ final class FundsService
         $commonAcrossFunds = $commonAcrossFunds ?? [];
         sort($commonAcrossFunds, SORT_STRING);
         $window = FinancialMath::resolveWindow($commonAcrossFunds, $period);
+        if ($window === null) {
+            return [
+                'period' => $period,
+                'window' => null,
+                'funds' => array_map(static function (array $fund): array {
+                    return [
+                        'fund_id' => $fund['id'],
+                        'aum_brl' => $fund['aum_brl'],
+                        'period_return' => null,
+                        'pct_cdi' => null,
+                        'volatility' => null,
+                        'sharpe' => null,
+                        'quality_status' => 'unavailable',
+                    ];
+                }, $funds),
+            ];
+        }
         $rows = [];
         foreach ($funds as $fund) {
             $performance = $this->performance($fund['id'], $period, $window);
