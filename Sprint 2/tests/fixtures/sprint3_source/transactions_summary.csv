@@ -1,0 +1,2 @@
+fund_id,fund_name,start_date,end_date,total_subscription,total_redemption,total_tax,nav
+SOURCE_FUND_A,Example Fund,2026-07-01,2026-08-01,100,20,1,1000

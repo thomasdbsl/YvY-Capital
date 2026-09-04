@@ -1,0 +1,2 @@
+fund_id,fund_name,date,stress_mask_ids,success,error_msg,risk_list_json
+SOURCE_FUND_A,Example Fund,2026-08-01,MASK_1,true,,[]

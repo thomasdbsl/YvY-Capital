@@ -1,0 +1,2 @@
+fund_id,name,currency_id,is_internal,is_active
+SOURCE_FUND_A,Example Fund,BRL,true,true

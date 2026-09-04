@@ -1,7 +1,12 @@
 # Confidential project inputs: keep local, never commit.
 /data_YvY/
 /data_YvY.zip
-/docs/
+/docs/*
+!/docs/sprint3/
+!/docs/sprint3/*.md
+!/docs/architecture/
+!/docs/architecture/*.md
+!/docs/architecture/*.mmd
 /Sprint 1/
 /Sprint 2/sprint2_commit.bundle
 /Sprint 2/reports/audit/SPRINT_2_AUDIT_REPORT.md
@@ -9,9 +14,15 @@
 
 # Generated pipeline and test artefacts.
 /Sprint 2/src/pipeline/output/
+/Sprint 2/src/pipeline/output_sprint3/
 /Sprint 2/src/pipeline/.work/
 /Sprint 2/assets/report-captures/
 /Sprint 2/assets/test-artifacts/
+/Sprint 2/reports/deliverables_v2/
+/Sprint 2/api/config.php
+/Sprint 2/api/*.log
+/Sprint 2/database/*.local.sql
+/Sprint 2/database/mysql-data/
 /Sprint 2/reports/**/*.pdf
 /Sprint 2/reports/**/*.docx
 /Sprint 2/reports/**/*.pptx
@@ -20,9 +31,14 @@
 /artifacts/
 /test-results/
 /playwright-report/
+/delivery/*.zip
+/delivery/source/
 
 # Local environments and caches.
 .venv/
+.env
+.env.*
+!.env.example
 node_modules/
 __pycache__/
 *.py[cod]

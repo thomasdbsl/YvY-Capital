@@ -1,0 +1,2 @@
+instrument_id,fund_id,cetip_code,isin_code,maturity_date
+INSTRUMENT_1,SOURCE_FUND_A,,,2030-01-01

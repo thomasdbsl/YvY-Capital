@@ -1,6 +1,8 @@
 # Source code
 
-- `app/` contient le dashboard statique servi sous `/src/app/`.
-- `pipeline/` contient le package Python et ses sorties locales ignorees.
+- `app/` contains the dashboard served under `/src/app/` and its adapter to `/api/dashboard.php`.
+- `pipeline/` contains the Python package and its ignored local outputs.
 
-Le code versionne ne doit contenir que des donnees synthetiques ou aliasees.
+The MySQL database and PHP API are located in `../database/` and `../api/`, respectively. Pipeline JSON outputs are no longer used by the browser at runtime.
+
+Versioned code must contain only synthetic or aliased data.

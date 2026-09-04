@@ -1,18 +1,24 @@
 {
-  "name": "funds-manager-sprint2-prototype",
-  "version": "0.1.0",
+  "name": "funds-manager-sprint3",
+  "version": "0.3.0",
   "private": true,
-  "description": "Local-only synthetic Sprint 2 prototype and verification suite.",
+  "description": "Local governed Funds Manager dashboard backed by YvY source data, MySQL, PHP, and reproducible quality controls.",
   "scripts": {
     "generate": "py -3.12 \"Sprint 2/src/pipeline/run_pipeline.py\"",
-    "build": "npm run generate",
-    "start": "py -3.12 -m http.server 4173 --directory \"Sprint 2\"",
+    "validate:sprint3": "py -3.12 \"Sprint 2/src/pipeline/run_sprint3.py\" --input \"Sprint 2/tests/fixtures/sprint3_source\" --dry-run",
+    "build": "npm run generate && npm run validate:sprint3",
+    "start": "node \"Sprint 2/scripts/start_local.mjs\"",
+    "database:seed": "py -3.12 \"Sprint 2/database/build_seed.py\"",
+    "database:setup": "powershell -ExecutionPolicy Bypass -File \"Sprint 2/scripts/setup_database.ps1\"",
     "test:python": "py -3.12 -m unittest discover -s \"Sprint 2/tests\" -p \"test_*.py\"",
+    "test:api": "node \"Sprint 2/tests/api/integration.mjs\"",
+    "test:business": "node \"Sprint 2/tests/api/business_logic.mjs\"",
     "test:web": "node \"Sprint 2/tests/web/smoke.mjs\"",
-    "test": "npm run test:python && npm run test:web",
-    "lint:python": "py -3.12 -m compileall -q \"Sprint 2/src/pipeline\" \"Sprint 2/tests\" \"Sprint 2/reports/progress/source\"",
-    "lint:web": "node --check \"Sprint 2/src/app/js/app.js\" && node --check \"Sprint 2/src/app/js/charts.js\" && node --check \"Sprint 2/src/app/js/components.js\" && node --check \"Sprint 2/src/app/js/data.js\" && node --check \"Sprint 2/src/app/js/pages.js\" && node --check \"Sprint 2/src/app/js/state.js\" && node --check \"Sprint 2/tests/web/smoke.mjs\"",
-    "lint": "npm run lint:python && npm run lint:web"
+    "test": "npm run build && npm run test:python && npm run test:business && npm run test:api && npm run test:web",
+    "lint:python": "py -3.12 -m compileall -q \"Sprint 2/src/pipeline\" \"Sprint 2/database\" \"Sprint 2/tests\" \"Sprint 2/reports/progress/source\"",
+    "lint:web": "node --check \"Sprint 2/src/app/js/app.js\" && node --check \"Sprint 2/src/app/js/charts.js\" && node --check \"Sprint 2/src/app/js/components.js\" && node --check \"Sprint 2/src/app/js/config.js\" && node --check \"Sprint 2/src/app/js/data.js\" && node --check \"Sprint 2/src/app/js/pages.js\" && node --check \"Sprint 2/src/app/js/state.js\" && node --check \"Sprint 2/scripts/php_runtime.mjs\" && node --check \"Sprint 2/scripts/start_local.mjs\" && node --check \"Sprint 2/tests/api/business_logic.mjs\" && node --check \"Sprint 2/tests/api/integration.mjs\" && node --check \"Sprint 2/tests/api/lint_php.mjs\" && node --check \"Sprint 2/tests/web/capture_visual_state.mjs\" && node --check \"Sprint 2/tests/web/smoke.mjs\"",
+    "lint:php": "node \"Sprint 2/tests/api/lint_php.mjs\"",
+    "lint": "npm run lint:python && npm run lint:web && npm run lint:php"
   },
   "devDependencies": {
     "playwright": "^1.52.0"

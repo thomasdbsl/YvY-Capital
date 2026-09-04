@@ -25,6 +25,20 @@ class TestDocumentation(unittest.TestCase):
         for field in ("Owner", "Reviewer", "Est.", "Fixture", "Commande d'acceptation", "Dependances", "Risques", "DoD"):
             self.assertIn(field, text)
 
+    def test_mamp_mysql_setup_covers_the_reproducible_local_flow(self) -> None:
+        text = (SPRINT2_ROOT.parent / "MAMP_MYSQL_SETUP.md").read_text(encoding="utf-8")
+        for required in (
+            "schema.sql",
+            "seed.sql",
+            "config.example.php",
+            "/api/health.php",
+            "pdo_mysql",
+            "CORS",
+            "reset_database.ps1",
+            "synthetic and anonymized",
+        ):
+            self.assertIn(required, text)
+
 
 if __name__ == "__main__":
     unittest.main()

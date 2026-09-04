@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Local synthetic prototype for the Funds Manager Sprint 2 dashboard.">
-  <title>Funds Manager | Prototype Sprint 2</title>
+  <meta name="description" content="Local governed Funds Manager Sprint 3 dashboard.">
+  <title>Funds Manager | Sprint 3</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2335204f'/%3E%3Cpath d='M16 43V31h8v12zm12 0V17h8v26zm12 0V25h8v18z' fill='%23f7f2fa'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles/tokens.css">
   <link rel="stylesheet" href="styles/base.css">
@@ -58,7 +58,7 @@
 
       <div class="sidebar-note">
         <span class="status-dot" aria-hidden="true"></span>
-        <div><strong>Prototype mode</strong><small>Synthetic data</small></div>
+        <div><strong>Local restricted mode</strong><small>Governed MySQL data</small></div>
       </div>
     </aside>
 
@@ -90,6 +90,10 @@
           <span>Fund</span>
           <select id="fund-select"></select>
         </label>
+        <label class="filter-field" id="snapshot-field">
+          <span>Snapshot</span>
+          <select id="snapshot-select" aria-label="Select a portfolio snapshot"></select>
+        </label>
         <label class="filter-field">
           <span>Period</span>
           <select id="period-select">
@@ -100,10 +104,9 @@
           </select>
         </label>
         <label class="filter-field prototype-control">
-          <span>Prototype scenario</span>
+          <span>Display state</span>
           <select id="scenario-select">
-            <option value="sample">Sample data</option>
-            <option value="current">Current data</option>
+            <option value="current" selected>Current data</option>
             <option value="loading">Loading</option>
             <option value="late">Late data</option>
             <option value="incomplete">Incomplete data</option>
@@ -116,7 +119,7 @@
         </label>
         <div class="source-status" id="source-status">
           <span class="status-dot" aria-hidden="true"></span>
-          <span><strong>SPRINT2-WF-001</strong><small>Synthetic source · current</small></span>
+          <span><strong>Loading run</strong><small>Governed MySQL source</small></span>
         </div>
       </section>
 
@@ -134,8 +137,7 @@
     </div>
     <div id="anomaly-content"></div>
     <div class="modal-actions">
-      <button class="button secondary" type="button" data-action="quarantine-anomaly">Quarantine</button>
-      <button class="button primary" type="button" data-action="resolve-anomaly">Mark as resolved</button>
+      <button class="button primary" type="button" data-action="close-dialog">Close</button>
     </div>
   </dialog>
 

@@ -14,7 +14,8 @@ function pathFrom(values) {
   return points(values).map(([x, y], index) => `${index ? "L" : "M"}${x.toFixed(2)},${y.toFixed(2)}`).join(" ");
 }
 
-export function lineChart(primary, secondary, label) {
+export function lineChart(primary, secondary, label, primaryLabel = "Fund", secondaryLabel = "Benchmark") {
+  if (!primary || primary.length < 2) return `<div class="state-panel"><div class="state-panel-inner"><div class="state-icon">N/A</div><h2>Series unavailable</h2><p>There are not enough validated observations for this selection.</p></div></div>`;
   const primaryPath = pathFrom(primary);
   const secondaryPath = secondary ? pathFrom(secondary) : "";
   const areaPath = `${primaryPath} L624,220 L16,220 Z`;
@@ -27,7 +28,7 @@ export function lineChart(primary, secondary, label) {
         ${secondaryPath ? `<path class="secondary-line" d="${secondaryPath}"/>` : ""}
         <path class="primary-line" d="${primaryPath}"/>
       </svg>
-      <div class="chart-legend"><span class="legend-key">FUND_01</span>${secondaryPath ? '<span class="legend-key secondary">Synthetic benchmark</span>' : ""}</div>
+      <div class="chart-legend"><span class="legend-key">${primaryLabel}</span>${secondaryPath ? `<span class="legend-key secondary">${secondaryLabel}</span>` : ""}</div>
     </div>`;
 }
 
@@ -38,11 +39,12 @@ export function miniBars(values, label) {
 
 export function donutGradient(allocation) {
   const colors = ["#4b3267", "#765590", "#a98bbc", "#c8b4d5", "#8d878f", "#d8d2ce"];
+  const positiveTotal = allocation.reduce((sum, item) => sum + Math.max(0, Number(item.weight)), 0) || 1;
   let cursor = 0;
   const stops = allocation.map((item, index) => {
     const start = cursor;
-    cursor += item.weight * 100;
-    return `${colors[index]} ${start.toFixed(1)}% ${cursor.toFixed(1)}%`;
+    cursor += Math.max(0, Number(item.weight)) / positiveTotal * 100;
+    return `${colors[index % colors.length]} ${start.toFixed(1)}% ${cursor.toFixed(1)}%`;
   });
-  return { gradient: `conic-gradient(${stops.join(",")})`, colors };
+  return { gradient: stops.length ? `conic-gradient(${stops.join(",")})` : "conic-gradient(#d8d2ce 0 100%)", colors };
 }

@@ -6,7 +6,10 @@ export const state = {
   role: "direction",
   selectedFund: "FUND_01",
   period: "12m",
-  scenario: "sample",
+  scenario: "current",
+  dataStatus: "loading",
+  errorMessage: null,
+  selectedSnapshot: null,
   allocationFilter: null,
   workflowStep: 0,
   selectedAnomaly: null,
@@ -21,10 +24,4 @@ export function setState(patch, options = {}) {
 export function subscribe(listener) {
   listeners.add(listener);
   return () => listeners.delete(listener);
-}
-
-export function updateAnomaly(anomalyId, status) {
-  const anomaly = state.data.anomalies.find((item) => item.anomaly_id === anomalyId);
-  if (anomaly) anomaly.status = status;
-  listeners.forEach((listener) => listener(state));
 }

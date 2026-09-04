@@ -1,7 +1,7 @@
-import { loadData } from "./data.js";
-import { escapeHtml, scenarioBanner } from "./components.js";
+import { loadData, loadInternalComparison, loadPerformance, loadPortfolio } from "./data.js";
+import { escapeHtml, scenarioBanner, statePanel } from "./components.js";
 import { renderPage } from "./pages.js";
-import { setState, state, subscribe, updateAnomaly } from "./state.js";
+import { setState, state, subscribe } from "./state.js";
 
 const labels = {
   overview: "Overview",
@@ -21,12 +21,14 @@ const bannerRoot = document.querySelector("#scenario-banner");
 const pageLabel = document.querySelector("#current-page-label");
 const fundSelect = document.querySelector("#fund-select");
 const periodSelect = document.querySelector("#period-select");
+const snapshotSelect = document.querySelector("#snapshot-select");
 const scenarioSelect = document.querySelector("#scenario-select");
 const roleSelect = document.querySelector("#role-select");
 const dialog = document.querySelector("#anomaly-dialog");
 const anomalyTitle = document.querySelector("#anomaly-title");
 const anomalyContent = document.querySelector("#anomaly-content");
 const toastRegion = document.querySelector("#toast-region");
+let requestSequence = 0;
 
 function toast(message) {
   const item = document.createElement("div");
@@ -57,10 +59,18 @@ function render() {
   });
   fundSelect.value = state.selectedFund;
   periodSelect.value = state.period;
+  const snapshots = state.data.portfolio?.available_snapshots || [];
+  snapshotSelect.innerHTML = snapshots.length
+    ? snapshots.map((date) => `<option value="${date}">${date}</option>`).join("")
+    : '<option value="">Unavailable</option>';
+  snapshotSelect.disabled = !snapshots.length;
+  snapshotSelect.value = state.selectedSnapshot || snapshots[0] || "";
   scenarioSelect.value = state.scenario;
   roleSelect.value = state.role;
+  const sourceStrong = document.querySelector("#source-status strong");
   const sourceSmall = document.querySelector("#source-status small");
-  if (sourceSmall) sourceSmall.textContent = `Synthetic source · ${state.scenario === "late" ? "late" : state.scenario === "incomplete" ? "incomplete" : "current"}`;
+  if (sourceStrong) sourceStrong.textContent = state.data.meta.run_id;
+  if (sourceSmall) sourceSmall.textContent = `Governed MySQL · ${state.data.meta.business_date || "date unavailable"}`;
 }
 
 function openAnomaly(anomalyId) {
@@ -78,41 +88,61 @@ function openAnomaly(anomalyId) {
 }
 
 function handleAction(action, target) {
-  if (action === "reset-scenario") setState({ scenario: "sample" });
-  if (action === "select-fund") setState({ selectedFund: target.dataset.fund, view: "fund-detail", allocationFilter: null });
+  if (action === "reset-scenario") setState({ scenario: "current" });
+  if (action === "select-fund") {
+    setState({ view: "fund-detail", allocationFilter: null });
+    refreshFund(target.dataset.fund);
+  }
   if (action === "filter-allocation") setState({ allocationFilter: target.dataset.class });
   if (action === "clear-allocation") setState({ allocationFilter: null });
   if (action === "open-anomaly") openAnomaly(target.dataset.anomaly);
   if (action === "close-dialog") dialog.close();
-  if (action === "resolve-anomaly" && state.selectedAnomaly) {
-    updateAnomaly(state.selectedAnomaly, "resolved");
-    dialog.close();
-    toast("Anomaly marked as resolved in the simulation.");
+}
+
+async function refreshFund(fundId) {
+  const sequence = ++requestSequence;
+  setState({ selectedFund: fundId, selectedSnapshot: null, dataStatus: "loading", errorMessage: null });
+  try {
+    const [portfolio, performance] = await Promise.all([
+      loadPortfolio(fundId),
+      loadPerformance(fundId, state.period),
+    ]);
+    if (sequence !== requestSequence) return;
+    setState({
+      data: { ...state.data, portfolio, allocation: portfolio.allocation, positions: portfolio.positions, performance, history: performance.history },
+      selectedSnapshot: portfolio.snapshot_date,
+      dataStatus: "ready",
+    });
+  } catch (error) {
+    if (sequence === requestSequence) setState({ dataStatus: "error", errorMessage: error.message });
   }
-  if (action === "quarantine-anomaly" && state.selectedAnomaly) {
-    updateAnomaly(state.selectedAnomaly, "quarantined");
-    dialog.close();
-    toast("Synthetic record quarantined.");
+}
+
+async function refreshSnapshot(snapshotDate) {
+  const sequence = ++requestSequence;
+  setState({ selectedSnapshot: snapshotDate, dataStatus: "loading", errorMessage: null });
+  try {
+    const portfolio = await loadPortfolio(state.selectedFund, snapshotDate);
+    if (sequence !== requestSequence) return;
+    setState({ data: { ...state.data, portfolio, allocation: portfolio.allocation, positions: portfolio.positions }, dataStatus: "ready" });
+  } catch (error) {
+    if (sequence === requestSequence) setState({ dataStatus: "error", errorMessage: error.message });
   }
-  if (action === "select-source") setState({ workflowStep: 1 });
-  if (action === "run-structure") {
-    setState({ workflowStep: 2 });
-    toast("Structure check completed.");
+}
+
+async function refreshPeriod(period) {
+  const sequence = ++requestSequence;
+  setState({ period, dataStatus: "loading", errorMessage: null });
+  try {
+    const [performance, internalComparison] = await Promise.all([
+      loadPerformance(state.selectedFund, period),
+      loadInternalComparison(period),
+    ]);
+    if (sequence !== requestSequence) return;
+    setState({ data: { ...state.data, performance, history: performance.history, internal_comparison: internalComparison }, dataStatus: "ready" });
+  } catch (error) {
+    if (sequence === requestSequence) setState({ dataStatus: "error", errorMessage: error.message });
   }
-  if (action === "quarantine-all") {
-    state.data.anomalies.filter((item) => item.severity === "blocking").forEach((item) => { item.status = "quarantined"; });
-    setState({ workflowStep: 3 });
-  }
-  if (action === "prepare-validation") setState({ workflowStep: 4 });
-  if (action === "validate-dataset") {
-    setState({ workflowStep: 5 });
-    toast("Synthetic dataset validated.");
-  }
-  if (action === "publish-dataset") {
-    setState({ workflowStep: 6 });
-    toast("Local publication completed. No external transfer occurred.");
-  }
-  if (action === "reset-workflow") setState({ workflowStep: 0 });
 }
 
 document.addEventListener("click", (event) => {
@@ -128,8 +158,9 @@ viewRoot.addEventListener("change", (event) => {
   if (event.target.id === "fund-search") setState({ query: event.target.value });
 });
 
-fundSelect.addEventListener("change", (event) => setState({ selectedFund: event.target.value }));
-periodSelect.addEventListener("change", (event) => setState({ period: event.target.value }));
+fundSelect.addEventListener("change", (event) => refreshFund(event.target.value));
+periodSelect.addEventListener("change", (event) => refreshPeriod(event.target.value));
+snapshotSelect.addEventListener("change", (event) => refreshSnapshot(event.target.value));
 scenarioSelect.addEventListener("change", (event) => setState({ scenario: event.target.value }));
 roleSelect.addEventListener("change", (event) => {
   const role = event.target.value;
@@ -142,7 +173,7 @@ document.querySelector("#menu-button").addEventListener("click", () => {
   document.querySelector("#menu-button").setAttribute("aria-expanded", String(!open));
 });
 
-document.querySelector("#help-button").addEventListener("click", () => toast("Use the Prototype scenario selector to demonstrate every state."));
+document.querySelector("#help-button").addEventListener("click", () => toast("Fund, snapshot, and period filters query the governed local API."));
 
 document.querySelector(".primary-nav").addEventListener("keydown", (event) => {
   if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
@@ -167,12 +198,19 @@ document.addEventListener("keydown", (event) => {
 subscribe(render);
 
 async function initialize() {
-  const data = await loadData();
-  fundSelect.innerHTML = data.funds.map((fund) => `<option value="${fund.id}">${fund.id}</option>`).join("");
-  setState({ data });
-  if (window.innerWidth <= 860) {
-    shell.dataset.sidebar = "closed";
-    document.querySelector("#menu-button").setAttribute("aria-expanded", "false");
+  try {
+    const data = await loadData();
+    fundSelect.innerHTML = data.funds.map((fund) => `<option value="${fund.id}">${fund.id}</option>`).join("");
+    const selectedFund = data.funds[0]?.id || "FUND_01";
+    setState({ data, selectedFund, selectedSnapshot: data.portfolio?.snapshot_date || null, dataStatus: "ready" });
+    if (window.innerWidth <= 860) {
+      shell.dataset.sidebar = "closed";
+      document.querySelector("#menu-button").setAttribute("aria-expanded", "false");
+    }
+  } catch (error) {
+    state.errorMessage = error.message;
+    viewRoot.innerHTML = statePanel("error");
+    viewRoot.setAttribute("aria-busy", "false");
   }
 }
 

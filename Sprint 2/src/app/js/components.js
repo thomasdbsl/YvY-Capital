@@ -5,16 +5,18 @@ export function escapeHtml(value) {
 }
 
 export function formatMoney(value, compact = true) {
+  if (value === null || value === undefined) return "Unavailable";
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "BRL",
     notation: compact ? "compact" : "standard",
     maximumFractionDigits: compact ? 1 : 0,
-  }).format(value ?? 0);
+  }).format(value);
 }
 
 export function formatPercent(value, digits = 2) {
-  return new Intl.NumberFormat("en-US", { style: "percent", maximumFractionDigits: digits, signDisplay: "exceptZero" }).format(value ?? 0);
+  if (value === null || value === undefined) return "Unavailable";
+  return new Intl.NumberFormat("en-US", { style: "percent", maximumFractionDigits: digits, signDisplay: "exceptZero" }).format(value);
 }
 
 export function badge(label, status = "info") {
@@ -30,7 +32,7 @@ export function statCard({ label, value, status = "current", statusLabel = "Curr
   return `<article class="card stat-card" style="--delay:${delay}ms" ${testId ? `data-testid="${testId}"` : ""}>
     <div class="stat-top"><span class="stat-label">${escapeHtml(label)}</span>${badge(statusLabel, status)}</div>
     <div class="stat-value">${escapeHtml(value)}</div>
-    <div class="stat-meta"><span class="trend ${trend ? trendClass : ""}">${escapeHtml(trend || "Synthetic source")}</span><span>${escapeHtml(meta)}</span></div>
+    <div class="stat-meta"><span class="trend ${trend ? trendClass : ""}">${escapeHtml(trend || "Governed source")}</span><span>${escapeHtml(meta)}</span></div>
   </article>`;
 }
 
@@ -51,13 +53,12 @@ export function statePanel(scenario) {
     return `<section class="card card-pad state-panel" aria-label="Loading"><div class="state-panel-inner" style="width:100%;text-align:left"><div class="skeleton title"></div><div class="skeleton line"></div><div class="skeleton line" style="width:72%"></div><div class="skeleton block"></div><span class="sr-only">Loading in progress</span></div></section>`;
   }
   const [icon, title, copy] = stateCopy[scenario] || stateCopy.empty;
-  return `<section class="card state-panel"><div class="state-panel-inner"><div class="state-icon" aria-hidden="true">${icon}</div><h2>${title}</h2><p>${copy}</p><button class="button primary" type="button" data-action="reset-scenario">Return to sample data</button></div></section>`;
+  return `<section class="card state-panel"><div class="state-panel-inner"><div class="state-icon" aria-hidden="true">${icon}</div><h2>${title}</h2><p>${copy}</p><button class="button primary" type="button" data-action="reset-scenario">Return to current data</button></div></section>`;
 }
 
 export function scenarioBanner(scenario) {
   const messages = {
-    sample: ["Sample data", "All values are synthetic and reproducible through SPRINT2-WF-001."],
-    current: ["Current data", "Freshness and quality controls pass in this scenario."],
+    current: ["Governed local data", "Values come from the curated MySQL database; private identifiers remain local."],
     late: ["Late data", "One source exceeds the proposed freshness threshold. Values remain visible with a warning."],
     incomplete: ["Incomplete data", "Some prerequisites are missing. Affected KPIs are marked as incomplete."],
     hypothesis: ["Hypothesis pending validation", "The fund-of-funds bridge and selected thresholds require a partner decision."],
@@ -70,7 +71,7 @@ export function scenarioBanner(scenario) {
 export function allocationView(allocation, activeFilter) {
   const { gradient, colors } = donutGradient(allocation);
   return `<div class="donut-layout">
-    <div class="donut-shell"><div class="donut" style="--donut-gradient:${gradient}"></div><div class="donut-center"><strong>100%</strong><small>allocation</small></div></div>
+    <div class="donut-shell"><div class="donut" style="--donut-gradient:${gradient}"></div><div class="donut-center"><strong>100%</strong><small>positive allocation</small></div></div>
     <div class="allocation-list" aria-label="Filter positions by asset class">
       ${allocation.map((item, index) => `<button type="button" class="allocation-button ${activeFilter === item.asset_class ? "is-active" : ""}" data-action="filter-allocation" data-class="${escapeHtml(item.asset_class)}" aria-pressed="${activeFilter === item.asset_class}"><span class="swatch" style="--swatch:${colors[index]}"></span><span>${escapeHtml(item.asset_class)}</span><strong>${formatPercent(item.weight, 0)}</strong></button>`).join("")}
       <button type="button" class="button ghost small" data-action="clear-allocation" ${activeFilter ? "" : "disabled"}>Show all positions</button>
@@ -78,8 +79,8 @@ export function allocationView(allocation, activeFilter) {
   </div>`;
 }
 
-export function sourceFootnote(source = "SRC_SYNTHETIC_FIXTURES", freshness = "Current", quality = "Valid") {
-  return `<div class="scenario-banner" style="margin:1rem 0 0"><p><strong>Source</strong> ${escapeHtml(source)} · <strong>Freshness</strong> ${escapeHtml(freshness)} · <strong>Quality</strong> ${escapeHtml(quality)} · <strong>Run</strong> SPRINT2-WF-001</p></div>`;
+export function sourceFootnote(source = "Governed MySQL", freshness = "Current", quality = "Validated", run = "Unavailable") {
+  return `<div class="scenario-banner" style="margin:1rem 0 0"><p><strong>Source</strong> ${escapeHtml(source)} · <strong>Freshness</strong> ${escapeHtml(freshness)} · <strong>Quality</strong> ${escapeHtml(quality)} · <strong>Run</strong> ${escapeHtml(run)}</p></div>`;
 }
 
 export function tableShell(title, subtitle, headings, rows, toolbar = "") {
@@ -87,6 +88,6 @@ export function tableShell(title, subtitle, headings, rows, toolbar = "") {
 }
 
 export function workflowSteps(current) {
-  const steps = ["Selection", "Structure", "Anomalies", "Treatment", "Validation", "Publication", "Lineage"];
+  const steps = ["Source", "Bronze", "Validation", "Silver", "Gold", "MySQL", "Serving"];
   return `<ol class="step-list" aria-label="Workflow steps">${steps.map((label, index) => `<li class="step ${index === current ? "is-current" : ""} ${index < current ? "is-complete" : ""}" ${index === current ? 'aria-current="step"' : ""}><span class="step-index">${index < current ? "OK" : index + 1}</span><span><strong>${label}</strong><small>${index < current ? "Completed" : index === current ? "In progress" : "Upcoming"}</small></span></li>`).join("")}</ol>`;
 }
