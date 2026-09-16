@@ -13,7 +13,7 @@ from pipeline.contracts import CONTRACTS, CONTRACT_VERSION, SourceContract
 from pipeline.models import PipelineBundle, QualityIssue, stable_hash
 
 csv.field_size_limit(16 * 1024 * 1024)
-TRANSFORM_VERSION = "sprint3-pipeline-v1"
+TRANSFORM_VERSION = "sprint4-integrated-beta-v1"
 
 
 def sha256_file(path: Path) -> str:
@@ -113,7 +113,7 @@ def read_contract(input_dir: Path, contract: SourceContract) -> tuple[list[dict[
     return accepted, manifest, findings
 
 
-def validate_domains(tables: dict[str, list[dict[str, Any]]]) -> list[QualityIssue]:
+def validate_domains(tables: dict[str, list[dict[str, Any]]], reconciliation: list[dict[str, Any]] | None = None) -> list[QualityIssue]:
     findings: list[QualityIssue] = []
     invalid_rows: dict[str, set[int]] = defaultdict(set)
     fund_ids = {row["fund_id"] for row in tables["funds.csv"]}
@@ -170,12 +170,14 @@ def validate_domains(tables: dict[str, list[dict[str, Any]]]) -> list[QualityIss
             invalid_holding_snapshots[key] = ("DQ13", "Holdings do not reconcile to NAV within 1%")
 
     valid_holdings = []
+    snapshot_issues = {}
     for row in tables["portfolio_holdings.csv"]:
         snapshot_key = (row["fund_id"], row["snapshot_date"])
         if snapshot_key in invalid_holding_snapshots:
             rule_id, message = invalid_holding_snapshots[snapshot_key]
             row_key = (*snapshot_key, row["group_identifier"], row["item_id"])
             findings.append(issue("portfolio_holdings.csv", row["_source_row"], row_key, rule_id, "blocking", "quarantine", message))
+            snapshot_issues.setdefault(snapshot_key, findings[-1].issue_id)
         else:
             valid_holdings.append(row)
     tables["portfolio_holdings.csv"] = valid_holdings
@@ -183,6 +185,23 @@ def validate_domains(tables: dict[str, list[dict[str, Any]]]) -> list[QualityIss
     holding_keys = {(row["fund_id"], row["snapshot_date"]) for row in tables["portfolio_holdings.csv"]}
     for key in sorted(set(nav) - holding_keys):
         findings.append(issue("portfolio_holdings.csv", None, key, "DQ14", "warning", "review", "NAV snapshot has no holdings; portfolio is unavailable for this date"))
+        snapshot_issues.setdefault(key, findings[-1].issue_id)
+    if reconciliation is not None:
+        for key in sorted(set(nav) | set(holding_sums)):
+            expected = nav.get(key)
+            total = holding_sums.get(key)
+            delta = total - expected if total is not None and expected is not None else None
+            failed = key in invalid_holding_snapshots
+            missing = total is None or expected is None
+            reconciliation.append({
+                "fund_id": key[0], "snapshot_date": key[1], "expected_nav": expected,
+                "holdings_total": total, "difference_value": delta,
+                "difference_fraction": delta / abs(expected) if delta is not None and expected else None,
+                "rule_id": invalid_holding_snapshots[key][0] if failed else ("DQ14" if missing else "DQ13"),
+                "rule_status": "fail" if failed else ("unavailable" if missing else "pass"),
+                "severity": "blocking" if failed else ("warning" if missing else "info"),
+                "source_issue_id": snapshot_issues.get(key),
+            })
     return findings
 
 
@@ -196,9 +215,10 @@ def ingest_sources(input_dir: Path) -> PipelineBundle:
         manifests.append(manifest)
         findings.extend(contract_findings)
     bronze_count = sum(len(rows) for rows in tables.values())
-    findings.extend(validate_domains(tables))
+    reconciliation: list[dict[str, Any]] = []
+    findings.extend(validate_domains(tables, reconciliation))
     bundle_sha = stable_hash([(item["logical_name"], item["sha256"]) for item in manifests], TRANSFORM_VERSION)
     run_id = f"S3-{bundle_sha[:20].upper()}"
     generated_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     quarantine = [item for item in findings if item.action == "quarantine"]
-    return PipelineBundle(run_id, bundle_sha, generated_at, manifests, tables, findings, quarantine, bronze_count)
+    return PipelineBundle(run_id, bundle_sha, generated_at, manifests, tables, findings, quarantine, bronze_count, reconciliation)

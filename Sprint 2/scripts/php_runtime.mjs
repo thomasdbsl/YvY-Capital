@@ -51,22 +51,25 @@ export function resolvePhpRuntime() {
 }
 
 async function waitForServer(url, child) {
+  let lastError;
   for (let attempt = 0; attempt < 80; attempt += 1) {
     if (child.exitCode !== null) throw new Error(`PHP server exited with code ${child.exitCode}`);
     try {
       const response = await fetch(url);
       if (response.status < 500) return;
-    } catch {}
+      lastError = new Error(`HTTP ${response.status}`);
+    } catch (error) { lastError = error; }
     await new Promise((resolve) => setTimeout(resolve, 100));
   }
-  throw new Error(`PHP server did not start at ${url}`);
+  const cause = lastError?.cause ? ` (${lastError.cause.code || lastError.cause.message || "unknown cause"})` : "";
+  throw new Error(`PHP server did not start at ${url}: ${lastError?.message || "no response"}${cause}`);
 }
 
 export async function startPhpServer({ sprintRoot, port = 4173, host = "127.0.0.1", stdio = "ignore" }) {
   const runtime = resolvePhpRuntime();
   const args = [];
   if (runtime.ini) args.push("-c", runtime.ini);
-  args.push("-S", `${host}:${port}`, "-t", sprintRoot);
+  args.push("-S", `${host}:${port}`, "-t", sprintRoot, path.join(sprintRoot, "scripts", "dev_router.php"));
   const child = spawn(runtime.executable, args, {
     cwd: sprintRoot,
     env: process.env,
@@ -75,7 +78,7 @@ export async function startPhpServer({ sprintRoot, port = 4173, host = "127.0.0.
   });
   const origin = `http://${host}:${port}`;
   try {
-    await waitForServer(`${origin}/src/app/`, child);
+    await waitForServer(`${origin}/api/auth.php`, child);
   } catch (error) {
     child.kill();
     throw error;

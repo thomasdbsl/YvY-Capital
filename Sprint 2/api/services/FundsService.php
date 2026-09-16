@@ -113,15 +113,18 @@ final class FundsService
         if ($window === null) {
             return $this->unavailablePerformance($fundCode, $period);
         }
-        $dates = array_values(array_filter($commonDates, static function (string $date) use ($window): bool {
-            return $date >= $window['start'] && $date <= $window['end'];
+        $windowDates = isset($window['dates']) ? array_fill_keys($window['dates'], true) : null;
+        $dates = array_values(array_filter($commonDates, static function (string $date) use ($window, $windowDates): bool {
+            return $date >= $window['start']
+                && $date <= $window['end']
+                && ($windowDates === null || isset($windowDates[$date]));
         }));
         if (count($dates) < 2) {
             return $this->unavailablePerformance($fundCode, $period);
         }
         $fundValues = array_map(static function (string $date) use ($maps): float { return $maps['fund'][$date]; }, $dates);
         $benchmarkValues = array_map(static function (string $date) use ($maps): float { return $maps['benchmark'][$date]; }, $dates);
-        $metrics = FinancialMath::metrics($fundValues, $benchmarkValues);
+        $metrics = FinancialMath::metrics($fundValues, $benchmarkValues, $this->minimumRiskObservations());
         $drawdowns = $this->funds->drawdowns($fundCode, $dates[0], $dates[count($dates) - 1]);
         $metrics['maximum_drawdown'] = $drawdowns ? min(array_map(static function (array $row): float { return (float) $row['drawdown']; }, $drawdowns)) : null;
         $history = [];
@@ -138,16 +141,27 @@ final class FundsService
             'fund_id' => $fundCode,
             'period' => $period,
             'status' => 'current',
-            'window' => ['start' => $dates[0], 'end' => $dates[count($dates) - 1]],
+            'window' => $this->windowPayload($window, $dates),
             'history' => $history,
             'metrics' => $metrics,
         ];
     }
 
-    public function internalComparison(string $period): array
+    public function internalComparison(string $period, ?string $fundA = null, ?string $fundB = null): array
     {
         FinancialMath::validatePeriod($period);
         $funds = $this->funds();
+        if (count($funds) < 2) {
+            throw new ApiException(503, 'At least two funds are required for comparison');
+        }
+        $fundA = $fundA ?? $funds[0]['id'];
+        $fundB = $fundB ?? $funds[1]['id'];
+        if ($fundA === $fundB) {
+            throw new ApiException(400, 'Fund A and Fund B must be different');
+        }
+        $this->ensureFund($fundA);
+        $this->ensureFund($fundB);
+        $targeted = $this->targetedComparison($fundA, $fundB, $period, $funds);
         $commonAcrossFunds = null;
         foreach ($funds as $fund) {
             $maps = $this->seriesMaps($this->funds->returnSeries($fund['id']));
@@ -172,6 +186,7 @@ final class FundsService
                         'quality_status' => 'unavailable',
                     ];
                 }, $funds),
+                'targeted' => $targeted,
             ];
         }
         $rows = [];
@@ -188,7 +203,132 @@ final class FundsService
             ];
         }
         usort($rows, static function (array $left, array $right): int { return ($right['period_return'] ?? -INF) <=> ($left['period_return'] ?? -INF); });
-        return ['period' => $period, 'window' => $window === null ? null : ['start' => $window['start'], 'end' => $window['end']], 'funds' => $rows];
+        return [
+            'period' => $period,
+            'window' => $this->windowPayload($window, $window['dates']),
+            'funds' => $rows,
+            'targeted' => $targeted,
+        ];
+    }
+
+    private function targetedComparison(string $fundA, string $fundB, string $period, array $funds): array
+    {
+        $mapsA = $this->seriesMaps($this->funds->returnSeries($fundA));
+        $mapsB = $this->seriesMaps($this->funds->returnSeries($fundB));
+        $commonDates = array_values(array_intersect(
+            array_keys($mapsA['fund']),
+            array_keys($mapsA['benchmark']),
+            array_keys($mapsB['fund']),
+            array_keys($mapsB['benchmark'])
+        ));
+        sort($commonDates, SORT_STRING);
+        $window = FinancialMath::resolveWindow($commonDates, $period);
+        if ($window === null) {
+            return [
+                'requested_funds' => ['fund_a' => $fundA, 'fund_b' => $fundB],
+                'status' => 'unavailable',
+                'window' => null,
+                'funds' => [
+                    $this->unavailableComparisonRow($fundA, $funds),
+                    $this->unavailableComparisonRow($fundB, $funds),
+                ],
+                'history' => [],
+            ];
+        }
+
+        $performanceA = $this->performance($fundA, $period, $window);
+        $performanceB = $this->performance($fundB, $period, $window);
+        if ($performanceA['status'] !== 'current' || $performanceB['status'] !== 'current') {
+            return [
+                'requested_funds' => ['fund_a' => $fundA, 'fund_b' => $fundB],
+                'status' => 'unavailable',
+                'window' => null,
+                'funds' => [
+                    $this->unavailableComparisonRow($fundA, $funds),
+                    $this->unavailableComparisonRow($fundB, $funds),
+                ],
+                'history' => [],
+            ];
+        }
+
+        $historyA = array_column($performanceA['history'], null, 'date');
+        $historyB = array_column($performanceB['history'], null, 'date');
+        $dates = array_values(array_intersect(array_keys($historyA), array_keys($historyB)));
+        sort($dates, SORT_STRING);
+        $baseA = (float) $historyA[$dates[0]]['nav_index'];
+        $baseB = (float) $historyB[$dates[0]]['nav_index'];
+        $history = array_map(static function (string $date) use ($historyA, $historyB, $baseA, $baseB): array {
+            return [
+                'date' => $date,
+                'fund_a_index' => (float) $historyA[$date]['nav_index'] / $baseA * 100.0,
+                'fund_b_index' => (float) $historyB[$date]['nav_index'] / $baseB * 100.0,
+            ];
+        }, $dates);
+
+        return [
+            'requested_funds' => ['fund_a' => $fundA, 'fund_b' => $fundB],
+            'status' => 'current',
+            'window' => $this->windowPayload($window, $dates),
+            'funds' => [
+                $this->comparisonRow($fundA, $performanceA, $funds),
+                $this->comparisonRow($fundB, $performanceB, $funds),
+            ],
+            'history' => $history,
+        ];
+    }
+
+    private function comparisonRow(string $fundCode, array $performance, array $funds): array
+    {
+        $fund = $this->findFund($fundCode, $funds);
+        return [
+            'fund_id' => $fundCode,
+            'aum_brl' => $fund['aum_brl'],
+            'period_return' => $performance['metrics']['period_return'],
+            'pct_cdi' => $performance['metrics']['pct_cdi'],
+            'volatility' => $performance['metrics']['volatility'],
+            'sharpe' => $performance['metrics']['sharpe'],
+            'sortino' => $performance['metrics']['sortino'],
+            'maximum_drawdown' => $performance['metrics']['maximum_drawdown'],
+            'status' => $performance['status'],
+        ];
+    }
+
+    private function unavailableComparisonRow(string $fundCode, array $funds): array
+    {
+        $fund = $this->findFund($fundCode, $funds);
+        return [
+            'fund_id' => $fundCode,
+            'aum_brl' => $fund['aum_brl'],
+            'period_return' => null,
+            'pct_cdi' => null,
+            'volatility' => null,
+            'sharpe' => null,
+            'sortino' => null,
+            'maximum_drawdown' => null,
+            'status' => 'unavailable',
+        ];
+    }
+
+    private function findFund(string $fundCode, array $funds): array
+    {
+        foreach ($funds as $fund) {
+            if ($fund['id'] === $fundCode) {
+                return $fund;
+            }
+        }
+        throw new ApiException(404, 'Fund was not found');
+    }
+
+    private function windowPayload(array $window, array $dates): array
+    {
+        return [
+            'start' => $dates[0],
+            'end' => $dates[count($dates) - 1],
+            'requested_start' => $window['requested_start'] ?? $window['start'],
+            'requested_end' => $window['requested_end'] ?? $window['end'],
+            'coverage_status' => $window['coverage_status'] ?? 'complete',
+            'observations' => count($dates),
+        ];
     }
 
     private function seriesMaps(array $rows): array
@@ -202,6 +342,11 @@ final class FundsService
         return $maps;
     }
 
+    private function minimumRiskObservations(): int
+    {
+        return (int) api_config()['minimum_risk_observations'];
+    }
+
     private function unavailablePerformance(string $fundCode, string $period): array
     {
         return [
@@ -210,7 +355,8 @@ final class FundsService
             'status' => 'unavailable',
             'window' => null,
             'history' => [],
-            'metrics' => ['period_return' => null, 'benchmark_return' => null, 'pct_cdi' => null, 'volatility' => null, 'sharpe' => null, 'sortino' => null, 'maximum_drawdown' => null, 'daily_observations' => 0],
+            'metrics' => ['period_return' => null, 'benchmark_return' => null, 'pct_cdi' => null, 'volatility' => null, 'sharpe' => null, 'sortino' => null, 'maximum_drawdown' => null, 'daily_observations' => 0,
+                'minimum_risk_observations' => $this->minimumRiskObservations(), 'risk_metrics_status' => 'unavailable-insufficient-history'],
         ];
     }
 }

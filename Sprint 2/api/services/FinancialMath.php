@@ -29,7 +29,16 @@ final class FinancialMath
         if (count($eligible) < 2) {
             return null;
         }
-        return ['start' => $eligible[0], 'end' => $end, 'dates' => $eligible];
+        $actualStart = $eligible[0];
+        $coverageGapDays = (new DateTimeImmutable($cutoff))->diff(new DateTimeImmutable($actualStart))->days;
+        return [
+            'start' => $actualStart,
+            'end' => $end,
+            'requested_start' => $cutoff,
+            'requested_end' => $end,
+            'coverage_status' => $coverageGapDays <= 4 ? 'complete' : 'partial',
+            'dates' => $eligible,
+        ];
     }
 
     public static function periodReturn(float $startIndex, float $endIndex): ?float
@@ -77,16 +86,20 @@ final class FinancialMath
         return sqrt($sum / (count($values) - 1));
     }
 
-    public static function metrics(array $fundIndexes, array $benchmarkIndexes): array
+    public static function metrics(array $fundIndexes, array $benchmarkIndexes, int $minimumRiskObservations = 2): array
     {
+        if ($minimumRiskObservations < 2 || $minimumRiskObservations > 252) {
+            throw new InvalidArgumentException('Minimum risk observations must be between 2 and 252');
+        }
         if (count($fundIndexes) < 2 || count($fundIndexes) !== count($benchmarkIndexes)) {
-            return self::unavailableMetrics();
+            return self::unavailableMetrics($minimumRiskObservations);
         }
         $fundReturn = self::periodReturn((float) $fundIndexes[0], (float) $fundIndexes[count($fundIndexes) - 1]);
         $benchmarkReturn = self::periodReturn((float) $benchmarkIndexes[0], (float) $benchmarkIndexes[count($benchmarkIndexes) - 1]);
         $fundDaily = self::dailyReturns($fundIndexes);
         $benchmarkDaily = self::dailyReturns($benchmarkIndexes);
-        $volatilityDaily = self::sampleStandardDeviation($fundDaily);
+        $riskMetricsAvailable = count($fundDaily) >= $minimumRiskObservations;
+        $volatilityDaily = $riskMetricsAvailable ? self::sampleStandardDeviation($fundDaily) : null;
         $volatility = $volatilityDaily === null ? null : $volatilityDaily * sqrt(252);
         $excess = [];
         for ($index = 0; $index < min(count($fundDaily), count($benchmarkDaily)); $index += 1) {
@@ -114,10 +127,12 @@ final class FinancialMath
             'sharpe' => $sharpe,
             'sortino' => $sortino,
             'daily_observations' => count($fundDaily),
+            'minimum_risk_observations' => $minimumRiskObservations,
+            'risk_metrics_status' => $riskMetricsAvailable ? 'available' : 'unavailable-insufficient-history',
         ];
     }
 
-    private static function unavailableMetrics(): array
+    private static function unavailableMetrics(int $minimumRiskObservations): array
     {
         return [
             'period_return' => null,
@@ -127,6 +142,8 @@ final class FinancialMath
             'sharpe' => null,
             'sortino' => null,
             'daily_observations' => 0,
+            'minimum_risk_observations' => $minimumRiskObservations,
+            'risk_metrics_status' => 'unavailable-insufficient-history',
         ];
     }
 }

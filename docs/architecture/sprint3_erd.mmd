@@ -1,0 +1,232 @@
+erDiagram
+    ingestion_runs {
+        varchar run_id PK
+        char bundle_sha256 UK
+        varchar transform_version UK
+        varchar classification
+        varchar status
+        datetime completed_at
+        int accepted_records
+        int warning_records
+        int quarantined_records
+        int blocking_records
+    }
+    source_files {
+        varchar run_id PK,FK
+        varchar logical_name PK
+        bigint byte_size
+        datetime modified_at
+        int row_count
+        char sha256
+        varchar contract_version
+        varchar status
+    }
+    pipeline_stage_counts {
+        varchar run_id PK,FK
+        varchar stage_name PK
+        int accepted_records
+        int warning_records
+        int quarantined_records
+    }
+    quality_issues {
+        char issue_id PK
+        varchar run_id FK
+        varchar logical_name
+        int source_row
+        char record_ref_hash
+        varchar rule_id
+        varchar severity
+        varchar action
+        varchar status
+    }
+    quarantine_records {
+        char quarantine_id PK
+        varchar run_id FK
+        varchar logical_name
+        int source_row
+        char record_ref_hash
+        varchar rule_id
+    }
+    funds {
+        varchar source_fund_id PK
+        varchar fund_code UK
+        varchar display_name
+        varchar currency_id
+        boolean is_internal
+        boolean is_active
+        varchar last_run_id FK
+    }
+    fund_nav_snapshots {
+        varchar source_fund_id PK,FK
+        date snapshot_date PK
+        decimal nav_brl
+        varchar last_run_id FK
+    }
+    portfolio_holdings {
+        varchar source_fund_id PK,FK
+        date snapshot_date PK
+        varchar group_identifier PK
+        varchar item_id PK
+        varchar holding_code UK
+        varchar instrument_code
+        varchar issuer_code
+        decimal nav_value_brl
+        decimal exposure_raw
+        varchar last_run_id FK
+    }
+    return_series {
+        varchar source_fund_id PK,FK
+        varchar series_type PK
+        date business_date PK
+        decimal index_value
+        varchar last_run_id FK
+    }
+    transaction_summaries {
+        varchar source_fund_id PK,FK
+        date start_date PK
+        date end_date PK
+        decimal total_subscription_brl
+        decimal total_redemption_brl
+        decimal total_tax_brl
+        decimal nav_brl
+        varchar last_run_id FK
+    }
+    cash_flows {
+        varchar source_fund_id PK,FK
+        date business_date PK
+        decimal net_value_brl
+        decimal subscriptions_brl
+        decimal redemptions_brl
+        varchar last_run_id FK
+    }
+    corporate_payments {
+        char event_key PK
+        varchar source_fund_id FK
+        date ex_date
+        decimal gross_value_per_unit_brl
+        varchar last_run_id FK
+    }
+    drawdowns {
+        varchar source_fund_id PK,FK
+        date business_date PK
+        decimal drawdown
+        varchar last_run_id FK
+    }
+    liquidity_horizons {
+        varchar source_fund_id PK,FK
+        date as_of_date PK
+        int projection_days PK
+        decimal nav_percent
+        varchar last_run_id FK
+    }
+    stress_results {
+        varchar source_fund_id PK,FK
+        date business_date PK
+        boolean success
+        varchar stress_mask_ids
+        varchar last_run_id FK
+    }
+    dv01_results {
+        varchar source_fund_id PK,FK
+        date business_date PK
+        boolean success
+        int item_count
+        char items_sha256
+        varchar last_run_id FK
+    }
+    dv01_items {
+        char item_key PK
+        varchar source_fund_id FK
+        date business_date FK
+        varchar item_code
+        varchar instrument_code
+        varchar risk_factor_code
+        decimal dv01_notional_value
+        decimal financial_value
+        varchar last_run_id FK
+    }
+    bond_instruments {
+        varchar source_fund_id PK,FK
+        varchar instrument_id_restricted PK
+        varchar instrument_code
+        date maturity_date
+        varchar last_run_id FK
+    }
+    var_mask_configs {
+        varchar var_mask_id_restricted PK
+        varchar mask_code UK
+        int time_horizon
+        int period_value
+        decimal probability
+        varchar method_type
+        varchar last_run_id FK
+    }
+    gold_allocations {
+        varchar source_fund_id PK,FK
+        date snapshot_date PK
+        varchar group_identifier PK
+        decimal nav_value_brl
+        decimal weight
+        int holdings_count
+        varchar quality_status
+        varchar last_run_id FK
+    }
+    gold_fund_latest {
+        varchar source_fund_id PK,FK
+        date snapshot_date
+        decimal nav_brl
+        decimal daily_return
+        boolean holdings_available
+        int freshness_days
+        varchar quality_status
+        varchar last_run_id FK
+    }
+    lineage_records {
+        char lineage_id PK
+        varchar run_id FK
+        varchar logical_name
+        int source_row
+        char source_sha256
+        varchar target_table
+        char target_key_hash
+    }
+
+    ingestion_runs ||--o{ source_files : records
+    ingestion_runs ||--o{ pipeline_stage_counts : summarizes
+    ingestion_runs ||--o{ quality_issues : detects
+    ingestion_runs ||--o{ quarantine_records : quarantines
+    ingestion_runs ||--o{ funds : loads
+    ingestion_runs ||--o{ fund_nav_snapshots : loads
+    ingestion_runs ||--o{ portfolio_holdings : loads
+    ingestion_runs ||--o{ return_series : loads
+    ingestion_runs ||--o{ transaction_summaries : loads
+    ingestion_runs ||--o{ cash_flows : loads
+    ingestion_runs ||--o{ corporate_payments : loads
+    ingestion_runs ||--o{ drawdowns : loads
+    ingestion_runs ||--o{ liquidity_horizons : loads
+    ingestion_runs ||--o{ stress_results : loads
+    ingestion_runs ||--o{ dv01_results : loads
+    ingestion_runs ||--o{ dv01_items : loads
+    ingestion_runs ||--o{ bond_instruments : loads
+    ingestion_runs ||--o{ var_mask_configs : loads
+    ingestion_runs ||--o{ gold_allocations : loads
+    ingestion_runs ||--o{ gold_fund_latest : loads
+    ingestion_runs ||--o{ lineage_records : proves
+
+    funds ||--o{ fund_nav_snapshots : has
+    funds ||--o{ portfolio_holdings : has
+    funds ||--o{ return_series : has
+    funds ||--o{ transaction_summaries : has
+    funds ||--o{ cash_flows : has
+    funds ||--o{ corporate_payments : has
+    funds ||--o{ drawdowns : has
+    funds ||--o{ liquidity_horizons : has
+    funds ||--o{ stress_results : has
+    funds ||--o{ dv01_results : has
+    funds ||--o{ bond_instruments : has
+    funds ||--o{ gold_allocations : summarizes
+    funds ||--o| gold_fund_latest : projects
+    fund_nav_snapshots ||--o{ portfolio_holdings : reconciles
+    fund_nav_snapshots ||--o{ gold_allocations : aggregates
+    fund_nav_snapshots ||--o| gold_fund_latest : projects
+    dv01_results ||--o{ dv01_items : contains

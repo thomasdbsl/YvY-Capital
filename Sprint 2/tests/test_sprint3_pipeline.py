@@ -16,7 +16,7 @@ if str(SRC_ROOT) not in sys.path:
 
 from pipeline.config import DatabaseConfig
 from pipeline.ingest import ingest_sources, sha256_file
-from pipeline.mysql_loader import DELETE_ORDER, TABLE_COLUMNS, apply_schema, load_bundle, run_mysql
+from pipeline.mysql_loader import DELETE_ORDER, TABLE_COLUMNS, apply_schema, database_counts, load_bundle, run_mysql, sql_value
 from pipeline.run_sprint3 import safe_report
 from pipeline.transform import transform_to_curated
 
@@ -137,12 +137,55 @@ class TestSprint3DatabaseIdempotence(unittest.TestCase):
             source = ingest_sources(FIXTURES)
             curated = transform_to_curated(source)
             first = load_bundle(config, source, curated)
+            business_before_migrations = {name: first[name] for name in TABLE_COLUMNS}
+            apply_schema(config, SCHEMA)
+            business_after_migrations = database_counts(config)
+            self.assertEqual(business_before_migrations, {name: business_after_migrations[name] for name in TABLE_COLUMNS})
+
+            migrated = int(run_mysql(config,
+                "SELECT COUNT(*) FROM information_schema.tables "
+                f"WHERE table_schema={sql_value(self.database_name)} AND table_name IN "
+                "('app_users','audit_events','issue_reviews','reconciliation_evidence');",
+                select_database=True).strip())
+            self.assertEqual(migrated, 4)
+
+            issue_id = run_mysql(config, "SELECT issue_id FROM quality_issues ORDER BY issue_id LIMIT 1;", select_database=True).strip()
+            self.assertTrue(issue_id)
+            password_hash = "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi."
+            run_mysql(config,
+                "INSERT INTO app_users(username,password_hash,role) VALUES "
+                f"({sql_value('db_test_analyst')},{sql_value(password_hash)},'ANALYST');"
+                "SET @test_user=LAST_INSERT_ID();"
+                "INSERT INTO issue_reviews(issue_id,status,analyst_note,reviewed_by,reviewed_at,revision) VALUES "
+                f"({sql_value(issue_id)},'resolved','safe test note',@test_user,UTC_TIMESTAMP(),1);"
+                "INSERT INTO audit_events(user_id,actor_role,action,target_type,target_id,previous_state,new_state) VALUES "
+                f"(@test_user,'ANALYST','QUALITY_ISSUE_STATUS_CHANGED','quality_issue',{sql_value(issue_id)},"
+                "JSON_OBJECT('status','open'),JSON_OBJECT('status','resolved'));",
+                select_database=True)
+
+            with self.assertRaises(RuntimeError, msg="Duplicate usernames must be rejected"):
+                run_mysql(config,
+                    "INSERT INTO app_users(username,password_hash,role) VALUES "
+                    f"({sql_value('db_test_analyst')},{sql_value(password_hash)},'ANALYST');",
+                    select_database=True)
+            with self.assertRaises(RuntimeError, msg="Review foreign keys must reject unknown issues"):
+                run_mysql(config,
+                    "INSERT INTO issue_reviews(issue_id,status,analyst_note,reviewed_by,reviewed_at,revision) "
+                    f"SELECT {sql_value('f' * 64)},'open','',user_id,UTC_TIMESTAMP(),1 FROM app_users WHERE username='db_test_analyst';",
+                    select_database=True)
+
             second = load_bundle(config, source, curated)
             self.assertEqual(first, second)
             self.assertEqual(second["ingestion_runs"], 1)
             self.assertEqual(second["funds"], 1)
             self.assertEqual(second["portfolio_holdings"], 2)
             self.assertEqual(second["var_mask_configs"], 1)
+            persisted = run_mysql(config,
+                f"SELECT r.status,r.revision,COUNT(a.event_id) FROM issue_reviews r "
+                f"LEFT JOIN audit_events a ON a.target_id=r.issue_id WHERE r.issue_id={sql_value(issue_id)} "
+                "COLLATE utf8mb4_unicode_ci GROUP BY r.status,r.revision;",
+                select_database=True).strip().split("\t")
+            self.assertEqual(persisted, ["resolved", "1", "1"], "A repeated ingestion must preserve review and audit evidence")
         finally:
             run_mysql(config, f"DROP DATABASE IF EXISTS `{self.database_name}`;", select_database=False)
 

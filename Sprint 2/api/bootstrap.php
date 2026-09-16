@@ -37,6 +37,15 @@ function api_config(): array
         return $config;
     }
 
+    $minimumRiskObservations = filter_var(
+        env_value('FUNDS_MANAGER_MIN_RISK_OBSERVATIONS', '20'),
+        FILTER_VALIDATE_INT,
+        ['options' => ['min_range' => 2, 'max_range' => 252]]
+    );
+    if ($minimumRiskObservations === false) {
+        throw new RuntimeException('FUNDS_MANAGER_MIN_RISK_OBSERVATIONS must be an integer from 2 to 252');
+    }
+
     $config = [
         'db_host' => env_value('FUNDS_MANAGER_DB_HOST', '127.0.0.1'),
         'db_port' => (int) env_value('FUNDS_MANAGER_DB_PORT', '3306'),
@@ -45,6 +54,7 @@ function api_config(): array
         'db_password' => env_value('FUNDS_MANAGER_DB_PASSWORD', ''),
         'allowed_origins' => env_value('FUNDS_MANAGER_ALLOWED_ORIGINS', 'http://127.0.0.1:4173,http://localhost:4173'),
         'debug' => filter_var(env_value('FUNDS_MANAGER_DEBUG', '0'), FILTER_VALIDATE_BOOLEAN),
+        'minimum_risk_observations' => $minimumRiskObservations,
     ];
 
     $localConfig = __DIR__ . DIRECTORY_SEPARATOR . 'config.php';
@@ -98,14 +108,15 @@ function apply_cors(): void
     }
 
     $allowed = array_filter(array_map('trim', explode(',', (string) api_config()['allowed_origins'])));
-    if (!in_array('*', $allowed, true) && !in_array($origin, $allowed, true)) {
+    if (!in_array($origin, $allowed, true)) {
         throw new ApiException(403, 'Origin is not allowed');
     }
 
-    header('Access-Control-Allow-Origin: ' . ($allowed === ['*'] ? '*' : $origin));
+    header('Access-Control-Allow-Origin: ' . $origin);
+    header('Access-Control-Allow-Credentials: true');
     header('Vary: Origin');
-    header('Access-Control-Allow-Methods: GET, OPTIONS');
-    header('Access-Control-Allow-Headers: Accept, Content-Type');
+    header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+    header('Access-Control-Allow-Headers: Accept, Content-Type, X-CSRF-Token');
 }
 
 function require_get_method(): void
@@ -166,7 +177,25 @@ function validate_iso_date(?string $value): ?string
     return $value;
 }
 
-function run_endpoint(callable $handler): void
+function auth_service(): AuthService
+{
+    require_once __DIR__ . '/services/AuthService.php';
+    return new AuthService(new AuthRepository(database()));
+}
+
+function request_body(): array
+{
+    if (stripos($_SERVER['CONTENT_TYPE'] ?? '', 'application/json') !== 0) {
+        throw new ApiException(415, 'Expected application/json');
+    }
+    $body = file_get_contents('php://input', false, null, 0, 8193);
+    if ($body === false || strlen($body) > 8192) { throw new ApiException(413, 'Request too large'); }
+    $decoded = json_decode($body, true);
+    if (!is_array($decoded) || json_last_error() !== JSON_ERROR_NONE) { throw new ApiException(400, 'Invalid JSON'); }
+    return $decoded;
+}
+
+function run_endpoint(callable $handler, array $methods = ['GET'], bool $public = false): void
 {
     try {
         apply_cors();
@@ -175,7 +204,20 @@ function run_endpoint(callable $handler): void
             http_response_code(204);
             return;
         }
-        require_get_method();
+        header('X-Content-Type-Options: nosniff');
+        header('Referrer-Policy: no-referrer');
+        if (!in_array($method, $methods, true)) {
+            header('Allow: ' . implode(', ', $methods));
+            throw new ApiException(405, 'Method not allowed');
+        }
+        if (!$public) {
+            require_once __DIR__ . '/services/AuthService.php';
+            AuthService::startSession();
+            if (empty($_SESSION['user_id'])) { throw new ApiException(401, 'Authentication required'); }
+            $analyst = ['anomalies.php', 'runs.php', 'health.php', 'audit.php', 'review.php', 'reconciliation.php'];
+            auth_service()->user(in_array(basename($_SERVER['SCRIPT_NAME'] ?? ''), $analyst, true) ? 'ANALYST' : null);
+            if ($method !== 'GET') { AuthService::checkCsrf(); }
+        }
         $handler();
     } catch (ApiException $exception) {
         $error = ['error' => ['message' => $exception->getMessage()]];
@@ -185,15 +227,9 @@ function run_endpoint(callable $handler): void
         respond_json($error, $exception->statusCode());
     } catch (PDOException $exception) {
         $error = ['error' => ['message' => 'Database is unavailable']];
-        if (api_config()['debug']) {
-            $error['error']['debug'] = $exception->getMessage();
-        }
         respond_json($error, 503);
     } catch (Throwable $exception) {
         $error = ['error' => ['message' => 'Unexpected API error']];
-        if (api_config()['debug']) {
-            $error['error']['debug'] = $exception->getMessage();
-        }
         respond_json($error, 500);
     }
 }

@@ -86,9 +86,14 @@ select, input[type="search"] { min-height: 2.45rem; border: 1px solid var(--line
 .chart-wrap { min-height: 15rem; }
 .line-chart { width: 100%; height: auto; overflow: visible; }
 .line-chart .grid-line { stroke: rgba(58,46,66,0.08); stroke-width: 1; }
-.line-chart .area { fill: url(#chart-area); }
+.line-chart .area { pointer-events: none; }
 .line-chart .primary-line { fill: none; stroke: var(--violet-700); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
-.line-chart .secondary-line { fill: none; stroke: var(--ink-300); stroke-width: 2; stroke-dasharray: 5 7; vector-effect: non-scaling-stroke; }
+.line-chart .secondary-line { fill: none; stroke: var(--ink-300); stroke-width: 2; stroke-dasharray: 2 7; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.line-chart .axis-line, .line-chart .axis-tick-mark { stroke: rgba(58,46,66,0.26); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.line-chart .axis-tick { fill: var(--ink-500); font-family: var(--font-mono); font-size: 9px; font-variant-numeric: tabular-nums; }
+.line-chart .axis-label { fill: var(--ink-650); font-size: 10px; font-weight: 700; letter-spacing: 0.02em; }
+.line-chart .chart-point { fill: transparent; stroke: transparent; pointer-events: all; }
+.line-chart .chart-point:hover { fill: var(--surface-solid); stroke: var(--violet-700); stroke-width: 2; }
 .chart-legend { display: flex; flex-wrap: wrap; gap: var(--space-4); margin-top: var(--space-3); color: var(--ink-500); font-size: 0.72rem; }
 .legend-key { display: inline-flex; align-items: center; gap: 0.42rem; }
 .legend-key::before { content: ""; width: 1.4rem; height: 2px; background: var(--violet-700); }
@@ -118,6 +123,16 @@ select, input[type="search"] { min-height: 2.45rem; border: 1px solid var(--line
 .row-title small { font-size: 0.67rem; }
 .quality-bar { width: 5rem; height: 0.34rem; overflow: hidden; border-radius: 1rem; background: #e8e4e1; }
 .quality-bar span { display: block; height: 100%; border-radius: inherit; background: var(--sage-700); }
+.targeted-comparison { margin-bottom: 1rem; }
+.comparison-controls { display: flex; align-items: end; gap: var(--space-3); margin-bottom: var(--space-5); }
+.comparison-controls label { display: grid; flex: 1; gap: var(--space-2); color: var(--ink-500); font-size: 0.72rem; font-weight: 700; }
+.comparison-controls select { width: 100%; }
+.comparison-versus { display: grid; width: 2.25rem; height: 2.25rem; place-items: center; margin-bottom: 0.05rem; border-radius: 50%; background: var(--violet-100); color: var(--violet-900); font-family: var(--font-mono); font-size: 0.68rem; font-weight: 760; }
+.comparison-result-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(18rem, 0.75fr); align-items: center; gap: var(--space-6); }
+.comparison-metrics { border: 1px solid var(--line); border-radius: var(--radius-md); }
+.comparison-metrics th[scope="row"] { color: var(--ink-650); font-weight: 600; }
+.portfolio-comparison { margin-top: 1rem; }
+.compact-state { min-height: 18rem; }
 
 .scenario-banner { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-4); padding: 0.78rem 1rem; border: 1px solid rgba(90,59,122,0.16); border-radius: var(--radius-md); background: rgba(238,230,244,0.72); color: var(--violet-900); }
 .scenario-banner p { margin: 0; color: inherit; font-size: 0.78rem; }
@@ -151,7 +166,7 @@ select, input[type="search"] { min-height: 2.45rem; border: 1px solid var(--line
 .progress-track { height: 0.5rem; overflow: hidden; border-radius: 1rem; background: #e8e4e1; }
 .progress-track span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--violet-700), var(--violet-500)); transition: width var(--duration-medium); }
 
-.lineage-chain { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-3); }
+.lineage-chain { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: var(--space-3); }
 .lineage-node { position: relative; padding: var(--space-4); border: 1px solid var(--line); border-radius: var(--radius-md); background: rgba(255,255,255,0.56); }
 .lineage-node:not(:last-child)::after { content: ""; position: absolute; top: 50%; left: calc(100% + 1px); width: var(--space-3); height: 1px; background: var(--violet-200); }
 .lineage-node strong { display: block; font-size: 0.78rem; }
@@ -176,6 +191,7 @@ select, input[type="search"] { min-height: 2.45rem; border: 1px solid var(--line
 
 @media (max-width: 1180px) {
   .hero-card { grid-template-columns: 1fr; }
+  .comparison-result-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 760px) {
@@ -185,6 +201,8 @@ select, input[type="search"] { min-height: 2.45rem; border: 1px solid var(--line
   .step { min-width: 8.5rem; }
   .lineage-chain { grid-template-columns: 1fr; }
   .lineage-node:not(:last-child)::after { top: 100%; left: 50%; width: 1px; height: var(--space-3); }
+  .comparison-controls { align-items: stretch; flex-direction: column; }
+  .comparison-versus { align-self: center; margin: 0; }
 }
 
 @media (max-width: 520px) {
@@ -194,3 +212,18 @@ select, input[type="search"] { min-height: 2.45rem; border: 1px solid var(--line
   .modal-actions .button { width: 100%; }
   .detail-grid { grid-template-columns: 1fr; }
 }
+[hidden] { display: none !important; }
+html[data-auth="pending"] .app-shell { display: none; }
+.login-panel { width: min(440px, calc(100% - 32px)); margin: 8vh auto; padding: 32px; position: relative; }
+.login-panel form { display: grid; gap: 12px; margin-top: 24px; }
+.login-panel input { width: 100%; min-width: 0; padding: 12px; font: inherit; border: 1px solid #877a90; border-radius: 8px; }
+#login-error { min-height: 1.5em; color: #912d3b; }
+#review-form { display: grid; gap: 10px; margin: 16px 0; }
+#review-note { width: 100%; min-height: 90px; font: inherit; }
+#review-error { color: #912d3b; }
+.risk-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0; }
+.risk-tabs [aria-current] { outline: 2px solid #5b3978; }
+.risk-bars > div { display: grid; grid-template-columns: minmax(80px,1fr) minmax(60px,2fr) minmax(70px,1fr); gap: 10px; align-items: center; margin: 10px 0; }
+.risk-bars meter { width: 100%; }
+.risk-bars span, .risk-bars strong { overflow-wrap: anywhere; }
+[data-page="risk"] svg { width: 100%; height: auto; }

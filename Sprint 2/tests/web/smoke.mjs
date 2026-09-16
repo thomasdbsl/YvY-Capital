@@ -4,6 +4,8 @@ import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { startPhpServer } from "../../scripts/php_runtime.mjs";
+import { provisionQaAccount, loginPage } from '../auth_helpers.mjs';
+const credentials=provisionQaAccount('qa_regression_browser');
 
 const require = createRequire(import.meta.url);
 const { chromium } = require("playwright");
@@ -11,6 +13,7 @@ const filePath = fileURLToPath(import.meta.url);
 const repoRoot = path.resolve(path.dirname(filePath), "../../..");
 const sprintRoot = path.join(repoRoot, "Sprint 2");
 const testPort = Number.parseInt(process.env.FUNDS_MANAGER_TEST_HTTP_PORT || "4193", 10);
+process.env.FUNDS_MANAGER_ALLOWED_ORIGINS=`http://127.0.0.1:${testPort}`;
 const server = await startPhpServer({ sprintRoot, port: testPort });
 const baseUrl = server.appUrl;
 
@@ -35,10 +38,11 @@ try {
   }
 
   await page.goto(baseUrl, { waitUntil: "networkidle" });
+  await loginPage(page,credentials);
   await page.getByRole("heading", { name: "A clear view before every decision." }).waitFor();
   assert.equal(dataRequests.some((url) => url.endsWith("/api/dashboard.php")), true);
   assert.equal(dataRequests.some((url) => url.includes("serving_data.json")), false);
-  assert.equal(await page.locator(".nav-item").count(), 9);
+  assert.equal(await page.locator(".nav-item").count(), 11);
   assert.equal(await page.locator("[onclick]").count(), 0);
   assert.match(await page.locator("#source-status").innerText(), /^S3-[A-F0-9]{20}/);
   await captureReportAsset("01-executive-overview-sprint3");
@@ -80,10 +84,35 @@ try {
   assert.notEqual(oneMonthReturn, twelveMonthReturn);
   assert.ok(dataRequests.some((url) => url.includes("performance.php") && url.includes("period=1m")));
   assert.ok(dataRequests.some((url) => url.includes("internal_comparison.php") && url.includes("period=12m")));
+  assert.equal(await page.locator(".axis-x").count() > 0, true);
+  assert.equal(await page.locator(".axis-y").count() > 0, true);
+  assert.match(await page.locator(".axis-y").first().textContent(), /Performance Index/);
+  assert.match(await page.locator(".axis-x").first().textContent(), /Date/);
+  assert.equal((await page.locator(".axis-y .axis-tick").first().textContent()).includes("%"), false);
+
+  const fundFiveResponse = page.waitForResponse((response) => response.url().includes("performance.php") && response.url().includes("fund_id=FUND_05") && response.url().includes("period=12m"));
+  await page.locator("#fund-select").selectOption("FUND_05");
+  const fundFivePerformance = await (await fundFiveResponse).json();
+  await page.getByRole("heading", { name: /FUND_05.*12M requested/ }).waitFor();
+  assert.match(await page.locator(".page-heading").innerText(), /Partial 12M coverage/);
+  const pctCdiCard = page.locator(".stat-card").filter({ hasText: "% of CDI" });
+  assert.equal(await pctCdiCard.locator(".stat-label").innerText(), "% of CDI");
+  assert.equal(await pctCdiCard.locator(".stat-value").innerText(), `${Number(fundFivePerformance.metrics.pct_cdi).toFixed(1)}%`);
   await captureReportAsset("03-performance-risk-sprint3");
 
   await page.locator('.nav-item[data-view="comparison"]').click();
-  assert.equal(await page.locator("tbody tr").count(), 14);
+  assert.equal(await page.locator("#comparison-fund-a").inputValue(), "FUND_01");
+  assert.equal(await page.locator("#comparison-fund-b").inputValue(), "FUND_02");
+  assert.equal(await page.locator('#comparison-fund-a option[value="FUND_02"]').getAttribute("disabled"), "");
+  assert.equal(await page.locator('#comparison-fund-b option[value="FUND_01"]').getAttribute("disabled"), "");
+  const targetedResponse = page.waitForResponse((response) => response.url().includes("internal_comparison.php") && response.url().includes("fund_a=FUND_01") && response.url().includes("fund_b=FUND_05"));
+  await page.locator("#comparison-fund-b").selectOption("FUND_05");
+  await targetedResponse;
+  await page.locator('#comparison-fund-a option[value="FUND_05"]:disabled').waitFor({ state: "attached" });
+  assert.equal(await page.locator("[data-testid=targeted-comparison-table] tbody tr").count(), 7);
+  assert.equal(await page.locator("[data-testid=portfolio-comparison-table] tbody tr").count(), 14);
+  assert.match(await page.locator(".targeted-comparison").innerText(), /FUND_01[\s\S]*FUND_05/);
+  assert.match(await page.locator(".targeted-comparison .axis-y").textContent(), /Performance Index/);
   await page.locator('.nav-item[data-view="peers"]').click();
   await page.getByRole("heading", { name: "Peer data is not yet certified." }).waitFor();
   assert.match(await page.locator("main").innerText(), /No governed peer dataset/);
@@ -92,7 +121,8 @@ try {
   await page.getByRole("button", { name: "Details" }).first().click();
   assert.equal(await page.locator("#anomaly-dialog").getAttribute("open"), "");
   await page.getByRole("button", { name: "Close", exact: true }).last().click();
-  await page.locator("#role-select").selectOption("analyst");
+  assert.equal(await page.locator("#role-select").isDisabled(),true);
+  await page.locator('.nav-item[data-view="import"]').click();
   await page.getByRole("heading", { name: "Import and validation" }).waitFor();
   assert.match(await page.locator("main").innerText(), /Successful governed ingestion/i);
   await page.locator('.nav-item[data-view="runs"]').click();
@@ -114,6 +144,10 @@ try {
     await page.setViewportSize(viewport);
     await page.reload({ waitUntil: "networkidle" });
     await page.getByRole("heading", { name: "A clear view before every decision." }).waitFor();
+    if (viewport.width <= 860) await page.locator("#menu-button").click();
+    await page.locator('.nav-item[data-view="performance"]').click();
+    await page.locator(".axis-x").waitFor();
+    if (viewport.width < 520) assert.ok(await page.locator(".axis-x .axis-tick").count() <= 3);
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     assert.ok(overflow <= 1, `Unexpected horizontal overflow at ${viewport.width}px: ${overflow}px`);
   }

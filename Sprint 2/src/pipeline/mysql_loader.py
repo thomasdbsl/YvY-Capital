@@ -111,6 +111,10 @@ def run_mysql(config: DatabaseConfig, sql: str, *, select_database: bool) -> str
 
 def apply_schema(config: DatabaseConfig, schema_path: Path) -> None:
     schema = schema_path.read_text(encoding="utf-8")
+    migration_root = schema_path.parent / "migrations"
+    if migration_root.is_dir():
+        for migration in sorted(migration_root.glob("*.sql")):
+            schema += "\n" + migration.read_text(encoding="utf-8")
     bootstrap = f"CREATE DATABASE IF NOT EXISTS `{config.database}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;\nUSE `{config.database}`;\n"
     run_mysql(config, bootstrap + schema, select_database=False)
 
@@ -178,6 +182,17 @@ def load_bundle(config: DatabaseConfig, source: PipelineBundle, curated: Curated
     quarantine_columns = ("quarantine_id", "run_id", "logical_name", "source_row", "record_ref_hash", "rule_id", "reason")
     sql.append(insert_statement("quality_issues", issue_columns, issue_rows, upsert=True))
     sql.append(insert_statement("quarantine_records", quarantine_columns, quarantine_rows, upsert=True))
+    fund_aliases = {row["source_fund_id"]: row["fund_code"] for row in (curated.tables.get("funds", []) if curated else [])}
+    evidence_rows = []
+    for evidence in source.reconciliation:
+        evidence_rows.append({
+            "evidence_id": stable_hash(source.run_id, evidence["fund_id"], evidence["snapshot_date"]),
+            "run_id": source.run_id, "fund_code": fund_aliases.get(evidence["fund_id"]),
+            **{key: evidence[key] for key in ("snapshot_date", "expected_nav", "holdings_total", "difference_value", "difference_fraction", "rule_id", "rule_status", "severity")},
+            "issue_id": stable_hash(source.run_id, evidence["source_issue_id"]) if evidence["source_issue_id"] else None,
+        })
+    evidence_columns = ("evidence_id", "run_id", "fund_code", "snapshot_date", "expected_nav", "holdings_total", "difference_value", "difference_fraction", "rule_id", "rule_status", "severity", "issue_id")
+    sql.extend(insert_statements("reconciliation_evidence", evidence_columns, evidence_rows, upsert=True))
 
     raw_count = sum(item["row_count"] for item in source.manifests)
     silver_count = sum(len(rows) for rows in source.tables.values())

@@ -1,0 +1,13 @@
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Only the browser application and declared API controllers are public.
+  RewriteRule ^(?:assets|config|data|database|docs|legacy|presentations|reports|scripts|tests|wireframes)(?:/|$) - [R=404,L,NC]
+  RewriteRule ^api/(?!allocation\.php$|anomalies\.php$|auth\.php$|dashboard\.php$|fund\.php$|funds\.php$|health\.php$|internal_comparison\.php$|kpis\.php$|peers\.php$|performance\.php$|reconciliation\.php$|review\.php$|risk\.php$|runs\.php$).* - [R=404,L,NC]
+</IfModule>
+
+<FilesMatch "(?:^\.|\.(?:csv|sql|json|zip|bundle|md|mjs|py|ps1))$">
+  Require all denied
+</FilesMatch>

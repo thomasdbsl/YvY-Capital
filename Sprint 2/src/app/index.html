@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-auth="pending">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Local governed Funds Manager Sprint 3 dashboard.">
-  <title>Funds Manager | Sprint 3</title>
+  <meta name="description" content="Local governed Funds Manager Sprint 4 integrated analytics beta.">
+  <title>Funds Manager | Sprint 4 Beta</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2335204f'/%3E%3Cpath d='M16 43V31h8v12zm12 0V17h8v26zm12 0V25h8v18z' fill='%23f7f2fa'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles/tokens.css">
   <link rel="stylesheet" href="styles/base.css">
@@ -12,6 +12,19 @@
   <link rel="stylesheet" href="styles/components.css">
 </head>
 <body>
+  <section id="login-panel" class="login-panel glass-panel" aria-labelledby="login-title" hidden>
+    <p class="eyebrow">YvY Capital</p>
+    <h1 id="login-title">Funds Manager</h1>
+    <p>Sign in to your workspace.</p>
+    <form id="login-form">
+      <label for="username">Username</label>
+      <input id="username" name="username" autocomplete="username" required maxlength="100">
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required maxlength="1024">
+      <p id="login-error" role="alert"></p>
+      <button class="button primary" type="submit">Sign in</button>
+    </form>
+  </section>
   <a class="skip-link" href="#main-content">Skip to main content</a>
   <div class="ambient ambient-one" aria-hidden="true"></div>
   <div class="ambient ambient-two" aria-hidden="true"></div>
@@ -44,7 +57,9 @@
           <span class="nav-icon" aria-hidden="true">06</span><span>Peers</span>
         </button>
 
+        <button class="nav-item" type="button" data-view="risk"><span class="nav-icon" aria-hidden="true">10</span><span>Risk Analytics</span></button>
         <p class="nav-label">Operations</p>
+        <button class="nav-item" type="button" data-view="reconciliation"><span class="nav-icon" aria-hidden="true">11</span><span>Reconciliation</span></button>
         <button class="nav-item" type="button" data-view="quality">
           <span class="nav-icon" aria-hidden="true">07</span><span>Data quality</span>
         </button>
@@ -74,14 +89,14 @@
 
         <div class="topbar-actions">
           <label class="compact-field">
-            <span>Journey</span>
-            <select id="role-select" aria-label="Select a user journey">
+            <span>Account role</span>
+            <select id="role-select" aria-label="Authenticated role" disabled>
               <option value="direction">Executive</option>
               <option value="analyst">Analyst</option>
             </select>
           </label>
           <button class="icon-button" id="help-button" type="button" aria-label="Show prototype help">?</button>
-          <button class="avatar-button" type="button" aria-label="Demonstration profile">YD</button>
+          <button class="button" id="logout-button" type="button">Sign out</button>
         </div>
       </header>
 

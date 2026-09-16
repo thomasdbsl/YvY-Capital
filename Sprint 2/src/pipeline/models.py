@@ -32,6 +32,7 @@ class PipelineBundle:
     issues: list[QualityIssue] = field(default_factory=list)
     quarantine: list[QualityIssue] = field(default_factory=list)
     bronze_record_count: int = 0
+    reconciliation: list[dict[str, Any]] = field(default_factory=list)
 
     @property
     def blocking_count(self) -> int:

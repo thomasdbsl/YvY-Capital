@@ -3,13 +3,16 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { startPhpServer } from "../../scripts/php_runtime.mjs";
+import { provisionQaAccount, loginCookie } from '../auth_helpers.mjs';
+const credentials=provisionQaAccount('qa_regression_api');
+let authCookie='';
 
 const filePath = fileURLToPath(import.meta.url);
 const repoRoot = path.resolve(path.dirname(filePath), "../../..");
 const sprintRoot = path.join(repoRoot, "Sprint 2");
 
 async function requestJson(apiUrl, route, expectedStatus = 200, options = {}) {
-  const response = await fetch(`${apiUrl}/${route}`, options);
+  const response = await fetch(`${apiUrl}/${route}`, {...options,headers:{Cookie:authCookie,...options.headers}});
   const text = await response.text();
   let body;
   try {
@@ -35,8 +38,43 @@ function assertNoPrivateData(value) {
   for (const pattern of forbidden) assert.equal(pattern.test(serialized), false, `Private pattern in API response: ${pattern}`);
 }
 
+function assertCdiCalculation(performance, fundId, period) {
+  const history = performance.history;
+  assert.ok(history.length >= 2, `${fundId} ${period}: insufficient aligned history`);
+  const first = history[0];
+  const last = history.at(-1);
+  const fundReturn = last.nav_index / first.nav_index - 1;
+  const benchmarkReturn = last.benchmark_index / first.benchmark_index - 1;
+  const pctCdi = Math.abs(benchmarkReturn) < 1e-15 ? null : fundReturn / benchmarkReturn * 100;
+  assert.equal(performance.window.start, first.date);
+  assert.equal(performance.window.end, last.date);
+  assert.equal(performance.window.observations, history.length);
+  assert.ok(Math.abs(performance.metrics.period_return - fundReturn) < 1e-12);
+  assert.ok(Math.abs(performance.metrics.benchmark_return - benchmarkReturn) < 1e-12);
+  if (pctCdi === null) assert.equal(performance.metrics.pct_cdi, null);
+  else assert.ok(Math.abs(performance.metrics.pct_cdi - pctCdi) < 1e-9);
+  process.stdout.write(`CDI diagnostic ${fundId} ${period}: requested ${performance.window.requested_start} to ${performance.window.requested_end}; common ${first.date} to ${last.date}; fund ${first.nav_index} -> ${last.nav_index} (${(fundReturn * 100).toFixed(8)}%); CDI ${first.benchmark_index} -> ${last.benchmark_index} (${(benchmarkReturn * 100).toFixed(8)}%); % of CDI ${pctCdi?.toFixed(8) ?? "unavailable"}; coverage ${performance.window.coverage_status}.\n`);
+}
+
 const server = await startPhpServer({ sprintRoot, port: 4180 });
 try {
+  for (const restrictedPath of [
+    "/data/contracts/silver.schema.json",
+    "/database/sprint3_schema.sql",
+    "/scripts/start_local.mjs",
+    "/tests/api/integration.mjs",
+    "/api/bootstrap.php",
+    "/api/repositories/AuthRepository.php",
+  ]) {
+    const response = await fetch(`${server.origin}${restrictedPath}`);
+    assert.equal(response.status, 404, `${restrictedPath} must not be served`);
+    assert.equal((response.headers.get("content-type") || "").includes("application/octet-stream"), false);
+  }
+  const appModule = await fetch(`${server.origin}/src/app/js/app.js`);
+  assert.equal(appModule.status, 200);
+  assert.match(appModule.headers.get("content-type") || "", /javascript/);
+
+  authCookie=await loginCookie(server.apiUrl,credentials);
   const health = await requestJson(server.apiUrl, "health.php");
   assert.equal(health.body.status, "ok");
   assert.equal(health.body.database, "connected");
@@ -51,6 +89,8 @@ try {
   assert.equal(dashboard.body.peer_sample.length, 0);
   assert.equal(dashboard.body.peer_status, "unavailable-pending-certification");
   assert.ok(dashboard.body.anomalies.length > 0);
+  assert.equal(dashboard.body.overview.open_issues, dashboard.body.anomalies.filter((item) => item.status === "open").length);
+  assert.equal(dashboard.body.overview.quarantined_records, dashboard.body.runs[0].quarantined_records);
   assertNoPrivateData(dashboard.body);
 
   const fundOne = await requestJson(server.apiUrl, "allocation.php?fund_id=FUND_01");
@@ -77,13 +117,50 @@ try {
   const last = performance1m.body.history.at(-1).nav_index;
   assert.ok(Math.abs(performance1m.body.metrics.period_return - (last / first - 1)) < 1e-12);
   assert.ok(performance1m.body.metrics.daily_observations > 1);
+  assert.equal(performance12m.body.window.requested_end, performance12m.body.window.end);
+  assert.ok(["complete", "partial"].includes(performance12m.body.window.coverage_status));
   await requestJson(server.apiUrl, "performance.php?fund_id=FUND_01&period=all", 400);
   await requestJson(server.apiUrl, "performance.php?fund_id=FUND_01%27%20OR%201%3D1&period=12m", 400);
+
+  const cdiCases = await Promise.all(["FUND_01", "FUND_02", "FUND_05", "FUND_11"].map(async (fundId) => {
+    const response = await requestJson(server.apiUrl, `performance.php?fund_id=${fundId}&period=12m`);
+    assertCdiCalculation(response.body, fundId, "12m");
+    return response.body;
+  }));
+  const fundFive = cdiCases.find((item) => item.fund_id === "FUND_05");
+  assert.equal(fundFive.window.coverage_status, "partial");
+  assert.ok(fundFive.metrics.period_return > 0.10);
+  assert.ok(fundFive.metrics.pct_cdi > 140 && fundFive.metrics.pct_cdi < 150);
 
   const comparison = await requestJson(server.apiUrl, "internal_comparison.php?period=6m");
   assert.equal(comparison.body.funds.length, 14);
   assert.ok(comparison.body.window.start < comparison.body.window.end);
   assert.ok(comparison.body.funds.every((row) => Object.hasOwn(row, "period_return") && Object.hasOwn(row, "volatility")));
+  assert.equal(comparison.body.targeted.requested_funds.fund_a, "FUND_01");
+  assert.equal(comparison.body.targeted.requested_funds.fund_b, "FUND_02");
+
+  const targeted = await requestJson(server.apiUrl, "internal_comparison.php?period=12m&fund_a=FUND_01&fund_b=FUND_05");
+  assert.equal(targeted.body.funds.length, 14, "Portfolio-wide ranking must remain available");
+  assert.deepEqual(targeted.body.targeted.requested_funds, { fund_a: "FUND_01", fund_b: "FUND_05" });
+  assert.equal(targeted.body.targeted.status, "current");
+  assert.equal(targeted.body.targeted.funds.length, 2);
+  assert.ok(targeted.body.targeted.history.length >= 2);
+  assert.ok(targeted.body.targeted.window.start < targeted.body.targeted.window.end);
+  assert.equal(targeted.body.targeted.window.observations, targeted.body.targeted.history.length);
+  const targetedFirst = targeted.body.targeted.history[0];
+  const targetedLast = targeted.body.targeted.history.at(-1);
+  assert.equal(targetedFirst.date, targeted.body.targeted.window.start);
+  assert.equal(targetedLast.date, targeted.body.targeted.window.end);
+  for (const [index, key] of ["fund_a_index", "fund_b_index"].entries()) {
+    const expectedReturn = targetedLast[key] / targetedFirst[key] - 1;
+    assert.ok(Math.abs(targeted.body.targeted.funds[index].period_return - expectedReturn) < 1e-12);
+  }
+  const shortComparison = await requestJson(server.apiUrl, "internal_comparison.php?period=12m&fund_a=FUND_05&fund_b=FUND_11");
+  assert.equal(shortComparison.body.targeted.status, "current");
+  assert.equal(shortComparison.body.targeted.window.coverage_status, "partial");
+  await requestJson(server.apiUrl, "internal_comparison.php?period=12m&fund_a=FUND_05&fund_b=FUND_05", 400);
+  await requestJson(server.apiUrl, "internal_comparison.php?period=12m&fund_a=FUND_01&fund_b=FUND_99", 404);
+  await requestJson(server.apiUrl, "internal_comparison.php?period=12m&fund_a=FUND_01", 400);
   await requestJson(server.apiUrl, "internal_comparison.php?period=24m", 400);
 
   const anomalies = await requestJson(server.apiUrl, "anomalies.php");
@@ -96,6 +173,10 @@ try {
   assert.ok(runs.body.runs.length >= 1);
   assert.equal(runs.body.source_files.length, 14);
   assert.ok(runs.body.lineage_proofs.length >= 10);
+  assert.deepEqual(runs.body.pipeline_stages.map((item) => item.stage), ["raw", "bronze", "silver", "gold", "serving"]);
+  assert.ok(runs.body.lineage_proofs.every((item) => item.dashboard_domain));
+  assert.equal(runs.body.latest_successful_run.run_id, runs.body.runs.find((item) => item.status !== "blocked").run_id);
+  assert.ok(runs.body.source_files.every((item) => item.modified_at));
   assertNoPrivateData(runs.body);
 
   await requestJson(server.apiUrl, "health.php", 405, { method: "POST" });
@@ -108,6 +189,7 @@ try {
   assert.match(dataSource, /dashboard\.php/);
   assert.match(dataSource, /allocation\.php/);
   assert.match(dataSource, /performance\.php/);
+  assert.match(dataSource, /internal_comparison\.php/);
 
   process.stdout.write("API integration: real MySQL data, business calculations, fund/date windows, privacy, errors, CORS and lineage passed.\n");
 } finally {

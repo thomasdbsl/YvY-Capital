@@ -11,5 +11,7 @@ run_endpoint(function (): void {
         'runs' => $governance->runs(),
         'source_files' => $governance->sourceFiles($run['run_id']),
         'lineage_proofs' => $governance->evidence($run['run_id']),
+        'pipeline_stages' => $governance->stages($run['run_id']),
+        'latest_successful_run' => $governance->latestSuccessfulRun(),
     ]);
 });

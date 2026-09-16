@@ -7,6 +7,7 @@ require_once __DIR__ . '/repositories/GovernanceRepository.php';
 require_once __DIR__ . '/services/FinancialMath.php';
 require_once __DIR__ . '/services/FundsService.php';
 require_once __DIR__ . '/services/GovernanceService.php';
+require_once __DIR__ . '/services/PeerService.php';
 
 function funds_service(): FundsService
 {
@@ -38,14 +39,17 @@ function dashboard_data(): array
     }
     $portfolio = $fundsService->portfolio($selectedFund);
     $performance = $fundsService->performance($selectedFund, '12m');
-    $anomalies = $governance->anomalies();
+    $user = auth_service()->user();
+    $isAnalyst = $user['role'] === 'ANALYST';
+    $anomalies = $isAnalyst ? $governance->anomalies() : [];
+    $issueCounts = $governance->issueCounts();
     $totalAum = array_sum(array_map(static function (array $fund): float {
         return $fund['aum_brl'] ?? 0.0;
     }, $funds));
     $kpis = [
         ['id' => 'K01', 'name' => 'Latest available net assets', 'value' => $totalAum, 'unit' => 'BRL', 'quality_status' => 'current', 'implementation_status' => 'implemented', 'lineage_ref' => $run['run_id']],
         ['id' => 'H02', 'name' => 'Period return', 'value' => $performance['metrics']['period_return'], 'unit' => 'ratio', 'quality_status' => $performance['status'], 'implementation_status' => 'implemented', 'lineage_ref' => $run['run_id']],
-        ['id' => 'H03', 'name' => 'Annualized volatility', 'value' => $performance['metrics']['volatility'], 'unit' => 'ratio', 'quality_status' => $performance['status'], 'implementation_status' => 'implemented', 'lineage_ref' => $run['run_id']],
+        ['id' => 'H03', 'name' => 'Annualized volatility', 'value' => $performance['metrics']['volatility'], 'unit' => 'ratio', 'quality_status' => $performance['metrics']['volatility'] === null ? 'unavailable' : 'current', 'implementation_status' => 'implemented', 'lineage_ref' => $run['run_id']],
         ['id' => 'H04', 'name' => 'Sharpe ratio', 'value' => $performance['metrics']['sharpe'], 'unit' => 'ratio', 'quality_status' => $performance['metrics']['sharpe'] === null ? 'unavailable' : 'current', 'implementation_status' => 'implemented', 'lineage_ref' => $run['run_id']],
         ['id' => 'H05', 'name' => 'Maximum drawdown', 'value' => $performance['metrics']['maximum_drawdown'], 'unit' => 'ratio', 'quality_status' => $performance['metrics']['maximum_drawdown'] === null ? 'unavailable' : 'current', 'implementation_status' => 'implemented', 'lineage_ref' => $run['run_id']],
         ['id' => 'H08', 'name' => 'Percentage of CDI', 'value' => $performance['metrics']['pct_cdi'], 'unit' => 'percent', 'quality_status' => $performance['metrics']['pct_cdi'] === null ? 'unavailable' : 'current', 'implementation_status' => 'implemented', 'lineage_ref' => $run['run_id']],
@@ -63,7 +67,10 @@ function dashboard_data(): array
             'total_aum_brl' => $totalAum,
             'fund_count' => count($funds),
             'funds_with_nav' => count(array_filter($funds, static function (array $fund): bool { return $fund['aum_brl'] !== null; })),
-            'open_issues' => count(array_filter($anomalies, static function (array $item): bool { return $item['status'] === 'open'; })),
+            'open_issues' => $issueCounts['open'],
+            'blocking_issues' => $issueCounts['blocking'],
+            'quarantined_records' => (int) $run['quarantined_records'],
+            'warning_records' => (int) $run['warning_records'],
         ],
         'funds' => $funds,
         'allocation' => $portfolio['allocation'],
@@ -74,9 +81,12 @@ function dashboard_data(): array
         'internal_comparison' => $fundsService->internalComparison('12m'),
         'kpis' => $kpis,
         'anomalies' => $anomalies,
-        'runs' => $governance->runs(),
-        'lineage_proofs' => $governance->evidence($run['run_id']),
+        'runs' => $isAnalyst ? $governance->runs() : [],
+        'lineage_proofs' => $isAnalyst ? $governance->evidence($run['run_id']) : [],
+        'pipeline_stages' => $isAnalyst ? $governance->stages($run['run_id']) : [],
+        'source_files' => $isAnalyst ? $governance->sourceFiles($run['run_id']) : [],
+        'latest_successful_run' => $isAnalyst ? $governance->latestSuccessfulRun() : null,
         'peer_sample' => [],
-        'peer_status' => 'unavailable-pending-certification',
+        'peer_status' => (new PeerService(new PendingPeerSource()))->dataset()['status'],
     ];
 }

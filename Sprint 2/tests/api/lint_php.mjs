@@ -6,7 +6,6 @@ import { resolvePhpRuntime } from "../../scripts/php_runtime.mjs";
 
 const filePath = fileURLToPath(import.meta.url);
 const sprintRoot = path.resolve(path.dirname(filePath), "../..");
-const apiRoot = path.join(sprintRoot, "api");
 const runtime = resolvePhpRuntime();
 function phpFiles(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -16,7 +15,9 @@ function phpFiles(directory) {
   });
 }
 
-const files = phpFiles(apiRoot).sort();
+const files = [path.join(sprintRoot, "api"), path.join(sprintRoot, "scripts"), path.join(sprintRoot, "tests", "api")]
+  .flatMap(phpFiles)
+  .sort();
 
 for (const name of files) {
   const args = [];
@@ -30,4 +31,4 @@ for (const name of files) {
   }
 }
 
-process.stdout.write(`PHP lint passed for ${files.length} API files.\n`);
+process.stdout.write(`PHP lint passed for ${files.length} API and CLI files.\n`);

@@ -5,6 +5,8 @@ export const state = {
   view: "overview",
   role: "direction",
   selectedFund: "FUND_01",
+  comparisonFundA: "FUND_01",
+  comparisonFundB: "FUND_02",
   period: "12m",
   scenario: "current",
   dataStatus: "loading",

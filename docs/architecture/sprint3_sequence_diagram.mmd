@@ -1,0 +1,96 @@
+sequenceDiagram
+    autonumber
+    actor User
+    participant Dashboard as Dashboard (HTML/JS)
+    participant Controller as PHP API Controller
+    participant Service as FundsService
+    participant Repository as FundRepository
+    participant Math as FinancialMath
+    participant MySQL as MySQL 5.7
+    participant Setup as setup_database.ps1
+    participant Pipeline as run_sprint3.py
+    participant Validation as ingest_sources / DQ
+    participant Transform as transform_to_curated
+    participant Loader as mysql_loader
+    participant Files as Immutable CSV Files
+
+    rect rgb(246, 242, 248)
+        Note over Setup,Files: Deterministic ingestion path
+        Setup->>Pipeline: input directory, database, optional reset
+        Pipeline->>Files: Read bytes and exact CSV contracts
+        Files-->>Pipeline: Source rows
+        Pipeline->>Pipeline: SHA-256, size, timestamp, row count
+        Pipeline->>Validation: Parse, type, deduplicate, validate domains
+        alt Missing file or invalid schema
+            Validation-->>Pipeline: reject_run issue
+            Pipeline->>Loader: Persist blocked run and issue metadata
+            Loader->>MySQL: Transactional governance UPSERT
+            Pipeline-->>Setup: Non-zero exit code
+        else Invalid row with recoverable dataset
+            Validation->>Validation: Quarantine opaque row reference
+            Validation-->>Pipeline: Clean Silver rows + DQ issues
+            Pipeline->>Transform: Build aliased relational and Gold rows
+            Transform-->>Pipeline: CuratedBundle + lineage
+            Pipeline->>Loader: Run, manifests, DQ, curated rows, lineage
+            Loader->>MySQL: Single transaction, natural keys and UPSERT
+            MySQL-->>Loader: Commit successful ingestion
+            Loader-->>Pipeline: Deterministic table counts
+            Pipeline-->>Setup: completed_with_quarantine or warnings
+        else All rows valid
+            Validation-->>Pipeline: Clean Silver rows
+            Pipeline->>Transform: Build aliased relational and Gold rows
+            Transform-->>Pipeline: CuratedBundle + lineage
+            Pipeline->>Loader: Load governed bundle
+            Loader->>MySQL: Single transaction
+            MySQL-->>Loader: Commit successful ingestion
+            Pipeline-->>Setup: completed
+        end
+    end
+
+    rect rgb(242, 247, 245)
+        Note over User,MySQL: Fund and 12-month performance request
+        User->>Dashboard: Select FUND_01 and 12 months
+        Dashboard->>Controller: GET performance.php?fund_id=FUND_01&period=12m
+        Controller->>Controller: Validate method, origin, fund format, period
+        Controller->>Service: performance(FUND_01, 12m)
+        Service->>Repository: exists(FUND_01)
+        Repository->>MySQL: Prepared fund lookup
+        MySQL-->>Repository: Fund exists
+        Service->>Repository: returnSeries(FUND_01)
+        Repository->>MySQL: Prepared return-series query
+        MySQL-->>Repository: Fund and benchmark index rows
+        Repository-->>Service: Ordered rows
+        Service->>Math: Resolve shared dates and 12M window
+        Service->>Math: Period return, CDI, volatility, Sharpe, Sortino
+        Service->>Repository: drawdowns(FUND_01, start, end)
+        Repository->>MySQL: Prepared date-window query
+        MySQL-->>Repository: Validated drawdown rows
+        Repository-->>Service: Ordered drawdowns
+        Service-->>Controller: Safe metrics, history, status, window
+        Controller-->>Dashboard: JSON response
+        alt Data available
+            Dashboard->>Dashboard: Render chart and calculated KPI cards
+            Dashboard-->>User: Updated 12M view
+        else Missing validated data
+            Dashboard->>Dashboard: Render explicit unavailable state
+            Dashboard-->>User: No invented fallback value
+        end
+    end
+
+    rect rgb(247, 244, 238)
+        Note over User,MySQL: Targeted two-fund comparison
+        User->>Dashboard: Select Fund A, Fund B, and period
+        Dashboard->>Controller: GET internal_comparison.php?fund_a=FUND_01&fund_b=FUND_05&period=12m
+        Controller->>Controller: Validate both funds exist and A differs from B
+        Controller->>Service: internalComparison(12m, FUND_01, FUND_05)
+        Service->>Repository: returnSeries for both funds
+        Repository->>MySQL: Prepared return-series queries
+        MySQL-->>Repository: Four fund/benchmark series
+        Repository-->>Service: Ordered rows
+        Service->>Math: Resolve exact common date set
+        Service->>Math: Calculate both funds on the fixed window
+        Service-->>Controller: Targeted metrics, rebased history, global ranking
+        Controller-->>Dashboard: Safe JSON response
+        Dashboard->>Dashboard: Render selectors, axes, metrics, and two lines
+        Dashboard-->>User: Targeted comparison plus portfolio-wide table
+    end

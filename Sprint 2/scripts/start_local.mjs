@@ -7,7 +7,7 @@ const sprintRoot = path.resolve(path.dirname(scriptPath), "..");
 const port = Number.parseInt(process.env.FUNDS_MANAGER_HTTP_PORT || "4173", 10);
 
 const server = await startPhpServer({ sprintRoot, port, stdio: "inherit" });
-const health = await fetch(`${server.apiUrl}/health.php`);
+const health = await fetch(`${server.apiUrl}/auth.php`);
 if (!health.ok) {
   const body = await health.text();
   await server.stop();
