@@ -2,11 +2,11 @@
 
 Audit started 2026-09-28 against main at 01c42fa plus existing, uncommitted Sprint 4 ticket and UI work. Those changes are part of the baseline and must be preserved. This is technical working evidence, not a partner acceptance report.
 
-The 2026-09-30 final-package checkpoint below supersedes pending statements in earlier chronological checkpoints. Publication remains a separate Git gate; external partner decisions are not represented as technical defects.
+The 2026-09-30 final-package and publication checkpoints below supersede pending statements in earlier chronological checkpoints. External partner decisions are not represented as technical defects.
 
 | Requirement | Current state | Evidence | Required Sprint 5 action | Final status |
 | --- | --- | --- | --- | --- |
-| Scope and product handover (0-1, 108, 113) | Existing stack stabilized; no new presentation materials created | Source diff; data-free source package; technical Markdown guides | Finish release publication without claiming partner acceptance | NEEDS FINAL QA |
+| Scope and product handover (0-1, 108, 113) | Existing stack stabilized; no new presentation materials created | Published 1.0.0 source; data-free source package; technical Markdown guides | YvY acceptance is not claimed | COMPLETE |
 | Baseline and preservation (2, 4-6) | Green baseline established; existing ticket work preserved | Baseline npm test exit 0; results below | Preserve these features through final release regression | COMPLETE |
 | Navigation/UI/states (7-9, 44-45, 87-94) | Twelve views and both roles inspected; partial/error/mobile states verified | Manual review checkpoint; extracted 1.0.0 browser/security suites | Chromium is the supported tested baseline; no redesign | COMPLETE |
 | Peer certification (10, 51) | Current decision log requires certification | docs/sprint3/DECISION_LOG.md; PeerService | Check remaining stakeholder files; retain certification gate | BLOCKED BY EXTERNAL DEPENDENCY |
@@ -24,10 +24,10 @@ The 2026-09-30 final-package checkpoint below supersedes pending statements in e
 | Role journeys (49-50, 93-94, 98-99) | Executive and Analyst flows verified manually and automatically | Manual ticket receipt/review evidence; extracted role suites | Demonstration uses normal login and source-backed application paths | COMPLETE |
 | Final QA sequence (54-59, 96-97, 100-104) | Upgrade, clean setup, replay, roles, regression and recovery verified on QA only | Extracted 1.0.0 npm test exit 0; 52 Python tests with zero skips; restored smoke | Primary database was not reset | COMPLETE |
 | Technical handover (60-66, 106) | User, operations, maintenance, deployment, limitations and backlog guides reviewed | docs/handover; financial conventions and architecture docs | Infrastructure and acceptance inputs remain YvY-owned | COMPLETE |
-| Release/package (68-73, 107) | Named final archive extracted; documented setup and full suite passed | package_release.py; 184-entry verified manifest; clean extracted 1.0.0 tests | Documentation-only evidence closure requires archive rebuild/hash verification | NEEDS FINAL QA |
+| Release/package (68-73, 107) | Named archive extracted; documented setup and full suite passed; documentation closure verified separately | package_release.py; 184-entry verified manifest; tested executable-byte comparison | Archive checksum sidecar identifies the delivered bytes | COMPLETE |
 | Deployment/acceptance (74-76, 105, 110) | No target identified in inspected docs | current docs/decision log | Confirm source evidence; document target and acceptance dependencies | BLOCKED BY EXTERNAL DEPENDENCY |
 | Dead code/dependencies (84-86) | Historical generator retained only for regression; runtime uses API | Static build contract; package exclusions; dependency audit zero known vulnerabilities | No speculative deletion or major upgrades | COMPLETE |
-| Git and final response (109, 111-113) | Dirty main; GitHub origin | git status/log/remote | Review safe changes; logical commits; push only after final QA | NEEDS FINAL QA |
+| Git and delivery communication (109, 111-113) | Reviewed release committed and pushed without rewriting history | Release commit 49c9b82; successful origin/main push | This documentation closure is a separate follow-up commit; final identity is in Git | COMPLETE |
 
 ## Baseline evidence to date
 
@@ -102,3 +102,10 @@ No final release, partner acceptance, deployment or Sprint 5 completion is claim
 - Backed up the extracted release database and restored into a separate absent QA database using the archive's own scripts. All 29 tables and 13,360 rows matched by content hash. Restored API integration and twelve-view browser smoke finished with exit 0. No primary database was reset.
 - Final documentation clarifies source versus rebased indexes, latest-successful reconciliation defaults, source observation versus publication, UTC timestamps and completed recovery evidence. These are documentation-only changes after the extracted suite; archive closure must verify that executable/configuration/test bytes remain identical to the tested extraction.
 - Remote fetch confirmed local main and origin/main have no divergence before the release commit. Current raw inputs remain local and ignored; their existing historical Git copies have not been rewritten. Publication still requires the final staged-content review.
+
+## Publication closure, 2026-09-30
+
+- Release commit `49c9b826f5833160f7e959f03dea533668c861e0` was pushed successfully to public `origin/main`, advancing it from `01c42fa`. No force-push or history rewrite was used. All 71 added/modified files passed the release allowlist/content scan; the other 24 changes remove previously tracked raw inputs from Git while preserving local originals. Existing project documents were preserved.
+- After the extracted full suite, only four handover Markdown files changed. All executable, configuration, migration, fixture and test bytes matched the tested extraction. The builder regenerated and verified the 184-entry archive and checksum. The publication closure updates this Markdown record only; the accompanying manifest/checksum, not a self-referential hash in this document, identifies the delivered archive.
+- An additional sandboxed repeat of the six packaging tests was stopped after it remained active without progress. It is not counted as a passing run. The same tests had already passed in the successful complete extracted suite; direct archive construction and manifest verification then completed successfully outside that sandbox. No test was weakened or skipped to obtain the full-suite result.
+- Technical final status: **FINAL PRODUCT READY - DEPLOYMENT TARGET PENDING YVY**. No critical application defect was identified in the recorded final checks. Peer certification, Stress/DV01 business-unit confirmation, deployment infrastructure and formal YvY acceptance remain external dependencies.
