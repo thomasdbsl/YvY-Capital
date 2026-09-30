@@ -9,7 +9,9 @@ try {
     $db->exec(file_get_contents(__DIR__ . '/../database/migrations/005_reviews.sql'));
     $db->exec(file_get_contents(__DIR__ . '/../database/migrations/006_reconciliation.sql'));
     $db->exec(file_get_contents(__DIR__ . '/../database/migrations/007_collation_hardening.sql'));
-    echo "Sprint 4 authentication migration applied. Business tables preserved.\n";
+    $db->exec(file_get_contents(__DIR__ . '/../database/migrations/008_tickets.sql'));
+    $db->exec(file_get_contents(__DIR__ . '/../database/migrations/009_pipeline_attempts.sql'));
+    echo "Application migrations applied. Business tables preserved.\n";
 } catch (Throwable $error) {
     fwrite(STDERR, "Migration failed. Verify local MySQL configuration.\n");
     exit(1);

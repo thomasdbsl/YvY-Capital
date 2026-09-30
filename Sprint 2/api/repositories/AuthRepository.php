@@ -16,7 +16,7 @@ final class AuthRepository
 
     public function byId(int $id): ?array
     {
-        $query = $this->db->prepare('SELECT user_id, username, role, active FROM app_users WHERE user_id = ?');
+        $query = $this->db->prepare('SELECT user_id, username, role, active, password_hash FROM app_users WHERE user_id = ?');
         $query->execute([$id]);
         return $query->fetch() ?: null;
     }
@@ -53,5 +53,12 @@ final class AuthRepository
     {
         $query = $this->db->prepare('INSERT INTO app_users (username,password_hash,role) VALUES (?,?,?) ON DUPLICATE KEY UPDATE password_hash = VALUES(password_hash), role = VALUES(role), active = TRUE, failed_attempts = 0, locked_until = NULL');
         $query->execute([$username, $hash, $role]);
+    }
+
+    public function disable(string $username): void
+    {
+        $query = $this->db->prepare('UPDATE app_users SET active = FALSE WHERE username = ?');
+        $query->execute([$username]);
+        if ($this->byUsername($username) === null) { throw new RuntimeException('Unknown user'); }
     }
 }

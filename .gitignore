@@ -11,6 +11,16 @@
 /Sprint 2/sprint2_commit.bundle
 /Sprint 2/reports/audit/SPRINT_2_AUDIT_REPORT.md
 /local_data/
+/backups/
+/delivery/
+/tmp/
+/output/
+/outputs/
+/.qa_sprint4/
+/.qa_sprint5/
+/.qa_tmp/
+!/docs/handover/
+!/docs/handover/*.md
 
 # Generated pipeline and test artefacts.
 /Sprint 2/src/pipeline/output/

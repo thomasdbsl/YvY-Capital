@@ -111,6 +111,7 @@ async function exerciseBusinessJourney(page) {
   }
 }
 try {
+  let ticketId;
   const anonymous = await request.newContext(); contexts.push(anonymous);
   await call(anonymous, "funds.php", 401);
   const preflight = await call(anonymous, "auth.php", 200);
@@ -136,6 +137,16 @@ try {
   assert.deepEqual(dashboard.runs, []);
   assert.ok(dashboard.overview.open_issues > 0);
   assert.ok(dashboard.overview.quarantined_records > 0);
+  const ticketBody={action:"create",title:"Allocation clarification",description:"Please review the selected fund allocation evidence.",category:"ALLOCATION",priority:"HIGH",related_fund:"FUND_01",related_context:"fund-detail"};
+  await call(anonymous,"tickets.php",403,ticketBody);
+  const createdTicket=await call(anonymous,"tickets.php",201,ticketBody,executive.csrf_token);
+  ticketId=createdTicket.ticket.ticket_id;
+  assert.match(ticketId,/^TKT-[0-9]{6}$/);
+  assert.equal(createdTicket.ticket.status,"OPEN");
+  assert.deepEqual(createdTicket.ticket.audit.map((event)=>event.action),["TICKET_CREATED"]);
+  const executiveTickets=await call(anonymous,"tickets.php",200);
+  assert.ok(executiveTickets.records.some((ticket)=>ticket.ticket_id===ticketId));
+  await call(anonymous,"tickets.php",403,{action:"update",ticket_id:ticketId,status:"IN_REVIEW",response:"Forbidden",revision:0},executive.csrf_token);
   await call(anonymous, "auth.php", 403, { action: "logout" });
   await call(anonymous, "auth.php", 200, { action: "logout" }, executive.csrf_token);
   await call(anonymous, "funds.php", 401);
@@ -151,6 +162,24 @@ try {
   const analyst = await request.newContext(); contexts.push(analyst);
   const initial = await call(analyst, "auth.php", 200);
   const signedIn = await call(analyst, "auth.php", 200, { action: "login", username: "qa_analyst", password }, initial.csrf_token);
+  const analystTickets=await call(analyst,"tickets.php?status=OPEN&category=ALLOCATION&priority=HIGH&fund_id=FUND_01",200);
+  assert.ok(analystTickets.records.some((ticket)=>ticket.ticket_id===ticketId));
+  const ticketDetail=await call(analyst,`tickets.php?ticket_id=${ticketId}`,200);
+  assert.equal(ticketDetail.ticket.history[0].event_type,"CREATED");
+  await call(analyst,"tickets.php",403,{action:"update",ticket_id:ticketId,status:"IN_REVIEW",response:"Evidence reviewed.",revision:0});
+  const updatedTicket=await call(analyst,"tickets.php",200,{action:"update",ticket_id:ticketId,status:"IN_REVIEW",response:"Evidence reviewed.",revision:0},signedIn.csrf_token);
+  assert.equal(updatedTicket.ticket.status,"IN_REVIEW");
+  assert.equal(updatedTicket.ticket.analyst_response,"Evidence reviewed.");
+  assert.deepEqual(updatedTicket.ticket.history.slice(-2).map((event)=>event.event_type),["STATUS_CHANGED","RESPONSE_ADDED"]);
+  assert.deepEqual(updatedTicket.ticket.audit.map((event)=>event.action),["TICKET_CREATED","TICKET_STATUS_CHANGED","TICKET_RESPONSE_ADDED"]);
+  assert.equal(JSON.stringify(updatedTicket.ticket.audit).includes("Evidence reviewed."),false);
+  await call(analyst,"tickets.php",409,{action:"update",ticket_id:ticketId,status:"RESOLVED",response:"Stale update",revision:0},signedIn.csrf_token);
+  const executiveAgain=await request.newContext(); contexts.push(executiveAgain);
+  const executiveAgainInitial=await call(executiveAgain,"auth.php",200);
+  await call(executiveAgain,"auth.php",200,{action:"login",username:"qa_executive",password},executiveAgainInitial.csrf_token);
+  const executiveUpdatedView=await call(executiveAgain,`tickets.php?ticket_id=${ticketId}`,200);
+  assert.equal(executiveUpdatedView.ticket.status,"IN_REVIEW");
+  assert.equal(executiveUpdatedView.ticket.analyst_response,"Evidence reviewed.");
   const issues = await call(analyst, "anomalies.php", 200);
   const blockingIssues = await call(analyst, "anomalies.php?severity=blocking", 200);
   assert.ok(blockingIssues.anomalies.length > 0);
@@ -284,6 +313,10 @@ try {
     catch (error) { console.error(await page.locator("body").innerText()); throw error; }
     assert.equal(await page.locator('#role-select').isDisabled(), true);
     assert.equal(await page.locator('.nav-item[data-view="quality"]').getAttribute("hidden") !== null, role === "executive");
+    assert.equal(await page.locator('.nav-item[data-view="tickets"]').isVisible(),true);
+    const navNumbers=await page.locator('.nav-item:not([hidden]) .nav-icon').allTextContents();
+    assert.equal(new Set(navNumbers).size,navNumbers.length);
+    assert.deepEqual(navNumbers,[...navNumbers].sort((a,b)=>Number(a)-Number(b)));
     assert.equal(await page.getByRole("button", { name: "View controls", exact: true }).count(), role === "analyst" ? 1 : 0);
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, `${role} overflow at ${width}px`);
     await assertAccessibleSurface(page, `${role} overview ${width}px`);
@@ -291,7 +324,7 @@ try {
     if (width <= 860) await page.locator("#menu-button").click();
     await page.locator('.nav-item[data-view="risk"]').focus();
     await page.locator('.nav-item[data-view="risk"]').press("ArrowDown");
-    const expectedNext = role === "analyst" ? "reconciliation" : "overview";
+    const expectedNext = "tickets";
     assert.equal(await page.evaluate(() => document.activeElement?.dataset?.view), expectedNext);
     await page.locator('.nav-item[data-view="risk"]').focus();
     await page.locator('.nav-item[data-view="risk"]').click();
@@ -300,6 +333,18 @@ try {
       await page.getByRole("button", { name: tab, exact: true }).click();
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true, `${tab} overflow at ${width}px`);
       await assertAccessibleSurface(page, `${tab} ${width}px`);
+    }
+    if (width <= 860) await page.locator("#menu-button").click();
+    await page.locator('.nav-item[data-view="tickets"]').click();
+    await page.getByRole("heading",{name:"Tickets",exact:true}).waitFor();
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),true,`Tickets overflow at ${width}px`);
+    await assertAccessibleSurface(page,`Tickets ${role} ${width}px`);
+    if (role === "executive" && width === 1440) {
+      await page.getByLabel("Title",{exact:true}).fill("Browser Executive request");
+      await page.getByLabel("Description",{exact:true}).fill("Please validate the browser journey request and its governed context.");
+      await page.getByRole("button",{name:"Send to Analyst",exact:true}).click();
+      await page.getByText("Request sent to the Analyst queue.",{exact:true}).waitFor();
+      await page.getByRole("heading",{name:"Browser Executive request",exact:true}).waitFor();
     }
     if (role === "analyst") {
       if (width===1440) await page.locator('#fund-select').selectOption(reconciliationFund);
@@ -338,6 +383,17 @@ try {
       await page.getByText("Review saved with audit evidence.", { exact: true }).waitFor();
       await page.getByRole("button", { name: "Close details", exact: true }).click();
       if (width===1440) {
+        await openView(page,'tickets');
+        const ticketButton=page.locator('[data-action="select-ticket"]').first();
+        await ticketButton.click();
+        await page.locator('#ticket-detail-title').waitFor();
+        const ticketStatus=page.locator('#ticket-update-form select[name="status"]');
+        if (await ticketStatus.count()) {
+          await ticketStatus.selectOption('RESOLVED');
+          await page.getByLabel('Analyst response',{exact:true}).fill('Reviewed and resolved from the Analyst journey.');
+          await page.getByRole('button',{name:'Save response and status',exact:true}).click();
+          await page.getByText('Ticket updated with audit evidence.',{exact:true}).waitFor();
+        }
         await openView(page,'import');
         assert.deepEqual(await page.locator('section[data-page="import"] table tbody tr td:first-child').allTextContents(),['raw','bronze','silver','gold','serving']);
         await openView(page,'runs');

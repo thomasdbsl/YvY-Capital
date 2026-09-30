@@ -11,7 +11,7 @@ Sprint 3 keeps the validated Sprint 2 frontend and introduces a traceable local 
 | Source ingestion | Python 3.12 standard library |
 | Database | MAMP MySQL 5.7, InnoDB, `utf8mb4` |
 | Backend runtime | MAMP PHP 8 with PDO MySQL |
-| HTTP API | read-only PHP endpoint controllers |
+| HTTP API | authenticated PHP endpoint controllers with controlled workflow writes |
 | Business logic | PHP service layer |
 | Query layer | PHP repositories with native prepared statements |
 | Frontend | existing HTML, CSS, and ES modules |
@@ -85,6 +85,7 @@ Governance domains:
 - `pipeline_stage_counts`;
 - `quality_issues` and `quarantine_records`;
 - `lineage_records`.
+- `app_users`, `audit_events`, `issue_reviews`, `reconciliation_evidence`, `tickets`, and immutable `ticket_events` from ordered Sprint 4 migrations.
 
 Natural and composite primary keys prevent duplicates. Foreign keys connect domain rows to funds and runs, and connect snapshot-dependent records to the exact NAV snapshot. The same bundle checksum and transform version are unique in `ingestion_runs`.
 
@@ -106,17 +107,17 @@ The application query path is `controller -> service -> repository -> MySQL`; ca
 
 Files such as `performance.php`, `allocation.php`, and `runs.php` accept HTTP requests. `bootstrap.php` enforces:
 
-- `GET`/`OPTIONS` only;
+- authenticated `GET` reads plus explicit CSRF-protected `POST` commands for reviews, tickets, login, and logout;
 - exact allowed query keys;
 - safe fund-ID, period, and ISO-date formats;
 - configured CORS origins;
 - JSON errors without database details unless local debug is explicitly enabled.
 
-Controllers do not contain SQL or formulas.
+Controllers do not contain SQL or formulas. Write controllers accept only controlled review/ticket commands, enforce CSRF, and delegate RBAC and validation to services.
 
 ### Repositories
 
-`FundRepository.php` and `GovernanceRepository.php` are the only components that issue application queries. Every dynamic value is passed through a PDO prepared statement with emulated prepares disabled.
+Repository classes are the only components that issue application queries. `FundRepository.php` and `GovernanceRepository.php` serve analytics and lineage, while the focused Auth, Review, Risk, Reconciliation, and Ticket repositories own their respective domains. Every dynamic value is passed through a PDO prepared statement with emulated prepares disabled.
 
 Repositories return database rows; they do not format cards or calculate financial indicators.
 
@@ -167,11 +168,11 @@ Portfolio requests follow the same controller/service/repository path through `a
 
 ## 9. Local state
 
-No fund, KPI, quality issue, run, lineage record, or financial value is persisted in browser local storage. Current fund/date/period and Fund A/Fund B choices live only in JavaScript application state and are refreshed from the API.
+No fund, KPI, quality issue, run, lineage record, or financial value is persisted in browser local storage. Tickets and their audit history are also persisted only in MySQL, never in browser storage. Current fund/date/period and Fund A/Fund B choices live only in JavaScript application state and are refreshed from the API.
 
 ## 10. Current limitations
 
-- This is a local demonstration architecture without authentication or RBAC.
+- Authentication, two-role RBAC, CSRF, session controls, review audit, and ticket audit are implemented for the local beta; production identity and deployment controls remain deferred.
 - Peer data is intentionally unavailable pending source classification and certification.
 - Advanced risk metrics not supported by validated source/formula combinations remain unavailable.
 - Restricted fields exist only in the local database; deployment and access controls for a managed environment are deferred.

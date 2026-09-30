@@ -16,6 +16,11 @@ export const state = {
   workflowStep: 0,
   selectedAnomaly: null,
   query: "",
+  ticketFilters: {},
+  ticketsStatus: "idle",
+  ticketsData: null,
+  selectedTicketId: null,
+  ticketDetail: null,
 };
 
 export function setState(patch, options = {}) {

@@ -42,12 +42,12 @@ try {
   await page.getByRole("heading", { name: "A clear view before every decision." }).waitFor();
   assert.equal(dataRequests.some((url) => url.endsWith("/api/dashboard.php")), true);
   assert.equal(dataRequests.some((url) => url.includes("serving_data.json")), false);
-  assert.equal(await page.locator(".nav-item").count(), 11);
+  assert.equal(await page.locator(".nav-item").count(), 12);
   assert.equal(await page.locator("[onclick]").count(), 0);
   assert.match(await page.locator("#source-status").innerText(), /^S3-[A-F0-9]{20}/);
   await captureReportAsset("01-executive-overview-sprint3");
 
-  const views = ["overview", "funds", "fund-detail", "performance", "comparison", "peers", "quality", "import", "runs"];
+  const views = ["overview", "funds", "fund-detail", "performance", "comparison", "peers", "risk", "tickets", "reconciliation", "quality", "import", "runs"];
   for (const view of views) {
     await page.locator(`.nav-item[data-view="${view}"]`).click();
     await page.locator(`[data-page="${view}"]`).waitFor();
@@ -70,9 +70,15 @@ try {
   assert.notEqual(fundTwoPositions, fundOnePositions);
   const snapshots = await page.locator("#snapshot-select option").allTextContents();
   assert.ok(snapshots.length > 1);
+  const latestNetReturnText=await page.getByTestId("allocation-net-return").innerText();
+  assert.match(latestNetReturnText,/\d{4}-\d{2}-\d{2} → \d{4}-\d{2}-\d{2}/);
   const olderSnapshot = snapshots.at(-1);
   await page.locator("#snapshot-select").selectOption(olderSnapshot);
   await page.getByRole("heading", { name: new RegExp(`FUND_02.*${olderSnapshot}`) }).waitFor();
+  const netReturnCard=page.getByTestId("allocation-net-return");
+  const olderNetReturnText=await netReturnCard.innerText();
+  assert.notEqual(olderNetReturnText,latestNetReturnText);
+  assert.match(olderNetReturnText,/No prior return observation|\d{4}-\d{2}-\d{2} → \d{4}-\d{2}-\d{2}/);
   await captureReportAsset("02-fund-allocation-sprint3");
 
   await page.locator('.nav-item[data-view="performance"]').click();
@@ -107,10 +113,15 @@ try {
   assert.equal(await page.locator('#comparison-fund-b option[value="FUND_01"]').getAttribute("disabled"), "");
   const targetedResponse = page.waitForResponse((response) => response.url().includes("internal_comparison.php") && response.url().includes("fund_a=FUND_01") && response.url().includes("fund_b=FUND_05"));
   await page.locator("#comparison-fund-b").selectOption("FUND_05");
-  await targetedResponse;
+  const targetedPayload=await (await targetedResponse).json();
   await page.locator('#comparison-fund-a option[value="FUND_05"]:disabled').waitFor({ state: "attached" });
   assert.equal(await page.locator("[data-testid=targeted-comparison-table] tbody tr").count(), 7);
   assert.equal(await page.locator("[data-testid=portfolio-comparison-table] tbody tr").count(), 14);
+  assert.deepEqual((await page.locator("[data-testid=portfolio-comparison-table] thead th").allTextContents()).slice(-3),["Sharpe","Sortino","Quality"]);
+  const apiFundOne=targetedPayload.funds.find((fund)=>fund.fund_id==="FUND_01");
+  const portfolioFundOne=page.locator('[data-testid="portfolio-comparison-table"] tbody tr').filter({has:page.locator('[data-fund="FUND_01"]')});
+  assert.equal((await portfolioFundOne.locator('td').nth(6).innerText()).trim(),apiFundOne.sharpe===null ? "Unavailable":Number(apiFundOne.sharpe).toFixed(2));
+  assert.equal((await portfolioFundOne.locator('td').nth(7).innerText()).trim(),apiFundOne.sortino===null ? "Unavailable":Number(apiFundOne.sortino).toFixed(2));
   assert.match(await page.locator(".targeted-comparison").innerText(), /FUND_01[\s\S]*FUND_05/);
   assert.match(await page.locator(".targeted-comparison .axis-y").textContent(), /Performance Index/);
   await page.locator('.nav-item[data-view="peers"]').click();
@@ -156,7 +167,7 @@ try {
   await page.keyboard.press("ArrowDown");
   assert.equal(await page.evaluate(() => document.activeElement?.getAttribute("data-view")), "funds");
   assert.deepEqual(consoleErrors, []);
-  process.stdout.write("Web smoke: real fund/snapshot/period queries, nine views, unavailable states, governance, keyboard and responsive checks passed.\n");
+  process.stdout.write("Web smoke: real fund/snapshot/period queries, twelve views, unavailable states, governance, keyboard and responsive checks passed.\n");
 } finally {
   if (browser) await browser.close();
   await server.stop();

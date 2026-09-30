@@ -14,7 +14,7 @@ final class GovernanceService
     {
         $run = $this->governance->latestRun();
         if ($run === null) {
-            throw new ApiException(503, 'Sprint 3 data has not been ingested');
+            throw new ApiException(503, 'Governed data has not been ingested');
         }
         return $run;
     }
@@ -23,6 +23,30 @@ final class GovernanceService
     {
         $run = $this->governance->latestSuccessfulRun();
         return $run === null ? null : $this->runPayload($run);
+    }
+
+    public function latestDataRun(): array
+    {
+        $run = $this->governance->latestSuccessfulRun();
+        if ($run === null) { throw new ApiException(503, 'No successful data ingestion is available'); }
+        return $run;
+    }
+
+    public function operationalHealth(): array
+    {
+        $convert = static function (?array $row): ?array {
+            if ($row === null) { return null; }
+            foreach (['started_at','completed_at'] as $field) {
+                $row[$field] = $row[$field] === null ? null : str_replace(' ', 'T', $row[$field]) . 'Z';
+            }
+            $row['duration_ms'] = $row['duration_ms'] === null ? null : (int) $row['duration_ms'];
+            return $row;
+        };
+        return [
+            'latest_attempt' => $convert($this->governance->latestAttempt()),
+            'latest_failed_attempt' => $convert($this->governance->latestAttempt(true)),
+            'latest_business_date' => $this->governance->latestBusinessDate(),
+        ];
     }
 
     public function anomalies(?string $severity = null, ?string $status = null, array $filters = [], int $offset = 0): array

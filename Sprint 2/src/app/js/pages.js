@@ -1,6 +1,7 @@
 import { lineChart, miniBars } from "./charts.js";
 import { riskPage } from "./risk.js";
 import { reconciliationPage } from "./reconciliation.js";
+import { ticketsPage } from "./tickets.js";
 import { allocationView, badge, card, escapeHtml, formatMoney, formatPercent, pageHeading, sourceFootnote, statCard, statePanel, tableShell, workflowSteps } from "./components.js";
 
 const blockingScenarios = new Set(["loading", "empty", "error", "denied", "no-match"]);
@@ -111,7 +112,8 @@ function fundDetail(state) {
     const bars = portfolio.allocation.map((item) => Math.abs(item.weight) * 100);
     return `<section class="page" data-page="fund-detail">${pageHeading("Funds / Allocation", `${fund.id} · ${portfolio.snapshot_date}`, "Fund-specific allocation and masked holdings from the selected validated snapshot.", '<button class="button secondary" type="button" data-nav="funds">Back to funds</button><button class="button primary" type="button" data-nav="performance">View performance</button>')}
       <div class="grid grid-kpis">
-        ${statCard({ label: "Net assets", value: formatMoney(portfolio.nav_brl), status: "current", statusLabel: "Validated", trend: formatPercent(fund.daily_return), meta: "K01", testId: "fund-aum" })}
+        ${statCard({ label: "Net assets", value: formatMoney(portfolio.nav_brl), status: "current", statusLabel: "Validated", trend: "Exact selected snapshot", meta: "K01", testId: "fund-aum" })}
+        ${statCard({ label: "Net return", value: formatPercent(portfolio.net_return.value), status: portfolio.net_return.status === "calculated" ? "current":"unavailable", statusLabel: portfolio.net_return.status === "calculated" ? "Calculated":"Unavailable", trend: portfolio.net_return.start_date ? `${portfolio.net_return.start_date} → ${portfolio.net_return.end_date}` : "No prior return observation", meta: "H01", testId: "allocation-net-return" })}
         ${statCard({ label: "Snapshot", value: portfolio.snapshot_date, status: "current", statusLabel: "Exact", trend: `${portfolio.positions.length} holdings`, meta: "NAV", delay: 40 })}
         ${statCard({ label: "Top 5 concentration", value: formatPercent(portfolio.metrics.top5_concentration), status: "current", statusLabel: "Calculated", trend: "Positive holdings / NAV", meta: "K07", delay: 80 })}
         ${statCard({ label: "Reconciliation", value: formatPercent(portfolio.metrics.reconciliation_ratio), status: "current", statusLabel: "Reconciled", trend: "Holdings / NAV", meta: "DQ13", delay: 120 })}
@@ -137,7 +139,7 @@ function performance(state) {
     const coverage = window?.coverage_status === "partial"
       ? `Partial ${state.period.toUpperCase()} coverage. Common history: ${windowText}; requested from ${window.requested_start}.`
       : `Validated common history: ${windowText}.`;
-    return `<section class="page" data-page="performance">${pageHeading("Performance & risk", `${fund.id} · ${state.period.toUpperCase()} requested`, `Base-100 fund and CDI series. ${coverage}`, '<button class="button secondary" type="button" data-nav="fund-detail">Allocation</button><button class="button primary" type="button" data-nav="comparison">Compare</button>')}
+    return `<section class="page" data-page="performance">${pageHeading("Performance & risk", `${fund.id} · ${state.period.toUpperCase()} requested`, `Source fund and CDI indexes, not rebased to the selected period. ${coverage}`, '<button class="button secondary" type="button" data-nav="fund-detail">Allocation</button><button class="button primary" type="button" data-nav="comparison">Compare</button>')}
       <div class="grid grid-kpis">
         ${statCard({ label: "Period return", value: formatPercent(metrics.period_return), status: performanceData.status, statusLabel: statusLabel(performanceData.status), trend: "Fund return over common window", meta: "H02" })}
         ${statCard({ label: "% of CDI", value: pctCdi(metrics.pct_cdi), status: metrics.pct_cdi === null ? "unavailable" : "current", statusLabel: metrics.pct_cdi === null ? "Unavailable" : "Calculated", trend: "Fund return / CDI return × 100", meta: "H02", delay: 40 })}
@@ -145,7 +147,7 @@ function performance(state) {
         ${statCard({ label: "Maximum drawdown", value: formatPercent(metrics.maximum_drawdown), status: metrics.maximum_drawdown === null ? "unavailable" : "current", statusLabel: metrics.maximum_drawdown === null ? "Unavailable" : "Observed", trend: "Minimum supplied drawdown", meta: "H05", delay: 120 })}
       </div>
       <div class="grid grid-main">
-        ${card("Performance index", `Base 100 · ${history.length} aligned observations`, lineChart(history.map((item) => item.nav_index), history.map((item) => item.benchmark_index), `Performance of ${fund.id}`, fund.id, "CDI benchmark", history.map((item) => item.date)), badge(window?.coverage_status === "partial" ? "Partial period" : "Calculated", window?.coverage_status === "partial" ? "incomplete" : "current"))}
+        ${card("Performance index", `Source index levels · ${history.length} aligned observations`, lineChart(history.map((item) => item.nav_index), history.map((item) => item.benchmark_index), `Performance of ${fund.id}`, fund.id, "CDI benchmark", history.map((item) => item.date)), badge(window?.coverage_status === "partial" ? "Partial period" : "Calculated", window?.coverage_status === "partial" ? "incomplete" : "current"))}
         ${card("Calculation evidence", "The backend applies one documented convention.", `<div class="alert-list"><div class="alert-item"><span class="alert-symbol">CDI</span><div><strong>${pctCdi(metrics.pct_cdi)} of CDI</strong><p>Fund and benchmark use exactly the same dates.</p></div>${badge("Aligned", "current")}</div><div class="alert-item"><span class="alert-symbol">SR</span><div><strong>Sharpe ${ratio(metrics.sharpe)} · Sortino ${ratio(metrics.sortino)}</strong><p>CDI is the proxy; downside deviation uses negative excess returns.</p></div>${badge(metrics.sharpe === null && metrics.sortino === null ? "Unavailable" : "Calculated", metrics.sharpe === null && metrics.sortino === null ? "unavailable" : "current")}</div><div class="alert-item"><span class="alert-symbol">NAV</span><div><strong>Daily index</strong><p>Values are displayed as an index, never as a percentage return.</p></div>${badge("Controlled", "current")}</div></div>`)}
       </div>${sourceFor(state)}
     </section>`;
@@ -161,7 +163,7 @@ function comparison(state) {
     const fundA = targetedFunds.find((fund) => fund.fund_id === state.comparisonFundA) || targetedFunds[0];
     const fundB = targetedFunds.find((fund) => fund.fund_id === state.comparisonFundB) || targetedFunds[1];
     const maxAum = Math.max(...funds.map((fund) => fund.aum_brl || 0), 1);
-    const rows = funds.map((fund) => `<tr><td><button class="table-button" type="button" data-action="select-fund" data-fund="${escapeHtml(fund.fund_id)}">${escapeHtml(fund.fund_id)}</button></td><td class="numeric">${formatMoney(fund.aum_brl)}</td><td><div class="quality-bar" aria-label="Relative size ${Math.round((fund.aum_brl || 0) / maxAum * 100)} percent"><span style="width:${(fund.aum_brl || 0) / maxAum * 100}%"></span></div></td><td class="numeric">${formatPercent(fund.period_return)}</td><td class="numeric">${pctCdi(fund.pct_cdi)}</td><td class="numeric">${formatPercent(fund.volatility)}</td><td>${badge(statusLabel(fund.quality_status), fund.quality_status)}</td></tr>`).join("");
+    const rows = funds.map((fund) => `<tr><td class="sticky-cell"><button class="table-button" type="button" data-action="select-fund" data-fund="${escapeHtml(fund.fund_id)}">${escapeHtml(fund.fund_id)}</button></td><td class="numeric">${formatMoney(fund.aum_brl)}</td><td><div class="quality-bar" aria-label="Relative size ${Math.round((fund.aum_brl || 0) / maxAum * 100)} percent"><span style="width:${(fund.aum_brl || 0) / maxAum * 100}%"></span></div></td><td class="numeric">${formatPercent(fund.period_return)}</td><td class="numeric">${pctCdi(fund.pct_cdi)}</td><td class="numeric">${formatPercent(fund.volatility)}</td><td class="numeric">${ratio(fund.sharpe)}</td><td class="numeric">${ratio(fund.sortino)}</td><td>${badge(statusLabel(fund.quality_status), fund.quality_status)}</td></tr>`).join("");
     const window = comparisonData.window ? `${comparisonData.window.start} to ${comparisonData.window.end}` : "Unavailable";
     const targetedWindow = targeted?.window ? `${targeted.window.start} to ${targeted.window.end}` : "No common comparison window";
     const targetedMetrics = fundA && fundB ? [
@@ -183,7 +185,7 @@ function comparison(state) {
       : '<div class="state-panel compact-state"><div class="state-panel-inner"><div class="state-icon">N/A</div><h2>No common comparison window</h2><p>The selected funds do not have enough aligned observations for a reliable comparison.</p></div></div>';
     return `<section class="page" data-page="comparison">${pageHeading("Internal comparison", "Compare two funds on exactly the same dates.", `Targeted comparison plus the existing ${funds.length}-fund ranking for ${state.period.toUpperCase()}.`, '<button class="button primary" type="button" data-nav="peers">Peer status</button>')}
       ${card("Targeted comparison", `${targetedWindow} · both performance series rebased to 100`, `${controls}${targetedContent}`, badge(targeted?.status === "current" ? "Common window" : "Unavailable", targeted?.status === "current" ? "current" : "unavailable"), "targeted-comparison")}
-      <div class="portfolio-comparison" data-testid="portfolio-comparison-table">${tableShell("Portfolio-wide comparison", `All funds aligned on the shared window: ${window}`, [{label:"Fund"},{label:"AUM",numeric:true},{label:"Relative size"},{label:"Period return",numeric:true},{label:"% of CDI",numeric:true},{label:"Volatility",numeric:true},{label:"Quality"}], rows)}</div>
+      <div class="portfolio-comparison wide-table" data-testid="portfolio-comparison-table">${tableShell("Portfolio-wide comparison", `All funds aligned on the shared window: ${window}`, [{label:"Fund"},{label:"AUM",numeric:true},{label:"Relative size"},{label:"Period return",numeric:true},{label:"% of CDI",numeric:true},{label:"Volatility",numeric:true},{label:"Sharpe",numeric:true},{label:"Sortino",numeric:true},{label:"Quality"}], rows)}</div>
       ${sourceFor(state)}</section>`;
   });
 }
@@ -236,7 +238,7 @@ function runs(state) {
   });
 }
 
-const renderers = { overview, funds, "fund-detail": fundDetail, performance, comparison, peers, quality, import: importValidation, runs, risk: riskPage, reconciliation: reconciliationPage };
+const renderers = { overview, funds, "fund-detail": fundDetail, performance, comparison, peers, quality, import: importValidation, runs, risk: riskPage, reconciliation: reconciliationPage, tickets: ticketsPage };
 
 export function renderPage(state) {
   return (renderers[state.view] || overview)(state);

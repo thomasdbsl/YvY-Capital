@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import json
 import subprocess
 from datetime import datetime
 from decimal import Decimal
@@ -61,7 +62,7 @@ def sql_value(value: Any) -> str:
     if isinstance(value, (int, Decimal)):
         return str(value)
     encoded = str(value).encode("utf-8").hex()
-    return f"CONVERT(0x{encoded} USING utf8mb4)"
+    return f"CONVERT(0x{encoded} USING utf8mb4) COLLATE utf8mb4_unicode_ci"
 
 
 def insert_statement(table: str, columns: tuple[str, ...], rows: list[dict[str, Any]], *, upsert: bool = False) -> str:
@@ -124,6 +125,16 @@ def load_bundle(config: DatabaseConfig, source: PipelineBundle, curated: Curated
     status = "blocked" if blocked else ("completed_with_quarantine" if source.quarantined_count else ("completed_with_warnings" if source.warning_count else "completed"))
     completed_at = datetime.fromisoformat(source.generated_at.replace("Z", "+00:00")).strftime("%Y-%m-%d %H:%M:%S")
     curated_count = 0 if curated is None else curated.record_count
+    if curated is not None and not blocked:
+        existing = [json.loads(row) for row in run_mysql(config,
+            "SELECT JSON_OBJECT('id',source_fund_id,'code',fund_code) FROM funds;",
+            select_database=True).splitlines()]
+        by_id = {str(row['id']): row['code'] for row in existing}
+        by_code = {row['code']: str(row['id']) for row in existing}
+        for row in curated.tables.get('funds', []):
+            identity, code = str(row['source_fund_id']), row['fund_code']
+            if (identity in by_id and by_id[identity] != code) or (code in by_code and by_code[code] != identity):
+                raise RuntimeError('Fund alias mapping changed; controlled mapping review required')
     sql = ["SET NAMES utf8mb4;\nSTART TRANSACTION;\n"]
     run_row = {
         "run_id": source.run_id,
@@ -208,9 +219,12 @@ def load_bundle(config: DatabaseConfig, source: PipelineBundle, curated: Curated
     sql.append(insert_statement("pipeline_stage_counts", stage_columns, stage_rows, upsert=True))
 
     if curated is not None and not blocked:
-        sql.extend(f"DELETE FROM `{table}`;\n" for table in DELETE_ORDER)
+        sql.extend(f"DELETE FROM `{table}`;\n" for table in DELETE_ORDER if table != 'funds')
+        # Retain identities referenced by workflow records on an identical replay.
+        incoming_ids = ','.join(sql_value(row['source_fund_id']) for row in curated.tables.get('funds', []))
+        sql.append('DELETE FROM funds' + (f' WHERE source_fund_id NOT IN ({incoming_ids})' if incoming_ids else '') + ';\n')
         for table in INSERT_ORDER:
-            sql.extend(insert_statements(table, TABLE_COLUMNS[table], curated.tables.get(table, [])))
+            sql.extend(insert_statements(table, TABLE_COLUMNS[table], curated.tables.get(table, []), upsert=table == 'funds'))
         lineage_columns = ("lineage_id", "run_id", "logical_name", "source_row", "source_sha256", "target_table", "target_key_hash")
         sql.extend(insert_statements("lineage_records", lineage_columns, curated.lineage, upsert=True))
 

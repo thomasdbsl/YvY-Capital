@@ -33,4 +33,4 @@ try {
     Pop-Location
 }
 
-Write-Output "The governed Sprint 3 database '$DatabaseName' is ready. Running this command again is idempotent. Use -Reset for a complete rebuild."
+Write-Output "The governed database '$DatabaseName' is ready. Running this command again is idempotent. -Reset is destructive and only permitted for database names ending in _qa."

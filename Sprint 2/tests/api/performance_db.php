@@ -40,10 +40,26 @@ foreach ($checks as $name => $check) {
     foreach ($plan as $row) {
         if (($row['table'] ?? null) === $check['alias']) { $target = $row; break; }
     }
-    if ($target === null || ($target['key'] ?? null) !== $check['key']) {
+    $scanReason = null;
+    if ($name === 'dv01' && $target !== null && ($target['type'] ?? null) === 'ALL'
+        && in_array($check['key'], explode(',', $target['possible_keys'] ?? ''), true)) {
+        // A restored database can favor a scan when this fund owns nearly all rows.
+        $counts = $db->prepare("SELECT COUNT(*) AS total,
+            SUM(d.source_fund_id=(SELECT source_fund_id FROM funds WHERE fund_code=?)
+                AND d.business_date=?) AS matched FROM dv01_items d");
+        $counts->execute($check['parameters']);
+        $distribution = $counts->fetch();
+        if ((int) $distribution['total'] > 0
+            && (int) $distribution['matched'] / (int) $distribution['total'] >= 0.8) {
+            $scanReason = 'At least 80% of rows match; optimizer may prefer a full scan';
+        }
+    }
+    if ($target === null || (($target['key'] ?? null) !== $check['key'] && $scanReason === null)) {
         throw new RuntimeException($name . ' query did not use the expected index');
     }
-    $evidence[$name] = ['table' => $target['table'], 'key' => $target['key'], 'estimated_rows' => (int) $target['rows']];
+    $evidence[$name] = ['table' => $target['table'], 'key' => $target['key'],
+        'access_type' => $target['type'], 'estimated_rows' => (int) $target['rows'],
+        'scan_reason' => $scanReason];
 }
 
 echo json_encode($evidence, JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION) . PHP_EOL;

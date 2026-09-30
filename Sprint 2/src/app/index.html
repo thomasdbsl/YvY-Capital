@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Local governed Funds Manager Sprint 4 integrated analytics beta.">
-  <title>Funds Manager | Sprint 4 Beta</title>
+  <meta name="description" content="Funds Manager: governed portfolio analytics and workflows for YvY Capital and Inteli.">
+  <title>Funds Manager | YvY Capital</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2335204f'/%3E%3Cpath d='M16 43V31h8v12zm12 0V17h8v26zm12 0V25h8v18z' fill='%23f7f2fa'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles/tokens.css">
   <link rel="stylesheet" href="styles/base.css">
@@ -36,7 +36,7 @@
         <span class="brand-copy"><strong>Funds Manager</strong><small>YvY Capital</small></span>
       </div>
 
-      <nav class="primary-nav" aria-label="Prototype sections">
+      <nav class="primary-nav" aria-label="Application sections">
         <p class="nav-label">Executive</p>
         <button class="nav-item is-active" type="button" data-view="overview" aria-current="page">
           <span class="nav-icon" aria-hidden="true">01</span><span>Overview</span>
@@ -57,17 +57,18 @@
           <span class="nav-icon" aria-hidden="true">06</span><span>Peers</span>
         </button>
 
-        <button class="nav-item" type="button" data-view="risk"><span class="nav-icon" aria-hidden="true">10</span><span>Risk Analytics</span></button>
+        <button class="nav-item" type="button" data-view="risk"><span class="nav-icon" aria-hidden="true">07</span><span>Risk Analytics</span></button>
+        <button class="nav-item" type="button" data-view="tickets"><span class="nav-icon" aria-hidden="true">08</span><span>Tickets</span></button>
         <p class="nav-label">Operations</p>
-        <button class="nav-item" type="button" data-view="reconciliation"><span class="nav-icon" aria-hidden="true">11</span><span>Reconciliation</span></button>
+        <button class="nav-item" type="button" data-view="reconciliation"><span class="nav-icon" aria-hidden="true">09</span><span>Reconciliation</span></button>
         <button class="nav-item" type="button" data-view="quality">
-          <span class="nav-icon" aria-hidden="true">07</span><span>Data quality</span>
+          <span class="nav-icon" aria-hidden="true">10</span><span>Data quality</span>
         </button>
         <button class="nav-item" type="button" data-view="import">
-          <span class="nav-icon" aria-hidden="true">08</span><span>Import & validation</span>
+          <span class="nav-icon" aria-hidden="true">11</span><span>Import & validation</span>
         </button>
         <button class="nav-item" type="button" data-view="runs">
-          <span class="nav-icon" aria-hidden="true">09</span><span>Runs & lineage</span>
+          <span class="nav-icon" aria-hidden="true">12</span><span>Runs & lineage</span>
         </button>
       </nav>
 
@@ -95,7 +96,7 @@
               <option value="analyst">Analyst</option>
             </select>
           </label>
-          <button class="icon-button" id="help-button" type="button" aria-label="Show prototype help">?</button>
+          <button class="icon-button" id="help-button" type="button" aria-label="Show application help">?</button>
           <button class="button" id="logout-button" type="button">Sign out</button>
         </div>
       </header>

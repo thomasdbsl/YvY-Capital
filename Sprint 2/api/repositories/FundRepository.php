@@ -58,6 +58,18 @@ final class FundRepository
         );
     }
 
+    public function latestFundReturnsAt(string $fundCode, string $snapshotDate): array
+    {
+        return $this->all(
+            "SELECT r.business_date,r.index_value
+             FROM return_series r
+             INNER JOIN funds f ON f.source_fund_id=r.source_fund_id
+             WHERE f.fund_code=:fund_code AND r.series_type='fund' AND r.business_date<=:snapshot_date
+             ORDER BY r.business_date DESC LIMIT 2",
+            ['fund_code'=>$fundCode,'snapshot_date'=>$snapshotDate]
+        );
+    }
+
     public function drawdowns(string $fundCode, string $start, string $end): array
     {
         return $this->all(

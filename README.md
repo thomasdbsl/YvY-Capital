@@ -1,10 +1,10 @@
-# Funds Manager - Sprint 4 Integrated Analytics Beta
+# Funds Manager - Sprint 5 / 1.0.0
 
-Funds Manager is the Inteli x YvY Capital fund-monitoring prototype. Sprint 4 preserves the governed Sprint 3 data path and adds local authentication, backend RBAC, audited review actions, risk analytics, reconciliation evidence, accessibility, and responsive hardening:
+Funds Manager is the Inteli x YvY Capital fund-monitoring application. This Sprint 5 source release preserves the governed data path and Sprint 4 features, adding operational monitoring, account lifecycle controls, backup/restore and technical handover documentation:
 
 `immutable CSV files -> Python ingestion and quality pipeline -> MySQL -> PHP API and business services -> dashboard`
 
-This is a **local restricted integrated beta ready for partner validation**, not a production system or a claim of partner acceptance. The browser receives aliased fund, holding, instrument, and issuer codes; restricted source identifiers remain in the local database and are never selected by the API.
+This is a **local restricted application**, not a production deployment or a claim of partner acceptance. See the handover gap matrix for verified delivery evidence and outstanding release gates. The browser receives aliased fund, holding, instrument, and issuer codes; restricted source identifiers remain in the local database and are never selected by the API.
 
 ## Security boundary
 
@@ -25,18 +25,18 @@ Authorized CSV files (local only)
   -> MySQL 5.7 relational Silver and Gold tables
   -> PHP 8 / PDO repositories
   -> PHP business services
-  -> read-only JSON endpoints
+  -> authenticated JSON endpoints with controlled review and ticket writes
   -> existing HTML/CSS/JavaScript dashboard
 ```
 
 | Path | Responsibility |
 |---|---|
 | `Sprint 2/src/pipeline/` | deterministic ingestion, DQ, masking, transformation, lineage, and MySQL load |
-| `Sprint 2/database/sprint3_schema.sql` | MySQL 5.7 schema, PK/FK, unique constraints, and indexes |
+| `Sprint 2/database/` | MySQL 5.7 base schema plus ordered Sprint 4 migrations, PK/FK, unique constraints, and indexes |
 | `Sprint 2/scripts/setup_database.ps1` | one-command idempotent build or complete reset |
 | `Sprint 2/api/repositories/` | parameterized MySQL queries |
 | `Sprint 2/api/services/` | financial calculations and response composition |
-| `Sprint 2/api/*.php` | HTTP validation and read-only JSON controllers |
+| `Sprint 2/api/*.php` | authenticated HTTP validation, read endpoints, and CSRF-protected workflow writes |
 | `Sprint 2/src/app/` | preserved Sprint 2 dashboard connected to the API |
 | `Sprint 2/tests/` | data, database, business, API, privacy, and browser tests |
 | `docs/architecture/` | backend architecture, Sequence Diagram, and ERD |
@@ -171,11 +171,11 @@ For an Apache-based MAMP setup instead, see [`MAMP_MYSQL_SETUP.md`](MAMP_MYSQL_S
 | Gold | validated allocation aggregates and latest-fund projections |
 | Serving | PHP repositories and services composing safe dashboard responses |
 
-The schema includes business tables for funds, NAV snapshots, holdings, return series, transactions, cash flow, corporate payments, drawdown, liquidity, stress, DV01 items, bond instruments, and VaR configurations. Governance tables store runs, files, stage counts, quality issues, quarantine, and lineage. See [`docs/architecture/sprint3_erd.md`](docs/architecture/sprint3_erd.md).
+The schema includes business tables for funds, NAV snapshots, holdings, return series, transactions, cash flow, corporate payments, drawdown, liquidity, stress, DV01 items, bond instruments, and VaR configurations. Governance tables store runs, files, stage counts, quality issues, quarantine, lineage, authenticated users, audit events, issue reviews, reconciliation evidence, tickets, and immutable ticket events. See [`docs/architecture/sprint3_erd.md`](docs/architecture/sprint3_erd.md) for the Sprint 3 core; Sprint 4 additions are applied by the ordered migrations.
 
 ## 9. API endpoints
 
-All endpoints validate inputs, use PDO native prepared statements, return JSON, and require an authenticated session except the authentication entry point. Analyst governance endpoints enforce backend RBAC; the only write is the CSRF-protected review action.
+All endpoints validate inputs, use PDO native prepared statements, return JSON, and require an authenticated session except the authentication entry point. Analyst governance endpoints enforce backend RBAC. The only application writes are CSRF-protected issue reviews and ticket workflow actions, with immutable audit evidence.
 
 | Endpoint | Purpose |
 |---|---|
@@ -194,6 +194,7 @@ All endpoints validate inputs, use PDO native prepared statements, return JSON, 
 | `GET /api/anomalies.php?severity=blocking&status=open` | persisted DQ issues |
 | `GET /api/reconciliation.php?fund_id=FUND_08&result=fail` | persisted reconciliation evidence and review status |
 | `GET/POST /api/review.php` | issue detail and audited Analyst review workflow |
+| `GET/POST /api/tickets.php` | Executive-owned requests, Analyst queue/response/status workflow, immutable history, and governance audit |
 | `GET /api/runs.php` | ingestion runs, file manifests, stage counts, and lineage |
 
 ## 10. Business logic
@@ -207,26 +208,30 @@ Financial formulas are centralized in `Sprint 2/api/services/FinancialMath.php` 
 - Sharpe and Sortino: annualized daily excess-return statistics;
 - reconstructed NAV, when explicitly requested by code: `NAV_anchor * index_target / index_anchor`;
 - allocation weight: grouped holding `nav_value / matching snapshot NAV`.
+- Allocation Net Return: the two latest fund return-index observations on or before the selected snapshot, calculated as `latest_index / previous_index - 1`; the API returns both exact dates and reports unavailable when no prior observation exists.
+
+Portfolio-wide Sharpe and Sortino come from the same backend `FinancialMath` implementation and shared comparison window used elsewhere. The browser renders these values and never recalculates them.
 
 The requested period and actual common period are returned separately. When a fund does not contain the full requested history, `coverage_status: partial` is explicit in the API and dashboard. If a required series, shared window, snapshot, or validated metric is absent, the API returns `null` and `status: unavailable`; it never invents a fallback value. Peer comparison remains unavailable pending source certification.
 
 ## 11. Run tests
 
-With MAMP MySQL running and the environment variables still configured:
+With MAMP MySQL running, configure a dedicated QA database ending in `_sprint4_qa` and import the authorized sources there first. Never run mutation suites on the main database. For example:
 
 ```powershell
 $env:FUNDS_MANAGER_RUN_DB_TESTS = "1"
+$env:FUNDS_MANAGER_DB_NAME = "yvy_funds_manager_final_sprint4_qa"
 npm run lint
 npm test
 ```
 
-The suite covers schema parsing, required fields, duplicates, fund and instrument references, DQ quarantine, immutable source hashes, deterministic transformation, database idempotence, formulas (including the deterministic 125% of CDI case and a zero benchmark), invalid parameters, two-fund comparison validation, database failure, CORS, API privacy, fund/date/period behavior, all nine dashboard views, chart axes, keyboard navigation, and desktop/mobile overflow.
+The suite covers schema parsing, required fields, duplicates, fund and instrument references, DQ quarantine, immutable source hashes, deterministic transformation, database idempotence, formulas (including the deterministic 125% of CDI case and a zero benchmark), exact Allocation Net Return dates, portfolio-wide Sharpe/Sortino parity, ticket RBAC/CSRF/audit, invalid parameters, two-fund comparison validation, database failure, CORS, API privacy, fund/date/period behavior, all 12 dashboard views, chart axes, keyboard navigation, and desktop/mobile overflow.
 
-`npm run build` still generates the legacy Sprint 2 synthetic artifact as a regression fixture and validates the Sprint 3 contracts with synthetic test CSVs. The dashboard does not read that JSON at runtime.
+`npm run build` verifies local application assets/imports and JavaScript/PHP syntax. This vanilla application requires no transpilation, and build does not generate or import financial data. Historical synthetic tests generate their own temporary fixtures. `npm run validate:sprint3` separately checks governed source contracts using test CSVs without writing to MySQL.
 
 ## 12. Complete reset
 
-To drop and rebuild only the configured local database from the immutable source files:
+Destructive reset is restricted to explicitly designated database names ending in `_qa`. It is not an upgrade procedure. Back up before migrations; use the operations guide for recovery of a non-QA database.
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File ".\Sprint 2\scripts\setup_database.ps1" -Reset
@@ -278,6 +283,14 @@ Open `/api/health.php`, then `/api/dashboard.php`. Check the browser Network pan
 
 ## Documentation and delivery
 
+- [User guide](docs/handover/USER_GUIDE.md)
+- [Operations and backup/restore](docs/handover/OPERATIONS_GUIDE.md)
+- [Maintenance guide](docs/handover/MAINTENANCE_GUIDE.md)
+- [Deployment guide](docs/handover/DEPLOYMENT_GUIDE.md)
+- [Known limitations](docs/handover/KNOWN_LIMITATIONS.md)
+- [Post-project backlog](docs/handover/POST_PROJECT_BACKLOG.md)
+- [Working release gates](docs/handover/SPRINT5_GAP_MATRIX.md)
+
 - [Current architecture audit](docs/sprint3/CURRENT_ARCHITECTURE_AUDIT.md)
 - [Sprint 3 implementation plan](docs/sprint3/SPRINT3_IMPLEMENTATION_PLAN.md)
 - [Backend architecture](docs/architecture/BACKEND_ARCHITECTURE.md)
@@ -291,10 +304,10 @@ Open `/api/health.php`, then `/api/dashboard.php`. Check the browser Network pan
 - [Final QA audit](docs/sprint3/FINAL_QA_AUDIT.md)
 - [Release notes](RELEASE_NOTES.md)
 
-Build the restricted, source-free delivery archive with:
+Build the data-free source release with:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File ".\Sprint 2\scripts\package_sprint3.ps1"
+npm run release:package
 ```
 
-The resulting `delivery/YvY_Capital_Funds_Manager_Sprint_3.zip` contains source code, schema, scripts, documentation, diagrams, tests, and launch instructions, but no partner data, secrets, cache, or generated database content. Authentication integration tests require `FUNDS_MANAGER_DB_NAME=yvy_funds_manager_sprint4_qa`; they generate isolated QA credentials and never provision accounts in the main local database.
+The resulting `delivery/YvY_Capital_Funds_Manager_Final_Release.zip` contains source code, all migrations, scripts, technical documentation, tests and the SHA-256 manifest. It excludes partner data, private configuration, backups, caches and presentation artifacts. Synthetic historical schema/seed assets remain solely for regression tests. The builder scans content, validates every archive entry against its allowlist and verifies all manifest hashes. A separate ZIP checksum accompanies it. The old `package_sprint3.ps1` remains a historical tool, not the final packaging command.

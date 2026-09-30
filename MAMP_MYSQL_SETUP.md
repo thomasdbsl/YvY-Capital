@@ -59,7 +59,7 @@ For a complete local reset:
 powershell -ExecutionPolicy Bypass -File ".\Sprint 2\scripts\setup_database.ps1" -Reset
 ```
 
-`-Reset` drops only the database named by `FUNDS_MANAGER_DB_NAME` and rebuilds it. The database name is restricted to letters, digits, and underscores. Never use this option against a shared or production database.
+`-Reset` is destructive and only permits database names ending in `_qa`. The database name is restricted to letters, digits, and underscores. It is never an upgrade procedure; use a backup and controlled migrations for non-QA databases.
 
 ## 5. Configure the PHP API
 
@@ -88,7 +88,7 @@ Then edit only the local database values. `config.php` is ignored by Git and mus
 | `db_password` | `FUNDS_MANAGER_DB_PASSWORD` | empty |
 | `allowed_origins` | `FUNDS_MANAGER_ALLOWED_ORIGINS` | local port `4173` origins |
 
-The API uses PDO MySQL with native prepared statements and exposes only read-only `GET` endpoints.
+The API uses PDO MySQL with native prepared statements. Financial, risk, and governance evidence is read-only; authenticated issue reviews and ticket actions are the only controlled writes and require backend RBAC plus CSRF validation.
 
 ## 6. Recommended CLI launch
 
@@ -149,7 +149,10 @@ npm test
 | `/api/allocation.php?fund_id=FUND_01` | fund-specific portfolio |
 | `/api/performance.php?fund_id=FUND_01&period=12m` | calculated period data |
 | `/api/internal_comparison.php?period=6m` | shared-window comparison |
+| `/api/risk.php?fund_id=FUND_01&period=12m` | performance/risk summary, drawdown, liquidity, Stress, and DV01 |
+| `/api/reconciliation.php` | reconciliation evidence and linked issues (Analyst only) |
 | `/api/anomalies.php` | persisted DQ issues |
+| `/api/tickets.php` | own Executive requests or the Analyst ticket queue |
 | `/api/runs.php` | manifests, stage counts, and lineage |
 
 ## 10. Common errors

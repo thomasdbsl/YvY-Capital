@@ -52,6 +52,7 @@ final class FundsService
                 'nav_brl' => null,
                 'allocation' => [],
                 'positions' => [],
+                'net_return' => ['value'=>null,'start_date'=>null,'end_date'=>null,'status'=>'unavailable'],
                 'metrics' => ['top5_concentration' => null, 'reconciliation_ratio' => null],
             ];
         }
@@ -87,6 +88,16 @@ final class FundsService
             return $row['value_brl'] > 0.0;
         })), 0, 5);
         $totalValue = array_sum(array_column($positions, 'value_brl'));
+        $returnRows = array_reverse($this->funds->latestFundReturnsAt($fundCode,$selected));
+        $netReturn = ['value'=>null,'start_date'=>null,'end_date'=>null,'status'=>'unavailable'];
+        if (count($returnRows) === 2 && (float) $returnRows[0]['index_value'] !== 0.0) {
+            $netReturn = [
+                'value'=>(float) $returnRows[1]['index_value'] / (float) $returnRows[0]['index_value'] - 1.0,
+                'start_date'=>$returnRows[0]['business_date'],
+                'end_date'=>$returnRows[1]['business_date'],
+                'status'=>'calculated',
+            ];
+        }
         return [
             'fund_id' => $fundCode,
             'snapshot_date' => $selected,
@@ -95,6 +106,7 @@ final class FundsService
             'nav_brl' => $nav,
             'allocation' => $allocation,
             'positions' => $positions,
+            'net_return' => $netReturn,
             'metrics' => [
                 'top5_concentration' => $nav !== null && $nav > 0.0 ? array_sum(array_column($topFive, 'value_brl')) / $nav : null,
                 'reconciliation_ratio' => $nav !== null && $nav > 0.0 ? $totalValue / $nav : null,
@@ -183,6 +195,7 @@ final class FundsService
                         'pct_cdi' => null,
                         'volatility' => null,
                         'sharpe' => null,
+                        'sortino' => null,
                         'quality_status' => 'unavailable',
                     ];
                 }, $funds),
@@ -199,6 +212,7 @@ final class FundsService
                 'pct_cdi' => $performance['metrics']['pct_cdi'],
                 'volatility' => $performance['metrics']['volatility'],
                 'sharpe' => $performance['metrics']['sharpe'],
+                'sortino' => $performance['metrics']['sortino'],
                 'quality_status' => $performance['status'] === 'current' ? $fund['quality_status'] : 'unavailable',
             ];
         }

@@ -4,12 +4,15 @@ import json
 import re
 import subprocess
 import tempfile
+import sys
 import unittest
 from pathlib import Path
 
 
 SPRINT2_ROOT = Path(__file__).resolve().parents[1]
 DATABASE_ROOT = SPRINT2_ROOT / "database"
+sys.path.insert(0, str(SPRINT2_ROOT / 'src'))
+from pipeline.run_pipeline import run
 
 
 class TestDatabaseAssets(unittest.TestCase):
@@ -34,13 +37,15 @@ class TestDatabaseAssets(unittest.TestCase):
         self.assertIn("DATETIME NOT NULL", schema)
 
     def test_seed_is_deterministic_and_synthetic(self) -> None:
-        source = SPRINT2_ROOT / "src" / "pipeline" / "output" / "serving_data.json"
         current_seed = DATABASE_ROOT / "seed.sql"
-        self.assertEqual(json.loads(source.read_text(encoding="utf-8"))["meta"]["classification"], "synthetic-example")
         with tempfile.TemporaryDirectory() as directory:
+            fixture_output = Path(directory) / 'fixture'
+            run(SPRINT2_ROOT / 'tests' / 'fixtures', fixture_output)
+            source = fixture_output / 'serving_data.json'
+            self.assertEqual(json.loads(source.read_text(encoding="utf-8"))["meta"]["classification"], "synthetic-example")
             generated = Path(directory) / "seed.sql"
             subprocess.run(
-                ["py", "-3.12", str(DATABASE_ROOT / "build_seed.py"), "--source", str(source), "--output", str(generated)],
+                [sys.executable, str(DATABASE_ROOT / "build_seed.py"), "--source", str(source), "--output", str(generated)],
                 check=True,
                 capture_output=True,
                 text=True,

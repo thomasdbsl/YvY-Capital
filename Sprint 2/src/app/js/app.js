@@ -1,4 +1,4 @@
-import { loadData, loadInternalComparison, loadPerformance, loadPortfolio, loadReview, saveReview, loadRisk, loadReconciliation, loadIssues } from "./data.js";
+import { loadData, loadInternalComparison, loadPerformance, loadPortfolio, loadReview, saveReview, loadRisk, loadReconciliation, loadIssues, loadTickets, loadTicket, saveTicket } from "./data.js";
 import { escapeHtml, scenarioBanner, statePanel } from "./components.js";
 import { renderPage } from "./pages.js";
 import { setState, state, subscribe } from "./state.js";
@@ -16,6 +16,7 @@ const labels = {
   quality: "Data quality",
   import: "Import and validation",
   runs: "Runs and lineage",
+  tickets: "Tickets",
 };
 
 const shell = document.querySelector(".app-shell");
@@ -34,6 +35,7 @@ const toastRegion = document.querySelector("#toast-region");
 let requestSequence = 0;
 let sessionRecovery = null;
 let dialogReturnFocus = null;
+let ticketRequestSequence = 0;
 
 function toast(message) {
   const item = document.createElement("div");
@@ -85,9 +87,26 @@ function render() {
       if (state.riskKey === riskKey) setState({ riskStatus: "error", riskError: error.message });
     });
   }
+  const ticketKey = JSON.stringify(state.ticketFilters || {});
+  if (state.view === "tickets" && state.ticketKey !== ticketKey) {
+    state.ticketKey = ticketKey;
+    state.ticketsStatus = "loading";
+    loadTickets(state.ticketFilters).then((ticketsData) => {
+      if (state.ticketKey === ticketKey && currentUser) setState({ ticketsData, ticketsStatus:"ready" });
+    }).catch((error) => {
+      if (state.ticketKey === ticketKey) setState({ ticketsStatus:"error", ticketsError:error.message });
+    });
+  }
   viewRoot.setAttribute("aria-busy", "true");
   bannerRoot.innerHTML = scenarioBanner(state.scenario);
+  const activeSearch = viewRoot.querySelector('input[data-quality-filter="search"]:focus');
+  const searchSelection = activeSearch ? [activeSearch.selectionStart, activeSearch.selectionEnd] : null;
   viewRoot.innerHTML = renderPage(state);
+  if (searchSelection) {
+    const search = viewRoot.querySelector('input[data-quality-filter="search"]');
+    search?.focus({ preventScroll: true });
+    search?.setSelectionRange(...searchSelection);
+  }
   viewRoot.setAttribute("aria-busy", "false");
   pageLabel.textContent = labels[state.view];
   document.title = `${labels[state.view]} | Funds Manager`;
@@ -122,7 +141,7 @@ async function openAnomaly(anomalyId, reviewContext = "quality") {
     <div class="detail-item"><small>Severity</small><strong>${escapeHtml(anomaly.severity)}</strong></div>
     <div class="detail-item"><small>Opaque reference</small><code>${escapeHtml(anomaly.record_ref)}</code></div>
     <div class="detail-item"><small>Proposed action</small><strong>${escapeHtml(anomaly.action)}</strong></div>
-  </div><p style="margin:1rem 0 0">The input value is never displayed in this prototype or in the shareable log.</p>`;
+  </div><p style="margin:1rem 0 0">The input value is never displayed in this application or in the shareable log.</p>`;
   dialog.showModal();
   try {
     const { issue, history } = await loadReview(anomalyId);
@@ -170,7 +189,19 @@ function handleAction(action, target) {
   if (action === "filter-allocation") setState({ allocationFilter: target.dataset.class });
   if (action === "clear-allocation") setState({ allocationFilter: null });
   if (action === "open-anomaly") openAnomaly(target.dataset.anomaly, target.dataset.reviewContext || "quality");
+  if (action === "select-ticket") openTicket(target.dataset.ticketId);
   if (action === "close-dialog") closeAnomaly();
+}
+
+async function openTicket(ticketId) {
+  const sequence=++ticketRequestSequence;
+  setState({ selectedTicketId:ticketId,ticketDetail:null,ticketDetailStatus:"loading",ticketDetailError:null });
+  try {
+    const ticketDetail=await loadTicket(ticketId);
+    if (sequence === ticketRequestSequence && state.selectedTicketId === ticketId) setState({ ticketDetail,ticketDetailStatus:"ready" });
+  } catch (error) {
+    if (sequence === ticketRequestSequence) setState({ ticketDetailStatus:"error",ticketDetailError:error.message });
+  }
 }
 
 async function refreshFund(fundId) {
@@ -240,22 +271,58 @@ document.addEventListener("click", (event) => {
   if (sidebarTarget) navigate(sidebarTarget.dataset.view);
 });
 
+viewRoot.addEventListener("input", (event) => {
+  if (event.target.matches('input[data-quality-filter="search"]')) {
+    // Preserve the draft before an in-flight response can replace the input.
+    setState({ qualityFilters:{ ...state.qualityFilters,search:event.target.value,offset:0 } }, { silent:true });
+  }
+});
+
 viewRoot.addEventListener("change", (event) => {
   const target = event.target;
   const qualityFilter = target.dataset.qualityFilter;
   const reconciliationFilter = target.dataset.reconciliationFilter;
+  const ticketFilter = target.dataset.ticketFilter;
   const value = target.value;
   const id = target.id;
   // Capture the intent before the async page load can replace this control.
   window.setTimeout(() => {
     if (qualityFilter) setState({ qualityFilters:{ ...state.qualityFilters,[qualityFilter]:value,offset:0 } });
     if (reconciliationFilter) setState({ reconciliationFilters:{ ...state.reconciliationFilters,[reconciliationFilter]:value,offset:0 } });
+    if (ticketFilter) setState({ ticketFilters:{ ...state.ticketFilters,[ticketFilter]:value },selectedTicketId:null,ticketDetail:null });
     if (id === "stress-scenario") setState({ stressScenario:value });
     if (id === "fund-search") setState({ query:value });
     if (id === "comparison-fund-a") refreshComparison(value,state.comparisonFundB);
     if (id === "comparison-fund-b") refreshComparison(state.comparisonFundA,value);
   }, 0);
 }, { capture: true });
+
+viewRoot.addEventListener("submit", async (event) => {
+  const form=event.target;
+  if (!(form instanceof HTMLFormElement) || !["ticket-create-form","ticket-update-form"].includes(form.id)) return;
+  event.preventDefault();
+  const button=form.querySelector('button[type="submit"]');
+  button.disabled=true;
+  const fields=new FormData(form);
+  const errorId=form.id === "ticket-create-form" ? "ticket-form-error":"ticket-update-error";
+  const errorNode=document.querySelector(`#${errorId}`);
+  try {
+    const body=form.id === "ticket-create-form" ? {
+      action:"create",title:fields.get("title"),description:fields.get("description"),category:fields.get("category"),priority:fields.get("priority"),
+      related_fund:fields.get("related_fund") || null,related_context:fields.get("related_context") || null,
+    } : {
+      action:"update",ticket_id:form.dataset.ticketId,status:fields.get("status"),response:fields.get("response"),revision:Number(form.dataset.revision),
+    };
+    const result=await saveTicket(body);
+    state.ticketKey=null;
+    setState({ selectedTicketId:result.ticket.ticket_id,ticketDetail:result,ticketDetailStatus:"ready" });
+    toast(form.id === "ticket-create-form" ? "Request sent to the Analyst queue.":"Ticket updated with audit evidence.");
+  } catch (error) {
+    if (errorNode) errorNode.textContent=error.message;
+  } finally {
+    if (button.isConnected) button.disabled=false;
+  }
+});
 
 fundSelect.addEventListener("change", (event) => refreshFund(event.target.value));
 periodSelect.addEventListener("change", (event) => refreshPeriod(event.target.value));
@@ -321,9 +388,12 @@ async function initialize() {
     state.reconciliationData = null;
     state.qualityKey = null;
     state.qualityData = null;
+    state.ticketKey = null;
+    state.ticketsData = null;
+    state.ticketDetail = null;
     setState({
       role:user.role === "ANALYST" ? "analyst" : "direction", view:"overview", period:"12m", scenario:"current",
-      selectedSnapshot:null, allocationFilter:null, query:"", qualityFilters:{}, reconciliationFilters:{},
+      selectedSnapshot:null, allocationFilter:null, query:"", qualityFilters:{}, reconciliationFilters:{}, ticketFilters:{}, selectedTicketId:null,
       riskTab:"overview", stressScenario:null, dataStatus:"loading", errorMessage:null,
     }, { silent:true });
     document.querySelectorAll('.nav-item[data-view="quality"], .nav-item[data-view="import"], .nav-item[data-view="runs"], .nav-item[data-view="reconciliation"]').forEach((item) => { item.hidden = user.role !== "ANALYST"; });

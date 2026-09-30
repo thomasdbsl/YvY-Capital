@@ -6,9 +6,9 @@
 
 ## Delivered content
 
-The prototype covers Executive Overview, Funds, Fund Detail, Allocation, Performance & Risk, Internal Comparison, Peer Comparison, Data Quality, Import & Validation, and Run History & Lineage. The Executive journey explores funds and their indicators; the Analyst journey simulates local structure checks, anomalies, quarantine, validation, and lineage.
+The integrated beta covers Executive Overview, Funds, Fund Detail, Allocation, Performance, Internal Comparison, Peer Comparison, Risk Analytics, Tickets, Reconciliation, Data Quality, Import & Validation, and Run History & Lineage. Executive users explore governed indicators and submit Analyst requests; Analyst users review tickets, reconciliation, anomalies, quarantine, validation, and lineage.
 
-Values remain synthetic or aliased. Production connectors, certified financial calculations, real RBAC, managed storage, orchestration, UAT, and partner validation are not declared complete.
+Runtime values come from governed MySQL data and use safe aliases. Synthetic values exist only in isolated regression fixtures. Local authentication and backend RBAC are implemented; managed deployment and formal partner acceptance remain separate decisions. Use the root README and `docs/handover/` for current Sprint 5 procedures.
 
 ## Structure
 
@@ -17,7 +17,7 @@ Values remain synthetic or aliased. Production connectors, certified financial c
 | `src/app/` | modular web application connected to the API |
 | `src/pipeline/` | deterministic generation, DQ, privacy, and local Serving |
 | `database/` | MySQL 5.7 schema, synthetic seed, and reproducible reset |
-| `api/` | local read-only PHP/PDO MySQL API |
+| `api/` | authenticated PHP/PDO MySQL API with controlled review and ticket writes |
 | `data/contracts/` | canonical schemas and KPI catalog |
 | `config/` | examples without secrets or real data |
 | `docs/` | architecture, policies, ADRs, backlog, and decisions |
@@ -68,7 +68,7 @@ py -3.12 "Sprint 2/src/pipeline/run_pipeline.py" --verify
 py -3.12 "Sprint 2/src/pipeline/run_pipeline.py" --check-shareable "Sprint 2/src/pipeline/output"
 ```
 
-Tests cover MySQL connectivity, every endpoint, parameter errors, injection attempts, exact parity with the synthetic fixture, all nine sections, ten scenarios, allocation drill-down, the Analyst workflow, keyboard navigation, desktop, and mobile.
+Tests cover MySQL connectivity, endpoints, parameter errors, injection attempts, source-backed financial parity, isolated synthetic edge cases, all 12 navigation views, risk states, allocation drill-down, ticket RBAC/audit, Analyst reviews, keyboard navigation, desktop and mobile. Run these only on a dedicated QA database as described in the root README.
 
 ## Local data and confidentiality
 

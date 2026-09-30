@@ -5,6 +5,8 @@ export function loadReview(issueId) { return request("review.php", { issue_id: i
 export function loadIssues(filters = {}) { return request("anomalies.php", filters); }
 export function loadRisk(fundId, period) { return request("risk.php", { fund_id: fundId, period }); }
 export function loadReconciliation(fundId, filters = {}) { return request("reconciliation.php", { fund_id: fundId, ...filters }); }
+export function loadTickets(filters = {}) { return request("tickets.php", filters); }
+export function loadTicket(ticketId) { return request("tickets.php", { ticket_id: ticketId }); }
 
 export async function saveReview(body) {
   const response = await fetch(`${API_BASE_URL}/review.php`, {
@@ -17,10 +19,21 @@ export async function saveReview(body) {
   return payload;
 }
 
+export async function saveTicket(body) {
+  const response = await fetch(`${API_BASE_URL}/tickets.php`, {
+    method: "POST", cache: "no-store", credentials: "same-origin",
+    headers: { "Content-Type": "application/json", "X-CSRF-Token": csrfToken() }, body: JSON.stringify(body),
+  });
+  const payload = await response.json();
+  if (response.status === 401) window.dispatchEvent(new Event("session-expired"));
+  if (!response.ok) throw new Error(payload?.error?.message || "Ticket could not be saved");
+  return payload;
+}
+
 function assertDashboardContract(data) {
   const requiredArrays = ["funds", "positions", "history", "kpis", "allocation", "anomalies", "runs", "lineage_proofs", "pipeline_stages", "source_files", "peer_sample"];
   if (data?.meta?.classification !== "local-restricted" || data.meta.runtime_source !== "governed-mysql") {
-    throw new Error("The API did not return the governed Sprint 3 contract.");
+    throw new Error("The API did not return the governed data contract.");
   }
   for (const field of requiredArrays) {
     if (!Array.isArray(data[field])) throw new Error(`The API response is missing ${field}.`);

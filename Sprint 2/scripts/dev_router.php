@@ -11,7 +11,7 @@ $path = rawurldecode((string) (parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL
 $apiEndpoints = [
     'allocation.php', 'anomalies.php', 'auth.php', 'dashboard.php', 'fund.php',
     'funds.php', 'health.php', 'internal_comparison.php', 'kpis.php', 'peers.php',
-    'performance.php', 'reconciliation.php', 'review.php', 'risk.php', 'runs.php',
+    'performance.php', 'reconciliation.php', 'review.php', 'risk.php', 'runs.php', 'tickets.php',
 ];
 
 if ($path === '/') {

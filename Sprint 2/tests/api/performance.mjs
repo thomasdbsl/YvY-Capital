@@ -33,7 +33,8 @@ try {
   const endpointTimings = {};
   for (const route of [
     "dashboard.php", "performance.php?fund_id=FUND_01&period=12m", "risk.php?fund_id=FUND_01&period=12m",
-    "anomalies.php?severity=blocking", "reconciliation.php?fund_id=FUND_01", "runs.php",
+    "internal_comparison.php?period=12m", "internal_comparison.php?period=12m&fund_a=FUND_01&fund_b=FUND_03",
+    "anomalies.php?severity=blocking", "reconciliation.php?fund_id=FUND_01", "tickets.php", "runs.php",
   ]) {
     const samples = [];
     for (let attempt = 0; attempt < 3; attempt += 1) {
@@ -43,7 +44,7 @@ try {
       await response.arrayBuffer();
       samples.push(Number((performance.now() - started).toFixed(2)));
     }
-    endpointTimings[route.split("?")[0]] = { min_ms: Math.min(...samples), median_ms: samples.sort((a,b) => a-b)[1], max_ms: Math.max(...samples) };
+    endpointTimings[route] = { min_ms: Math.min(...samples), median_ms: samples.sort((a,b) => a-b)[1], max_ms: Math.max(...samples) };
   }
 
   browser = await chromium.launch({ headless: true });

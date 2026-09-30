@@ -53,7 +53,6 @@ function assertCdiCalculation(performance, fundId, period) {
   assert.ok(Math.abs(performance.metrics.benchmark_return - benchmarkReturn) < 1e-12);
   if (pctCdi === null) assert.equal(performance.metrics.pct_cdi, null);
   else assert.ok(Math.abs(performance.metrics.pct_cdi - pctCdi) < 1e-9);
-  process.stdout.write(`CDI diagnostic ${fundId} ${period}: requested ${performance.window.requested_start} to ${performance.window.requested_end}; common ${first.date} to ${last.date}; fund ${first.nav_index} -> ${last.nav_index} (${(fundReturn * 100).toFixed(8)}%); CDI ${first.benchmark_index} -> ${last.benchmark_index} (${(benchmarkReturn * 100).toFixed(8)}%); % of CDI ${pctCdi?.toFixed(8) ?? "unavailable"}; coverage ${performance.window.coverage_status}.\n`);
 }
 
 const server = await startPhpServer({ sprintRoot, port: 4180 });
@@ -110,6 +109,19 @@ try {
 
   const performance1m = await requestJson(server.apiUrl, "performance.php?fund_id=FUND_01&period=1m");
   const performance12m = await requestJson(server.apiUrl, "performance.php?fund_id=FUND_01&period=12m");
+  for (const portfolio of [fundOne.body,olderPortfolio.body]) {
+    const eligible=performance12m.body.history.filter((row)=>row.date<=portfolio.snapshot_date);
+    const window=eligible.slice(-2);
+    if (window.length===2) {
+      assert.equal(portfolio.net_return.start_date,window[0].date);
+      assert.equal(portfolio.net_return.end_date,window[1].date);
+      assert.equal(portfolio.net_return.end_date<=portfolio.snapshot_date,true);
+      assert.ok(Math.abs(portfolio.net_return.value-(window[1].nav_index/window[0].nav_index-1))<1e-12);
+    } else {
+      assert.deepEqual(portfolio.net_return,{value:null,start_date:null,end_date:null,status:"unavailable"});
+    }
+  }
+  assert.notEqual(fundOne.body.net_return.end_date,olderPortfolio.body.net_return.end_date);
   assert.ok(performance1m.body.history.length < performance12m.body.history.length);
   assert.notEqual(performance1m.body.window.start, performance12m.body.window.start);
   assert.notEqual(performance1m.body.metrics.period_return, performance12m.body.metrics.period_return);
@@ -135,7 +147,7 @@ try {
   const comparison = await requestJson(server.apiUrl, "internal_comparison.php?period=6m");
   assert.equal(comparison.body.funds.length, 14);
   assert.ok(comparison.body.window.start < comparison.body.window.end);
-  assert.ok(comparison.body.funds.every((row) => Object.hasOwn(row, "period_return") && Object.hasOwn(row, "volatility")));
+  assert.ok(comparison.body.funds.every((row) => ["period_return","volatility","sharpe","sortino"].every((key)=>Object.hasOwn(row,key))));
   assert.equal(comparison.body.targeted.requested_funds.fund_a, "FUND_01");
   assert.equal(comparison.body.targeted.requested_funds.fund_b, "FUND_02");
 
@@ -190,6 +202,7 @@ try {
   assert.match(dataSource, /allocation\.php/);
   assert.match(dataSource, /performance\.php/);
   assert.match(dataSource, /internal_comparison\.php/);
+  assert.match(dataSource, /tickets\.php/);
 
   process.stdout.write("API integration: real MySQL data, business calculations, fund/date windows, privacy, errors, CORS and lineage passed.\n");
 } finally {

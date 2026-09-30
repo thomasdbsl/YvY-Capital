@@ -4,8 +4,9 @@ import { fileURLToPath } from "node:url";
 import { resolvePhpRuntime } from "../../scripts/php_runtime.mjs";
 
 const filePath = fileURLToPath(import.meta.url);
-const testFile = path.join(path.dirname(filePath), "business_logic.php");
 const runtime = resolvePhpRuntime();
+for (const filename of ["business_logic.php", "error_handling.php", "release_configuration.php"]) {
+const testFile = path.join(path.dirname(filePath), filename);
 const args = [];
 if (runtime.ini) args.push("-c", runtime.ini);
 args.push(testFile);
@@ -16,3 +17,4 @@ if (result.status !== 0) {
   process.exit(result.status || 1);
 }
 process.stdout.write(result.stdout);
+}

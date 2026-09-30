@@ -58,7 +58,10 @@ final class RiskService
             $stress['scenarios']=array_values(array_filter($stress['scenarios'],static function ($item) use ($scenario): bool { return $item['id'] === $scenario; }));
             if (!$stress['scenarios']) throw new ApiException(404,'Stress scenario unavailable for this fund/date');
         }
+        $fundRows=$this->performance->funds($fund);
+        $fundContext=$fundRows[0] ?? null;
         return ['fund_id'=>$fund,'period'=>$period,'window'=>$window,'metrics'=>$performance['metrics'],
+            'context'=>['nav_brl'=>$fundContext['aum_brl'] ?? null,'nav_date'=>$fundContext['business_date'] ?? null],
             'drawdown'=>['status'=>$drawdowns ? 'available':'unavailable','history'=>$drawdowns,
                 'current'=>$drawdowns ? $drawdowns[count($drawdowns)-1]['drawdown']:null,
                 'maximum'=>$drawdowns ? min(array_column($drawdowns,'drawdown')):null],

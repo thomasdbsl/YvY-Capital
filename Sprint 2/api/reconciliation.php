@@ -19,7 +19,7 @@ run_endpoint(function (): void {
     }
     $run=query_string('run_id');
     if ($run!==null && !preg_match('/\AS3-[A-F0-9]{20}\z/',$run)) throw new ApiException(400,'Invalid run ID');
-    $filters['run_id']=$run ?? governance_service()->latestRun()['run_id'];
+    $filters['run_id']=$run ?? governance_service()->latestDataRun()['run_id'];
     $offset=query_string('offset') ?? '0';
     if (!preg_match('/\A[0-9]{1,6}\z/',$offset)) throw new ApiException(400,'Invalid offset');
     respond_json((new ReconciliationService(new ReconciliationRepository(database())))->listing($filters,(int)$offset));

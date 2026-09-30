@@ -37,6 +37,21 @@ final class GovernanceRepository
         );
     }
 
+    public function latestAttempt(bool $failedOnly = false): ?array
+    {
+        return $this->one(
+            'SELECT attempt_id,run_id,status,stage,started_at,completed_at,duration_ms,error_code
+             FROM pipeline_attempts ' . ($failedOnly ? "WHERE status IN ('failed','blocked') " : '') .
+            'ORDER BY started_at DESC,attempt_id DESC LIMIT 1'
+        );
+    }
+
+    public function latestBusinessDate(): ?string
+    {
+        $row = $this->one('SELECT MAX(snapshot_date) AS business_date FROM fund_nav_snapshots');
+        return $row['business_date'] ?? null;
+    }
+
     public function runs(): array
     {
         return $this->all(

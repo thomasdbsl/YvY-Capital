@@ -31,7 +31,7 @@ function dashboard_data(): array
 {
     $fundsService = funds_service();
     $governance = governance_service();
-    $run = $governance->latestRun();
+    $run = $governance->latestDataRun();
     $funds = $fundsService->funds();
     $selectedFund = $funds[0]['id'] ?? null;
     if ($selectedFund === null) {

@@ -37,7 +37,7 @@
 
 .compact-field, .filter-field { display: grid; gap: 0.28rem; color: var(--ink-500); font-size: 0.65rem; font-weight: 680; letter-spacing: 0.055em; text-transform: uppercase; }
 .compact-field { grid-template-columns: auto auto; align-items: center; }
-select, input[type="search"] { min-height: 2.45rem; border: 1px solid var(--line); border-radius: 0.75rem; background: rgba(255,253,249,0.82); color: var(--ink-800); padding: 0.48rem 2rem 0.48rem 0.72rem; font-size: 0.8rem; font-weight: 600; letter-spacing: normal; text-transform: none; }
+select, input:not([type]), input[type="search"], input[type="text"], input[type="date"], textarea { min-height: 2.45rem; border: 1px solid var(--line); border-radius: 0.75rem; background: rgba(255,253,249,0.82); color: var(--ink-800); padding: 0.48rem 0.72rem; font: inherit; font-size: 0.8rem; font-weight: 600; letter-spacing: normal; text-transform: none; }
 .compact-field select { min-height: 2.3rem; }
 .breadcrumb { display: flex; align-items: center; gap: var(--space-2); color: var(--ink-500); font-size: 0.8rem; }
 .breadcrumb strong { color: var(--ink-800); }
@@ -69,7 +69,8 @@ select, input[type="search"] { min-height: 2.45rem; border: 1px solid var(--line
 .badge { display: inline-flex; align-items: center; gap: 0.35rem; width: fit-content; padding: 0.3rem 0.55rem; border-radius: 999px; font-size: 0.67rem; font-weight: 750; letter-spacing: 0.015em; white-space: nowrap; }
 .badge::before { content: ""; width: 0.37rem; height: 0.37rem; border-radius: 50%; background: currentColor; }
 .badge.current, .badge.resolved, .badge.published { background: var(--sage-100); color: var(--sage-700); }
-.badge.warning, .badge.late, .badge.hypothesis { background: var(--amber-100); color: var(--amber-700); }
+.badge.warning, .badge.late, .badge.hypothesis, .badge.open { background: var(--amber-100); color: var(--amber-700); }
+.badge.in_review { background: var(--blue-100); color: var(--blue-700); }
 .badge.blocking, .badge.error, .badge.quarantined { background: var(--rose-100); color: var(--rose-700); }
 .badge.sample, .badge.info { background: var(--violet-100); color: var(--violet-700); }
 .badge.unavailable, .badge.incomplete { background: #ece9e7; color: var(--ink-650); }
@@ -132,7 +133,17 @@ select, input[type="search"] { min-height: 2.45rem; border: 1px solid var(--line
 .comparison-metrics { border: 1px solid var(--line); border-radius: var(--radius-md); }
 .comparison-metrics th[scope="row"] { color: var(--ink-650); font-weight: 600; }
 .portfolio-comparison { margin-top: 1rem; }
+.wide-table table { min-width: 72rem; }
+.wide-table .sticky-cell, .wide-table thead th:first-child { position: sticky; left: 0; z-index: 1; background: var(--surface-solid); }
 .compact-state { min-height: 18rem; }
+.ticket-create, .ticket-detail { margin-top: var(--space-4); }
+.ticket-form { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: var(--space-3); margin-top: var(--space-4); }
+.ticket-form label { display: grid; gap: var(--space-2); color: var(--ink-650); font-size: 0.78rem; font-weight: 700; }
+.ticket-form textarea { min-height: 7rem; resize: vertical; }
+.ticket-history { display: grid; gap: var(--space-2); padding-left: 1.4rem; }
+.ticket-history li { padding: var(--space-2); border-bottom: 1px solid var(--line); }
+.ticket-history p { margin: var(--space-2) 0 0; }
+.risk-context { margin: var(--space-4) 0; }
 
 .scenario-banner { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-4); padding: 0.78rem 1rem; border: 1px solid rgba(90,59,122,0.16); border-radius: var(--radius-md); background: rgba(238,230,244,0.72); color: var(--violet-900); }
 .scenario-banner p { margin: 0; color: inherit; font-size: 0.78rem; }
@@ -211,6 +222,8 @@ select, input[type="search"] { min-height: 2.45rem; border: 1px solid var(--line
   .modal-actions { flex-direction: column; }
   .modal-actions .button { width: 100%; }
   .detail-grid { grid-template-columns: 1fr; }
+  .ticket-form { grid-template-columns: 1fr; }
+  .ticket-form .span-2 { grid-column: auto; }
 }
 [hidden] { display: none !important; }
 html[data-auth="pending"] .app-shell { display: none; }

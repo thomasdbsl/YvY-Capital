@@ -15,8 +15,9 @@ final class AuthService
         ini_set('session.use_strict_mode', '1');
         ini_set('session.use_only_cookies', '1');
         session_name('funds_manager_session');
+        $config = api_config();
         $secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-            || filter_var(env_value('FUNDS_MANAGER_SECURE_COOKIE', '0'), FILTER_VALIDATE_BOOLEAN);
+            || $config['secure_cookie'];
         session_set_cookie_params(['lifetime' => 0, 'path' => '/', 'secure' => $secure, 'httponly' => true, 'samesite' => 'Strict']);
         if (!session_start()) { throw new RuntimeException('Session unavailable'); }
     }
@@ -49,14 +50,16 @@ final class AuthService
     {
         self::startSession();
         if (empty($_SESSION['user_id'])) { throw new ApiException(401, 'Authentication required'); }
-        $timeout = max(1, (int) env_value('FUNDS_MANAGER_SESSION_TIMEOUT', '1800'));
+        $timeout = api_config()['session_timeout'];
         if (time() - (int) ($_SESSION['last_activity'] ?? 0) >= $timeout
             || time() - (int) ($_SESSION['created_at'] ?? 0) >= 28800) {
             self::invalidate();
             throw new ApiException(401, 'Session expired');
         }
         $user = $this->users->byId((int) $_SESSION['user_id']);
-        if ($user === null || !$user['active']) {
+        if ($user === null || !$user['active']
+            || !hash_equals((string) ($_SESSION['credential_fingerprint'] ?? ''), hash('sha256', $user['password_hash']))
+            || ($_SESSION['authenticated_role'] ?? null) !== $user['role']) {
             self::invalidate();
             throw new ApiException(401, 'Authentication required');
         }
@@ -79,7 +82,9 @@ final class AuthService
         }
         $this->users->loginSucceeded($user);
         if (!session_regenerate_id(true)) { throw new RuntimeException('Session unavailable'); }
-        $_SESSION = ['user_id' => (int) $user['user_id'], 'created_at' => time(), 'last_activity' => time(), 'csrf' => bin2hex(random_bytes(32))];
+        $_SESSION = ['user_id' => (int) $user['user_id'], 'created_at' => time(), 'last_activity' => time(),
+            'credential_fingerprint' => hash('sha256', $user['password_hash']),
+            'authenticated_role' => $user['role'], 'csrf' => bin2hex(random_bytes(32))];
         return $this->user();
     }
 
